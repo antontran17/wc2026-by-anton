@@ -3674,6 +3674,41 @@
             }
         }
     </style>
+    <style id="anton-group-filter-final">
+        .group-card {
+            cursor: pointer !important;
+        }
+
+        .group-card .group-table,
+        .group-card .group-table * {
+            cursor: default !important;
+        }
+
+        .mobile-filter-row {
+            max-width: 100% !important;
+        }
+
+        @media(max-width:640px){
+            .mobile-filter-row {
+                grid-template-columns: 1fr !important;
+            }
+
+            .mobile-hide-stat {
+                display: none !important;
+            }
+
+            .group-table th,
+            .group-table td {
+                padding-left: 8px !important;
+                padding-right: 8px !important;
+            }
+
+            .group-table .team-cell img {
+                width: 30px !important;
+                height: 20px !important;
+            }
+        }
+    </style>
 
 </head>
 <body>
@@ -3714,6 +3749,12 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="visually-hidden-title" data-i18n="matches_title">LỊCH THI ĐẤU</h2>
+            </div>
+
+            <div class="mobile-filter-row">
+                <select class="mobile-filter-select" id="match-filter-select" onchange="filterMatches(this.value)" aria-label="Chọn bảng hoặc vòng">
+                    <option value="all">TẤT CẢ TRẬN</option>
+                </select>
             </div>
             
             <div class="tabs" id="match-tabs">
@@ -3813,9 +3854,9 @@
                 matchday: 'LƯỢT TRẬN',
                 capacity: 'SỨC CHỨA',
                 mp: 'TRẬN',
-                w: 'THẮNG',
-                d: 'HÒA',
-                l: 'THUA',
+                w: 'W',
+                d: 'D',
+                l: 'L',
                 gf: 'BT',
                 ga: 'BB',
                 gd: 'HS',
@@ -4080,6 +4121,27 @@
             return labels[key] || `${translations[currentLang].group} ${value}`;
         }
 
+        function stageSortValue(value) {
+            const key = String(value || '').trim().toUpperCase();
+            if (key === 'ALL') return -1;
+            if (/^[A-L]$/.test(key)) return key.charCodeAt(0) - 65;
+            const stageOrder = { R32: 20, R16: 21, QF: 22, SF: 23, '3RD': 24, FINAL: 25 };
+            return stageOrder[key] ?? 99;
+        }
+
+        function sortStageValues(values) {
+            return [...values].sort((a, b) => {
+                const orderA = stageSortValue(a);
+                const orderB = stageSortValue(b);
+                if (orderA !== orderB) return orderA - orderB;
+                return String(a).localeCompare(String(b), 'vi', { sensitivity: 'base' });
+            });
+        }
+
+        function isGroupStageValue(value) {
+            return /^[A-L]$/i.test(String(value || '').trim());
+        }
+
         function scoreCenter(game) {
             const hs = Number(game.home_score || 0);
             const as = Number(game.away_score || 0);
@@ -4111,7 +4173,7 @@
             const tabsContainer = document.getElementById('match-tabs');
             const selectContainer = document.getElementById('match-filter-select');
 
-            const groups = ['all', ...new Set(games.map(g => g.group).filter(Boolean))];
+            const groups = ['all', ...sortStageValues(new Set(games.map(g => g.group).filter(Boolean)))];
             const labelFor = (g) => stageLabel(g);
 
             if (tabsContainer) {
@@ -4140,6 +4202,7 @@
 
             const filtered = currentMatchFilter === 'all' ? gamesData : gamesData.filter(g => g.group === currentMatchFilter);
             renderMatchCards(filtered);
+            renderGroups(groupsData);
         }
 
         function renderSingleMatchCard(game, compact = false) {
@@ -4255,7 +4318,7 @@
             const tabsContainer = document.getElementById('team-tabs');
             
             // Create tabs
-            const groups = ['all', ...new Set(teams.map(t => t.groups).filter(Boolean))];
+            const groups = ['all', ...sortStageValues(new Set(teams.map(t => t.groups).filter(Boolean)))];
             tabsContainer.innerHTML = groups.map(g => `
                 <button class="tab-btn ${g === 'all' ? 'active' : ''}" onclick="filterTeams('${g}')">
                     ${g === 'all' ? translations[currentLang].all_teams : translations[currentLang].group + ' ' + g}
@@ -4283,7 +4346,13 @@
                 return;
             }
             
-            grid.innerHTML = teams.map(team => `
+            const sortedTeams = [...teams].sort((a, b) => {
+                const nameA = String(a.name_en || a.fifa_code || '').toUpperCase();
+                const nameB = String(b.name_en || b.fifa_code || '').toUpperCase();
+                return nameA.localeCompare(nameB, 'en', { sensitivity: 'base' });
+            });
+
+            grid.innerHTML = sortedTeams.map(team => `
                 <div class="team-card" id="team-card-${team.id}" data-team-id="${team.id}">
                     <button class="fav-btn team-fav ${favoriteTeams.has(String(team.id)) ? 'active' : ''}" onclick="toggleFavoriteTeam('${team.id}')" aria-label="Yêu thích đội">★</button>
                     <img class="team-flag" src="${team.flag || ''}" alt="${team.name_en}" onerror="this.src='https://via.placeholder.com/80x55?text=Flag'">
@@ -4297,27 +4366,38 @@
         // Render Groups
         function renderGroups(groups) {
             const grid = document.getElementById('groups-grid');
-            
-            if (groups.length === 0) {
-                grid.innerHTML = `<div class="no-data"><p>NO GROUPS FOUND</p></div>`;
+
+            const filteredGroups = groups
+                .filter(group => {
+                    const key = String(group.group || group.name || '').trim();
+                    return currentMatchFilter === 'all' || (isGroupStageValue(currentMatchFilter) && key === currentMatchFilter);
+                })
+                .sort((a, b) => {
+                    const orderA = stageSortValue(a.group || a.name);
+                    const orderB = stageSortValue(b.group || b.name);
+                    if (orderA !== orderB) return orderA - orderB;
+                    return String(a.group || a.name || '').localeCompare(String(b.group || b.name || ''), 'vi', { sensitivity: 'base' });
+                });
+
+            if (filteredGroups.length === 0) {
+                grid.innerHTML = `<div class="no-data"><p>KHÔNG CÓ BẢNG TỔNG HỢP CHO VÒNG NÀY</p></div>`;
                 return;
             }
             
-            grid.innerHTML = groups.map(group => {
+            grid.innerHTML = filteredGroups.map(group => {
                 const groupTeams = group.teams || [];
                 
-                // Sort teams by points, then goal difference
+                // Sort table rows by team name/code for easier scanning before matches start.
                 const sortedTeams = [...groupTeams].sort((a, b) => {
-                    const ptsA = parseInt(a.pts) || 0;
-                    const ptsB = parseInt(b.pts) || 0;
-                    if (ptsB !== ptsA) return ptsB - ptsA;
-                    const gdA = parseInt(a.gd) || 0;
-                    const gdB = parseInt(b.gd) || 0;
-                    return gdB - gdA;
+                    const teamA = teamsData.find(t => t.id === a.team_id) || {};
+                    const teamB = teamsData.find(t => t.id === b.team_id) || {};
+                    const nameA = teamCode(teamA, teamA.name_en || 'TBD');
+                    const nameB = teamCode(teamB, teamB.name_en || 'TBD');
+                    return nameA.localeCompare(nameB, 'en', { sensitivity: 'base' });
                 });
                 
                 return `
-                    <div class="group-card">
+                    <div class="group-card" onclick="filterMatches('${group.group || group.name || 'all'}')">
                         <div class="group-header">
                             <span>${translations[currentLang].group} ${group.group || group.name || '-'}</span>
                         </div>
@@ -4330,8 +4410,8 @@
                                     <th>${translations[currentLang].w}</th>
                                     <th>${translations[currentLang].d}</th>
                                     <th>${translations[currentLang].l}</th>
-                                    <th>BT</th>
-                                    <th>BB</th>
+                                    <th class="mobile-hide-stat">BT</th>
+                                    <th class="mobile-hide-stat">BB</th>
                                     <th>${translations[currentLang].gd}</th>
                                     <th>${translations[currentLang].pts}</th>
                                 </tr>
@@ -4356,8 +4436,8 @@
                                             <td class="stat-positive">${teamInfo.w || 0}</td>
                                             <td class="stat-zero">${teamInfo.d || 0}</td>
                                             <td class="stat-negative">${teamInfo.l || 0}</td>
-                                            <td>${teamInfo.gf || 0}</td>
-                                            <td>${teamInfo.ga || 0}</td>
+                                            <td class="mobile-hide-stat">${teamInfo.gf || 0}</td>
+                                            <td class="mobile-hide-stat">${teamInfo.ga || 0}</td>
                                             <td class="${gdClass}">${gd > 0 ? '+' : ''}${gd}</td>
                                             <td class="pts-cell">${teamInfo.pts || 0}</td>
                                         </tr>
