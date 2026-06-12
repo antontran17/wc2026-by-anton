@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Disallow API endpoints from indexing (no SEO value)
+Disallow: /get/
+Disallow: /auth/
+Disallow: /data/
+Disallow: /health
+Disallow: /api-docs
+
+# Sitemap
+Sitemap: https://worldcup26.ir/sitemap.xml
