@@ -3728,9 +3728,14 @@
                 inset 0 1px 0 rgba(255,255,255,.16) !important;
         }
 
-        .team-card.favorite-team-card .team-flag {
+        .team-card.favorite-team-card .team-flag,
+        .team-flag.favorite-flag {
             animation: favoriteFlagSparkle 1.8s ease-in-out infinite !important;
             filter: drop-shadow(0 0 10px rgba(255,230,145,.72)) drop-shadow(0 0 18px rgba(123,220,255,.36)) !important;
+        }
+
+        .team-flag-jump.favorite-flag-wrap {
+            position: relative !important;
         }
 
         .team-card.favorite-team-card::after {
@@ -3750,8 +3755,23 @@
             opacity: .95 !important;
         }
 
+        .team-flag-jump.favorite-flag-wrap::after {
+            content: "" !important;
+            position: absolute !important;
+            inset: -9px !important;
+            border-radius: 15px !important;
+            pointer-events: none !important;
+            background:
+                radial-gradient(circle at 14% 18%, rgba(255,255,255,.98) 0 2px, transparent 3px),
+                radial-gradient(circle at 72% 16%, rgba(255,230,145,.94) 0 2px, transparent 3px),
+                radial-gradient(circle at 84% 78%, rgba(123,220,255,.88) 0 2px, transparent 3px),
+                radial-gradient(circle at 28% 82%, rgba(255,139,170,.78) 0 1.5px, transparent 3px);
+            animation: favoriteFlagTwinkle 1.2s linear infinite !important;
+        }
+
         .match-card.has-favorite-team {
             border-color: rgba(255,230,145,.52) !important;
+            overflow: hidden !important;
         }
 
         .match-card.has-favorite-team::after {
@@ -3759,13 +3779,17 @@
             position: absolute !important;
             inset: 0 !important;
             border-radius: inherit !important;
-            padding: 2px !important;
             pointer-events: none !important;
-            background: conic-gradient(from 0deg, rgba(255,230,145,.95), rgba(123,220,255,.86), rgba(182,154,255,.92), rgba(255,89,120,.86), rgba(255,230,145,.95)) !important;
-            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0) !important;
-            -webkit-mask-composite: xor !important;
-            mask-composite: exclude !important;
-            animation: favoriteMatchBorderSpin 2.8s linear infinite !important;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,230,145,.18) 28%, rgba(123,220,255,.24) 48%, rgba(182,154,255,.18) 68%, transparent 100%) !important;
+            background-size: 240% 100% !important;
+            animation: favoriteMatchSweep 3.2s linear infinite !important;
+            opacity: .9 !important;
+            z-index: 0 !important;
+        }
+
+        .match-card.has-favorite-team > * {
+            position: relative !important;
+            z-index: 2 !important;
         }
 
         .all-group .match-priority-title {
@@ -3791,8 +3815,9 @@
             70% { opacity: .55; transform: scale(1) rotate(-3deg); }
         }
 
-        @keyframes favoriteMatchBorderSpin {
-            to { transform: rotate(360deg); }
+        @keyframes favoriteMatchSweep {
+            from { background-position: 160% 50%; }
+            to { background-position: -80% 50%; }
         }
 
         @media(max-width:640px){
@@ -4309,7 +4334,9 @@
             const awayName = teamCode(awayTeam, game.away_team_name_en || awayTeam.name_en || 'TBD');
             const stadiumName = (stadium.name_en || '');
             const dateStr = vietnamTimeText(game);
-            const hasFavoriteTeam = favoriteTeams.has(String(game.home_team_id)) || favoriteTeams.has(String(game.away_team_id));
+            const homeFavorite = favoriteTeams.has(String(game.home_team_id));
+            const awayFavorite = favoriteTeams.has(String(game.away_team_id));
+            const hasFavoriteTeam = homeFavorite || awayFavorite;
 
             return `
                 <div class="match-card${matchStatusClass(game)} ${compact ? 'match-card-compact' : ''} ${hasFavoriteTeam ? 'has-favorite-team' : ''}">
@@ -4322,15 +4349,15 @@
                     </div>
                     <div class="match-teams">
                         <div class="match-team">
-                            <button class="team-flag-jump" onclick="scrollToTeam('${homeTeam.id || game.home_team_id || ''}')" aria-label="Xem đội ${homeName}">
-                                <img class="team-flag" src="${homeTeam.flag || ''}" alt="${homeName}" onerror="this.src='https://via.placeholder.com/60x40?text=Flag'">
+                            <button class="team-flag-jump ${homeFavorite ? 'favorite-flag-wrap' : ''}" onclick="scrollToTeam('${homeTeam.id || game.home_team_id || ''}')" aria-label="Xem đội ${homeName}">
+                                <img class="team-flag ${homeFavorite ? 'favorite-flag' : ''}" src="${homeTeam.flag || ''}" alt="${homeName}" onerror="this.src='https://via.placeholder.com/60x40?text=Flag'">
                             </button>
                             <span class="team-name">${homeName}</span>
                         </div>
                         <span class="match-vs">${scoreCenter(game)}</span>
                         <div class="match-team">
-                            <button class="team-flag-jump" onclick="scrollToTeam('${awayTeam.id || game.away_team_id || ''}')" aria-label="Xem đội ${awayName}">
-                                <img class="team-flag" src="${awayTeam.flag || ''}" alt="${awayName}" onerror="this.src='https://via.placeholder.com/60x40?text=Flag'">
+                            <button class="team-flag-jump ${awayFavorite ? 'favorite-flag-wrap' : ''}" onclick="scrollToTeam('${awayTeam.id || game.away_team_id || ''}')" aria-label="Xem đội ${awayName}">
+                                <img class="team-flag ${awayFavorite ? 'favorite-flag' : ''}" src="${awayTeam.flag || ''}" alt="${awayName}" onerror="this.src='https://via.placeholder.com/60x40?text=Flag'">
                             </button>
                             <span class="team-name">${awayName}</span>
                         </div>
@@ -4497,7 +4524,7 @@
             grid.innerHTML = sortedTeams.map(team => `
                 <div class="team-card ${favoriteTeams.has(String(team.id)) ? 'favorite-team-card' : ''}" id="team-card-${team.id}" data-team-id="${team.id}">
                     <button class="fav-btn team-fav ${favoriteTeams.has(String(team.id)) ? 'active' : ''}" onclick="toggleFavoriteTeam('${team.id}')" aria-label="Yêu thích đội">★</button>
-                    <img class="team-flag" src="${team.flag || ''}" alt="${team.name_en}" onerror="this.src='https://via.placeholder.com/80x55?text=Flag'">
+                    <img class="team-flag ${favoriteTeams.has(String(team.id)) ? 'favorite-flag' : ''}" src="${team.flag || ''}" alt="${team.name_en}" onerror="this.src='https://via.placeholder.com/80x55?text=Flag'">
                     <span class="team-name">${team.name_en}</span>
                     <span class="team-group">${translations[currentLang].group} ${team.groups || '-'}</span>
                     <span class="fifa-code">${team.fifa_code || ''}</span>
