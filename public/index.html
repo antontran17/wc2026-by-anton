@@ -3772,19 +3772,11 @@
         .match-card.has-favorite-team {
             border-color: rgba(255,230,145,.52) !important;
             overflow: hidden !important;
-        }
-
-        .match-card.has-favorite-team::after {
-            content: "" !important;
-            position: absolute !important;
-            inset: 0 !important;
-            border-radius: inherit !important;
-            pointer-events: none !important;
-            background: linear-gradient(90deg, transparent 0%, rgba(255,230,145,.18) 28%, rgba(123,220,255,.24) 48%, rgba(182,154,255,.18) 68%, transparent 100%) !important;
-            background-size: 240% 100% !important;
-            animation: favoriteMatchSweep 3.2s linear infinite !important;
-            opacity: .9 !important;
-            z-index: 0 !important;
+            box-shadow:
+                0 18px 44px rgba(0,0,0,.24),
+                0 0 24px rgba(255,213,92,.36),
+                0 0 58px rgba(237,196,125,.22),
+                inset 0 1px 0 rgba(255,255,255,.14) !important;
         }
 
         .match-card.has-favorite-team > * {
@@ -3813,11 +3805,6 @@
             0%, 100% { opacity: .2; transform: scale(.96) rotate(0deg); }
             35% { opacity: 1; transform: scale(1.04) rotate(4deg); }
             70% { opacity: .55; transform: scale(1) rotate(-3deg); }
-        }
-
-        @keyframes favoriteMatchSweep {
-            from { background-position: 160% 50%; }
-            to { background-position: -80% 50%; }
         }
 
         @media(max-width:640px){
