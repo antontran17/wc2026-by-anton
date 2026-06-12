@@ -3709,6 +3709,100 @@
             }
         }
     </style>
+    <style id="anton-favorite-motion-final">
+        .match-card,
+        .team-card,
+        .group-card {
+            transform-origin: center center !important;
+            will-change: transform, box-shadow !important;
+        }
+
+        .match-card:hover,
+        .team-card:hover,
+        .group-card:hover {
+            transform: translateY(-8px) scale(1.055) !important;
+            z-index: 20 !important;
+            box-shadow:
+                0 28px 68px rgba(0,0,0,.38),
+                0 0 34px rgba(237,196,125,.26),
+                inset 0 1px 0 rgba(255,255,255,.16) !important;
+        }
+
+        .team-card.favorite-team-card .team-flag {
+            animation: favoriteFlagSparkle 1.8s ease-in-out infinite !important;
+            filter: drop-shadow(0 0 10px rgba(255,230,145,.72)) drop-shadow(0 0 18px rgba(123,220,255,.36)) !important;
+        }
+
+        .team-card.favorite-team-card::after {
+            content: "" !important;
+            position: absolute !important;
+            inset: 44px calc(50% - 54px) auto !important;
+            width: 108px !important;
+            height: 76px !important;
+            border-radius: 14px !important;
+            pointer-events: none !important;
+            background:
+                radial-gradient(circle at 18% 22%, rgba(255,255,255,.95) 0 2px, transparent 3px),
+                radial-gradient(circle at 76% 18%, rgba(255,230,145,.9) 0 2px, transparent 3px),
+                radial-gradient(circle at 82% 74%, rgba(123,220,255,.85) 0 2px, transparent 3px);
+            background-size: 100% 100% !important;
+            animation: favoriteFlagTwinkle 1.35s linear infinite !important;
+            opacity: .95 !important;
+        }
+
+        .match-card.has-favorite-team {
+            border-color: rgba(255,230,145,.52) !important;
+        }
+
+        .match-card.has-favorite-team::after {
+            content: "" !important;
+            position: absolute !important;
+            inset: 0 !important;
+            border-radius: inherit !important;
+            padding: 2px !important;
+            pointer-events: none !important;
+            background: conic-gradient(from 0deg, rgba(255,230,145,.95), rgba(123,220,255,.86), rgba(182,154,255,.92), rgba(255,89,120,.86), rgba(255,230,145,.95)) !important;
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0) !important;
+            -webkit-mask-composite: xor !important;
+            mask-composite: exclude !important;
+            animation: favoriteMatchBorderSpin 2.8s linear infinite !important;
+        }
+
+        .all-group .match-priority-title {
+            background: rgba(237,196,125,.15) !important;
+            border-color: rgba(237,196,125,.42) !important;
+            color: #ffe2a7 !important;
+        }
+
+        @keyframes favoriteFlagSparkle {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+                filter: drop-shadow(0 0 8px rgba(255,230,145,.58)) drop-shadow(0 0 14px rgba(123,220,255,.28));
+            }
+            50% {
+                transform: translateY(-2px) scale(1.045);
+                filter: drop-shadow(0 0 16px rgba(255,230,145,.95)) drop-shadow(0 0 28px rgba(123,220,255,.52));
+            }
+        }
+
+        @keyframes favoriteFlagTwinkle {
+            0%, 100% { opacity: .2; transform: scale(.96) rotate(0deg); }
+            35% { opacity: 1; transform: scale(1.04) rotate(4deg); }
+            70% { opacity: .55; transform: scale(1) rotate(-3deg); }
+        }
+
+        @keyframes favoriteMatchBorderSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media(max-width:640px){
+            .match-card:hover,
+            .team-card:hover,
+            .group-card:hover {
+                transform: translateY(-5px) scale(1.025) !important;
+            }
+        }
+    </style>
 
 </head>
 <body>
@@ -3955,6 +4049,7 @@
             favoriteTeams.has(id) ? favoriteTeams.delete(id) : favoriteTeams.add(id);
             saveFavorites();
             renderTeamCards(currentTeamFilter === 'all' ? teamsData : teamsData.filter(t => t.groups === currentTeamFilter));
+            renderMatchCards(currentMatchFilter === 'all' ? gamesData : gamesData.filter(g => g.group === currentMatchFilter));
         }
 
         function scrollToTeam(teamId) {
@@ -4214,9 +4309,10 @@
             const awayName = teamCode(awayTeam, game.away_team_name_en || awayTeam.name_en || 'TBD');
             const stadiumName = (stadium.name_en || '');
             const dateStr = vietnamTimeText(game);
+            const hasFavoriteTeam = favoriteTeams.has(String(game.home_team_id)) || favoriteTeams.has(String(game.away_team_id));
 
             return `
-                <div class="match-card${matchStatusClass(game)} ${compact ? 'match-card-compact' : ''}">
+                <div class="match-card${matchStatusClass(game)} ${compact ? 'match-card-compact' : ''} ${hasFavoriteTeam ? 'has-favorite-team' : ''}">
                     <button class="fav-btn match-fav ${favoriteMatches.has(String(game.id)) ? 'active' : ''}" onclick="toggleFavoriteMatch('${game.id}')" aria-label="Yêu thích trận">★</button>
                     <div class="match-time-top">${dateStr}</div>
                     <div class="match-header">
@@ -4348,6 +4444,7 @@
 
             const restHtml = rest.length ? `
                 <div class="match-priority-group all-group">
+                    <div class="match-priority-title">LỊCH THI ĐẤU</div>
                     <div class="cards-grid match-priority-grid">
                         ${rest.map(game => renderSingleMatchCard(game)).join('')}
                     </div>
@@ -4398,7 +4495,7 @@
             });
 
             grid.innerHTML = sortedTeams.map(team => `
-                <div class="team-card" id="team-card-${team.id}" data-team-id="${team.id}">
+                <div class="team-card ${favoriteTeams.has(String(team.id)) ? 'favorite-team-card' : ''}" id="team-card-${team.id}" data-team-id="${team.id}">
                     <button class="fav-btn team-fav ${favoriteTeams.has(String(team.id)) ? 'active' : ''}" onclick="toggleFavoriteTeam('${team.id}')" aria-label="Yêu thích đội">★</button>
                     <img class="team-flag" src="${team.flag || ''}" alt="${team.name_en}" onerror="this.src='https://via.placeholder.com/80x55?text=Flag'">
                     <span class="team-name">${team.name_en}</span>
