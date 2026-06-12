@@ -3727,8 +3727,8 @@
             <div class="header-content">
                 <nav>
                     <a href="#matches" data-i18n="nav_matches">LỊCH ĐẤU</a>
-                    <a href="#teams" data-i18n="nav_teams">ĐỘI TUYỂN</a>
                     <a href="#groups" data-i18n="nav_groups">BẢNG ĐẤU</a>
+                    <a href="#teams" data-i18n="nav_teams">ĐỘI TUYỂN</a>
                     <button id="header-refresh-btn" class="header-refresh-btn" onclick="refreshData()" aria-label="Tải lại">TẢI LẠI</button></nav>
             </div>
         </div>
@@ -3770,6 +3770,22 @@
         </div>
     </section>
 
+    <!-- Groups Section -->
+    <section id="groups">
+        <div class="container">
+            <div class="section-header">
+                <h2 data-i18n="groups_title">BẢNG ĐẤU</h2>
+            </div>
+            
+            <div class="cards-grid" id="groups-grid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span data-i18n="loading">ĐANG TẢI...</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Teams Section -->
     <section id="teams">
         <div class="container">
@@ -3782,22 +3798,6 @@
             </div>
             
             <div class="cards-grid" id="teams-grid">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <span data-i18n="loading">ĐANG TẢI...</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Groups Section -->
-    <section id="groups">
-        <div class="container">
-            <div class="section-header">
-                <h2 data-i18n="groups_title">BẢNG ĐẤU</h2>
-            </div>
-            
-            <div class="cards-grid" id="groups-grid">
                 <div class="loading">
                     <div class="spinner"></div>
                     <span data-i18n="loading">ĐANG TẢI...</span>
@@ -4264,6 +4264,51 @@
             });
         }
 
+        function statNumber(value) {
+            const number = Number(value);
+            return Number.isFinite(number) ? number : 0;
+        }
+
+        function isCompletedGame(game) {
+            const finished = String(game.finished || '').trim().toLowerCase();
+            const elapsed = String(game.time_elapsed || game.status || '').trim().toLowerCase();
+            return finished === 'true' || finished === '1' || elapsed === 'finished' || elapsed === 'ft' || elapsed === 'fulltime';
+        }
+
+        function headToHeadScore(teamAId, teamBId, groupKey) {
+            const score = { aPts: 0, bPts: 0, aGd: 0, bGd: 0, aGf: 0, bGf: 0 };
+            gamesData
+                .filter(game => {
+                    if (!isCompletedGame(game)) return false;
+                    if (String(game.group || '') !== String(groupKey || '')) return false;
+                    const homeId = String(game.home_team_id || '');
+                    const awayId = String(game.away_team_id || '');
+                    return (homeId === String(teamAId) && awayId === String(teamBId)) ||
+                        (homeId === String(teamBId) && awayId === String(teamAId));
+                })
+                .forEach(game => {
+                    const homeId = String(game.home_team_id || '');
+                    const homeScore = statNumber(game.home_score);
+                    const awayScore = statNumber(game.away_score);
+                    const aIsHome = homeId === String(teamAId);
+                    const aGoals = aIsHome ? homeScore : awayScore;
+                    const bGoals = aIsHome ? awayScore : homeScore;
+                    score.aGf += aGoals;
+                    score.bGf += bGoals;
+                    score.aGd += aGoals - bGoals;
+                    score.bGd += bGoals - aGoals;
+                    if (aGoals > bGoals) {
+                        score.aPts += 3;
+                    } else if (aGoals < bGoals) {
+                        score.bPts += 3;
+                    } else {
+                        score.aPts += 1;
+                        score.bPts += 1;
+                    }
+                });
+            return score;
+        }
+
         function renderMatchGroup(title, items, className = '', compact = false) {
             if (!items.length) return '';
             return `
@@ -4387,10 +4432,23 @@
             grid.innerHTML = filteredGroups.map(group => {
                 const groupTeams = group.teams || [];
                 
-                // Sort table rows by team name/code for easier scanning before matches start.
+                // Ranking order: points, goal difference, goals scored, head-to-head, then name/code.
                 const sortedTeams = [...groupTeams].sort((a, b) => {
                     const teamA = teamsData.find(t => t.id === a.team_id) || {};
                     const teamB = teamsData.find(t => t.id === b.team_id) || {};
+                    const ptsDiff = statNumber(b.pts) - statNumber(a.pts);
+                    if (ptsDiff !== 0) return ptsDiff;
+                    const gdDiff = statNumber(b.gd) - statNumber(a.gd);
+                    if (gdDiff !== 0) return gdDiff;
+                    const gfDiff = statNumber(b.gf) - statNumber(a.gf);
+                    if (gfDiff !== 0) return gfDiff;
+                    const h2h = headToHeadScore(a.team_id, b.team_id, group.group || group.name);
+                    const h2hPtsDiff = h2h.bPts - h2h.aPts;
+                    if (h2hPtsDiff !== 0) return h2hPtsDiff;
+                    const h2hGdDiff = h2h.bGd - h2h.aGd;
+                    if (h2hGdDiff !== 0) return h2hGdDiff;
+                    const h2hGfDiff = h2h.bGf - h2h.aGf;
+                    if (h2hGfDiff !== 0) return h2hGfDiff;
                     const nameA = teamCode(teamA, teamA.name_en || 'TBD');
                     const nameB = teamCode(teamB, teamB.name_en || 'TBD');
                     return nameA.localeCompare(nameB, 'en', { sensitivity: 'base' });
