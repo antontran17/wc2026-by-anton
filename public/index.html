@@ -3495,6 +3495,48 @@
             box-shadow: 0 8px 18px rgba(0,0,0,.20) !important;
         }
 
+        .schedule-stage-group .match-priority-title {
+            background: rgba(123,220,255,.14) !important;
+            border-color: rgba(123,220,255,.36) !important;
+            color: #eef3ff !important;
+        }
+
+        .collapsed-stage-group {
+            margin-bottom: 18px !important;
+        }
+
+        .schedule-label-group {
+            margin-bottom: 12px !important;
+        }
+
+        .collapsed-stage-card {
+            width: 100% !important;
+            min-height: 72px !important;
+            border: 1px solid rgba(142,162,255,.28) !important;
+            border-radius: 18px !important;
+            background: linear-gradient(90deg, rgba(28,20,72,.72), rgba(58,68,150,.42)) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 14px 32px rgba(0,0,0,.18) !important;
+            color: #eef3ff !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 14px !important;
+            padding: 18px 20px !important;
+            text-transform: uppercase !important;
+        }
+
+        .collapsed-stage-card strong {
+            font-size: 15px !important;
+            letter-spacing: .06em !important;
+        }
+
+        .collapsed-stage-card span {
+            color: rgba(238,243,255,.74) !important;
+            font-size: 12px !important;
+            letter-spacing: .04em !important;
+            text-align: right !important;
+        }
+
         .match-teams,
         .match-card .match-teams {
             align-items: center !important;
@@ -3566,6 +3608,20 @@
         }
 
         @media(max-width:640px){
+            .collapsed-stage-card {
+                min-height: 58px !important;
+                padding: 14px 15px !important;
+                border-radius: 16px !important;
+            }
+
+            .collapsed-stage-card strong {
+                font-size: 13px !important;
+            }
+
+            .collapsed-stage-card span {
+                font-size: 10px !important;
+            }
+
             .header-refresh-btn {
                 width: auto !important;
                 height: auto !important;
@@ -3996,6 +4052,68 @@
                 padding: 14px !important;
                 min-height: 198px !important;
             }
+
+            #matches .match-card {
+                cursor: pointer !important;
+            }
+
+            #matches .match-card:not(.mobile-expanded) {
+                min-height: 132px !important;
+                padding: 13px 14px 12px !important;
+                border-radius: 17px !important;
+            }
+
+            #matches .match-card:not(.mobile-expanded) .match-header,
+            #matches .match-card:not(.mobile-expanded) .match-info,
+            #matches .match-card:not(.mobile-expanded) .match-status-slot {
+                display: none !important;
+            }
+
+            #matches .match-card:not(.mobile-expanded) .match-time-top {
+                min-height: 20px !important;
+                margin-bottom: 9px !important;
+                font-size: 12px !important;
+                letter-spacing: .02em !important;
+            }
+
+            #matches .match-card:not(.mobile-expanded) .match-teams,
+            #matches .match-card:not(.mobile-expanded).match-card-compact .match-teams {
+                grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr) !important;
+                gap: 6px !important;
+                align-items: center !important;
+            }
+
+            #matches .match-card:not(.mobile-expanded) .match-vs {
+                margin-top: 0 !important;
+                align-self: center !important;
+            }
+
+            #matches .match-card:not(.mobile-expanded) .score-center,
+            #matches .match-card:not(.mobile-expanded) .match-vs .score-center {
+                width: 58px !important;
+                min-width: 58px !important;
+                font-size: 21px !important;
+            }
+
+            #matches .match-card:not(.mobile-expanded) .score-center span {
+                min-width: 20px !important;
+            }
+
+            #matches .match-card:not(.mobile-expanded) .team-flag,
+            #matches .match-card:not(.mobile-expanded) .team-flag-placeholder {
+                width: 56px !important;
+                height: 38px !important;
+                font-size: 11px !important;
+            }
+
+            #matches .match-card:not(.mobile-expanded) .match-team .team-name {
+                font-size: 12px !important;
+                margin-top: 7px !important;
+            }
+
+            #matches .match-card.mobile-expanded {
+                cursor: default !important;
+            }
         }
     </style>
 
@@ -4164,6 +4282,7 @@
         let favoriteTeams = new Set(JSON.parse(localStorage.getItem('wc2026_fav_teams') || '[]'));
         let currentMatchFilter = 'all';
         let currentTeamFilter = 'all';
+        let expandedMobileMatchId = null;
 
         const API_BASE = window.location.origin;
 
@@ -4411,7 +4530,7 @@
             if (!raw) return 'TBD';
             if (/winner match/i.test(raw)) return 'WIN';
             if (/runner-up/i.test(raw)) return 'RUP';
-            if (/winner group/i.test(raw)) return 'WGR';
+            if (/winner group/i.test(raw)) return 'WIN';
             if (/3rd group/i.test(raw)) return '3RD';
             return 'TBD';
         }
@@ -4421,7 +4540,7 @@
             if (flag) {
                 return `<img class="team-flag ${isFavorite ? 'favorite-flag' : ''}" src="${escapeHtml(flag)}" alt="${escapeHtml(team.name_en || fallbackLabel || 'Team')}" onerror="this.replaceWith(Object.assign(document.createElement('span'), {className:'team-flag-placeholder', textContent:'TBD'}))">`;
             }
-            return `<span class="team-flag-placeholder" title="${escapeHtml(fallbackLabel || 'Team not decided')}">${pendingTeamLabel(fallbackLabel)}</span>`;
+            return `<span class="team-flag-placeholder" title="${escapeHtml(fallbackLabel || 'Team not decided')}">TBD</span>`;
         }
 
         function stageLabel(value) {
@@ -4457,6 +4576,23 @@
 
         function isGroupStageValue(value) {
             return /^[A-L]$/i.test(String(value || '').trim());
+        }
+
+        function scheduleStageKey(game) {
+            return isGroupStageValue(game.group) ? 'GROUP' : String(game.group || 'OTHER').trim().toUpperCase();
+        }
+
+        function scheduleStageTitle(key) {
+            if (key === 'GROUP') return 'LỊCH VÒNG BẢNG';
+            return `LỊCH ${stageLabel(key)}`;
+        }
+
+        function hasResolvedCandidate(game) {
+            return Boolean(teamsData.find(t => t.id === game.home_team_id) || teamsData.find(t => t.id === game.away_team_id));
+        }
+
+        function filteredMatchesForCurrentTab() {
+            return currentMatchFilter === 'all' ? gamesData : gamesData.filter(g => g.group === currentMatchFilter);
         }
 
         function scoreCenter(game) {
@@ -4511,6 +4647,7 @@
 
         function filterMatches(group) {
             currentMatchFilter = group || 'all';
+            expandedMobileMatchId = null;
             document.querySelectorAll('#match-tabs .tab-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.getAttribute('onclick') === `filterMatches('${currentMatchFilter}')`);
             });
@@ -4536,10 +4673,11 @@
             const homeFavorite = favoriteTeams.has(String(game.home_team_id));
             const awayFavorite = favoriteTeams.has(String(game.away_team_id));
             const hasFavoriteTeam = homeFavorite || awayFavorite;
+            const isMobileExpanded = String(game.id) === String(expandedMobileMatchId);
 
             return `
-                <div class="match-card${matchStatusClass(game)} ${compact ? 'match-card-compact' : ''} ${hasFavoriteTeam ? 'has-favorite-team' : ''}">
-                    <button class="fav-btn match-fav ${favoriteMatches.has(String(game.id)) ? 'active' : ''}" onclick="toggleFavoriteMatch('${game.id}')" aria-label="Yêu thích trận">★</button>
+                <div class="match-card${matchStatusClass(game)} ${compact ? 'match-card-compact' : ''} ${hasFavoriteTeam ? 'has-favorite-team' : ''} ${isMobileExpanded ? 'mobile-expanded' : ''}" data-match-id="${escapeHtml(game.id)}" onclick="toggleMobileMatch('${game.id}')">
+                    <button class="fav-btn match-fav ${favoriteMatches.has(String(game.id)) ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavoriteMatch('${game.id}')" aria-label="Yêu thích trận">★</button>
                     <div class="match-time-top">${dateStr}</div>
                     <div class="match-header">
                         <span class="match-group">${translations[currentLang].group} ${game.group || '-'}</span>
@@ -4548,14 +4686,14 @@
                     </div>
                     <div class="match-teams">
                         <div class="match-team">
-                            <button class="team-flag-jump ${homeFavorite ? 'favorite-flag-wrap' : ''}" onclick="scrollToTeam('${homeTeam.id || game.home_team_id || ''}')" aria-label="Xem đội ${homeName}">
+                            <button class="team-flag-jump ${homeFavorite ? 'favorite-flag-wrap' : ''}" onclick="event.stopPropagation(); scrollToTeam('${homeTeam.id || game.home_team_id || ''}')" aria-label="Xem đội ${homeName}">
                                 ${renderMatchFlag(homeTeam, homeLabel, homeFavorite)}
                             </button>
                             <span class="team-name">${homeName}</span>
                         </div>
                         <span class="match-vs">${scoreCenter(game)}</span>
                         <div class="match-team">
-                            <button class="team-flag-jump ${awayFavorite ? 'favorite-flag-wrap' : ''}" onclick="scrollToTeam('${awayTeam.id || game.away_team_id || ''}')" aria-label="Xem đội ${awayName}">
+                            <button class="team-flag-jump ${awayFavorite ? 'favorite-flag-wrap' : ''}" onclick="event.stopPropagation(); scrollToTeam('${awayTeam.id || game.away_team_id || ''}')" aria-label="Xem đội ${awayName}">
                                 ${renderMatchFlag(awayTeam, awayLabel, awayFavorite)}
                             </button>
                             <span class="team-name">${awayName}</span>
@@ -4566,6 +4704,12 @@
                     </div>
                 </div>
             `;
+        }
+
+        function toggleMobileMatch(id) {
+            if (!window.matchMedia('(max-width: 640px)').matches) return;
+            expandedMobileMatchId = String(expandedMobileMatchId) === String(id) ? null : String(id);
+            renderMatchCards(filteredMatchesForCurrentTab());
         }
 
         function uniqueMatches(items) {
@@ -4643,6 +4787,43 @@
             `;
         }
 
+        function renderStageScheduleGroup(stageKey, items) {
+            if (!items.length) return '';
+            const sortedItems = sortByStartTime(items);
+            const isKnockout = stageKey !== 'GROUP';
+            const collapsed = isKnockout && !sortedItems.some(hasResolvedCandidate);
+            const title = scheduleStageTitle(stageKey);
+
+            if (collapsed) {
+                return `
+                    <div class="match-priority-group schedule-stage-group collapsed-stage-group">
+                        <div class="match-priority-title">${title}</div>
+                        <div class="collapsed-stage-card">
+                            <strong>${title}</strong>
+                            <span>${sortedItems.length} trận · chờ xác định đội</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="match-priority-group schedule-stage-group">
+                    <div class="match-priority-title">${title}</div>
+                    <div class="cards-grid match-priority-grid">
+                        ${sortedItems.map(game => renderSingleMatchCard(game)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderScheduleLabel() {
+            return `
+                <div class="match-priority-group schedule-label-group">
+                    <div class="match-priority-title">LỊCH THI ĐẤU</div>
+                </div>
+            `;
+        }
+
         function renderMatchCards(games) {
             const grid = document.getElementById('matches-grid');
 
@@ -4663,19 +4844,26 @@
             const rest = games.filter(g => !highlightedIds.has(String(g.id)));
 
             const groupedHtml = [
+                renderScheduleLabel(),
                 renderMatchGroup('ĐANG DIỄN RA', live, 'live-group', true),
                 renderMatchGroup('SẮP DIỄN RA', upcoming, 'upcoming-group', true),
                 renderMatchGroup('YÊU THÍCH', favorites, 'favorite-group')
             ].join('');
 
-            const restHtml = rest.length ? `
-                <div class="match-priority-group all-group">
-                    <div class="match-priority-title">LỊCH THI ĐẤU</div>
-                    <div class="cards-grid match-priority-grid">
-                        ${rest.map(game => renderSingleMatchCard(game)).join('')}
-                    </div>
-                </div>
-            ` : '';
+            const stageBuckets = new Map();
+            rest.forEach(game => {
+                const key = scheduleStageKey(game);
+                if (!stageBuckets.has(key)) stageBuckets.set(key, []);
+                stageBuckets.get(key).push(game);
+            });
+
+            const stageKeys = [...stageBuckets.keys()].sort((a, b) => {
+                const orderA = a === 'GROUP' ? -1 : stageSortValue(a);
+                const orderB = b === 'GROUP' ? -1 : stageSortValue(b);
+                return orderA - orderB;
+            });
+
+            const restHtml = stageKeys.map(key => renderStageScheduleGroup(key, stageBuckets.get(key))).join('');
 
             grid.innerHTML = groupedHtml + restHtml;
         }
