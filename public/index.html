@@ -3519,7 +3519,7 @@
             -webkit-background-clip: text !important;
             background-clip: text !important;
             box-shadow: none !important;
-            font-size: 52px !important;
+            font-size: 26px !important;
             line-height: .95 !important;
             letter-spacing: 0 !important;
             text-transform: uppercase !important;
@@ -4144,10 +4144,88 @@
 
             #matches .match-card.mobile-expanded {
                 cursor: default !important;
+                padding: 18px 22px 16px !important;
+                display: grid !important;
+                grid-template-rows: auto auto 1fr auto !important;
+                align-items: center !important;
+            }
+
+            #matches .match-card.mobile-expanded .match-time-top {
+                margin: 0 38px 16px !important;
+                min-height: 22px !important;
+                text-align: center !important;
+                font-size: 14px !important;
+                line-height: 1.1 !important;
+            }
+
+            #matches .match-card.mobile-expanded .match-header {
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+                align-items: center !important;
+                gap: 10px !important;
+                width: 100% !important;
+                margin: 0 0 22px !important;
+            }
+
+            #matches .match-card.mobile-expanded .match-header .match-group {
+                justify-self: start !important;
+                text-align: left !important;
+            }
+
+            #matches .match-card.mobile-expanded .match-header .match-status-slot {
+                justify-self: center !important;
+                min-width: 74px !important;
+                text-align: center !important;
+            }
+
+            #matches .match-card.mobile-expanded .match-header .matchday-label {
+                justify-self: end !important;
+                text-align: right !important;
+            }
+
+            #matches .match-card.mobile-expanded .match-teams,
+            #matches .match-card.mobile-expanded.match-card-compact .match-teams {
+                grid-template-columns: minmax(96px, 1fr) 84px minmax(96px, 1fr) !important;
+                gap: 14px !important;
+                align-items: center !important;
+                justify-items: center !important;
+                width: 100% !important;
+                margin: 0 !important;
+            }
+
+            #matches .match-card.mobile-expanded .match-vs {
+                margin-top: 0 !important;
+                align-self: center !important;
+                justify-self: center !important;
+            }
+
+            #matches .match-card.mobile-expanded .score-center,
+            #matches .match-card.mobile-expanded .match-vs .score-center {
+                width: 84px !important;
+                min-width: 84px !important;
+                justify-content: space-around !important;
+                font-size: 27px !important;
+            }
+
+            #matches .match-card.mobile-expanded .team-flag,
+            #matches .match-card.mobile-expanded .team-flag-placeholder {
+                width: 74px !important;
+                height: 50px !important;
+            }
+
+            #matches .match-card.mobile-expanded .match-team .team-name {
+                min-width: 86px !important;
+                text-align: center !important;
+                margin-top: 10px !important;
+            }
+
+            #matches .match-card.mobile-expanded .match-info {
+                margin-top: 22px !important;
+                text-align: center !important;
             }
 
             #matches-grid .match-priority-title {
-                font-size: 30px !important;
+                font-size: 15px !important;
                 margin-bottom: 16px !important;
             }
         }
