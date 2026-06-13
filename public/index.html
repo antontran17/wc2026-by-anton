@@ -3480,6 +3480,21 @@
             filter: brightness(1.08) !important;
         }
 
+        .team-flag-placeholder {
+            width: 76px !important;
+            height: 52px !important;
+            border-radius: 8px !important;
+            display: inline-grid !important;
+            place-items: center !important;
+            background: linear-gradient(135deg, rgba(142,162,255,.24), rgba(123,220,255,.10)) !important;
+            border: 1px solid rgba(185,197,255,.34) !important;
+            color: rgba(238,243,255,.84) !important;
+            font-size: 13px !important;
+            line-height: 1 !important;
+            text-transform: uppercase !important;
+            box-shadow: 0 8px 18px rgba(0,0,0,.20) !important;
+        }
+
         .match-teams,
         .match-card .match-teams {
             align-items: center !important;
@@ -3726,6 +3741,16 @@
                 0 28px 68px rgba(0,0,0,.38),
                 0 0 34px rgba(237,196,125,.26),
                 inset 0 1px 0 rgba(255,255,255,.16) !important;
+        }
+
+        .fav-btn.active,
+        .match-fav.active,
+        .team-fav.active {
+            color: #ffd85a !important;
+            text-shadow: 0 0 10px rgba(255,216,90,.74), 0 0 20px rgba(255,132,38,.34) !important;
+            border-color: rgba(255,216,90,.72) !important;
+            background: linear-gradient(135deg, rgba(255,216,90,.18), rgba(255,132,38,.12)) !important;
+            box-shadow: 0 0 18px rgba(255,216,90,.28) !important;
         }
 
         .team-card.favorite-team-card .team-flag,
@@ -4115,7 +4140,7 @@
                 all_teams: 'TẤT CẢ ĐỘI',
                 group: 'BẢNG',
                 vs: 'VS',
-                matchday: 'LƯỢT TRẬN',
+                matchday: 'LƯỢT',
                 capacity: 'SỨC CHỨA',
                 mp: 'TRẬN',
                 w: 'W',
@@ -4372,6 +4397,33 @@
                 .toUpperCase() || 'TBD';
         }
 
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function pendingTeamLabel(label) {
+            const raw = String(label || '').trim();
+            if (!raw) return 'TBD';
+            if (/winner match/i.test(raw)) return 'WIN';
+            if (/runner-up/i.test(raw)) return 'RUP';
+            if (/winner group/i.test(raw)) return 'WGR';
+            if (/3rd group/i.test(raw)) return '3RD';
+            return 'TBD';
+        }
+
+        function renderMatchFlag(team, fallbackLabel, isFavorite) {
+            const flag = String(team && team.flag ? team.flag : '').trim();
+            if (flag) {
+                return `<img class="team-flag ${isFavorite ? 'favorite-flag' : ''}" src="${escapeHtml(flag)}" alt="${escapeHtml(team.name_en || fallbackLabel || 'Team')}" onerror="this.replaceWith(Object.assign(document.createElement('span'), {className:'team-flag-placeholder', textContent:'TBD'}))">`;
+            }
+            return `<span class="team-flag-placeholder" title="${escapeHtml(fallbackLabel || 'Team not decided')}">${pendingTeamLabel(fallbackLabel)}</span>`;
+        }
+
         function stageLabel(value) {
             const key = String(value || '').trim().toUpperCase();
             const labels = {
@@ -4475,8 +4527,10 @@
             const awayTeam = teamsData.find(t => t.id === game.away_team_id) || {};
             const stadium = stadiumsData.find(s => s.id === game.stadium_id) || {};
 
-            const homeName = teamCode(homeTeam, game.home_team_name_en || homeTeam.name_en || 'TBD');
-            const awayName = teamCode(awayTeam, game.away_team_name_en || awayTeam.name_en || 'TBD');
+            const homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || 'Team not decided';
+            const awayLabel = game.away_team_name_en || awayTeam.name_en || game.away_team_label || 'Team not decided';
+            const homeName = homeTeam.id ? teamCode(homeTeam, homeLabel) : pendingTeamLabel(homeLabel);
+            const awayName = awayTeam.id ? teamCode(awayTeam, awayLabel) : pendingTeamLabel(awayLabel);
             const stadiumName = (stadium.name_en || '');
             const dateStr = vietnamTimeText(game);
             const homeFavorite = favoriteTeams.has(String(game.home_team_id));
@@ -4495,14 +4549,14 @@
                     <div class="match-teams">
                         <div class="match-team">
                             <button class="team-flag-jump ${homeFavorite ? 'favorite-flag-wrap' : ''}" onclick="scrollToTeam('${homeTeam.id || game.home_team_id || ''}')" aria-label="Xem đội ${homeName}">
-                                <img class="team-flag ${homeFavorite ? 'favorite-flag' : ''}" src="${homeTeam.flag || ''}" alt="${homeName}" onerror="this.src='https://via.placeholder.com/60x40?text=Flag'">
+                                ${renderMatchFlag(homeTeam, homeLabel, homeFavorite)}
                             </button>
                             <span class="team-name">${homeName}</span>
                         </div>
                         <span class="match-vs">${scoreCenter(game)}</span>
                         <div class="match-team">
                             <button class="team-flag-jump ${awayFavorite ? 'favorite-flag-wrap' : ''}" onclick="scrollToTeam('${awayTeam.id || game.away_team_id || ''}')" aria-label="Xem đội ${awayName}">
-                                <img class="team-flag ${awayFavorite ? 'favorite-flag' : ''}" src="${awayTeam.flag || ''}" alt="${awayName}" onerror="this.src='https://via.placeholder.com/60x40?text=Flag'">
+                                ${renderMatchFlag(awayTeam, awayLabel, awayFavorite)}
                             </button>
                             <span class="team-name">${awayName}</span>
                         </div>
