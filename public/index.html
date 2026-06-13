@@ -3501,12 +3501,32 @@
             color: #eef3ff !important;
         }
 
-        .collapsed-stage-group {
-            margin-bottom: 18px !important;
+        #matches-grid .match-priority-title,
+        #matches-grid .live-group .match-priority-title,
+        #matches-grid .upcoming-group .match-priority-title,
+        #matches-grid .favorite-group .match-priority-title,
+        #matches-grid .schedule-stage-group .match-priority-title {
+            display: flex !important;
+            width: 100% !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            padding: 0 !important;
+            margin: 0 0 24px !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: linear-gradient(90deg, #eef3ff 0%, #b9a7ff 38%, #8a6dff 72%, #ffe2a7 100%) !important;
+            color: transparent !important;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            box-shadow: none !important;
+            font-size: 52px !important;
+            line-height: .95 !important;
+            letter-spacing: 0 !important;
+            text-transform: uppercase !important;
         }
 
-        .schedule-label-group {
-            margin-bottom: 12px !important;
+        .collapsed-stage-group {
+            margin-bottom: 18px !important;
         }
 
         .collapsed-stage-card {
@@ -4059,8 +4079,11 @@
 
             #matches .match-card:not(.mobile-expanded) {
                 min-height: 132px !important;
-                padding: 13px 14px 12px !important;
+                padding: 14px 22px 14px !important;
                 border-radius: 17px !important;
+                display: grid !important;
+                grid-template-rows: 24px 1fr !important;
+                align-items: center !important;
             }
 
             #matches .match-card:not(.mobile-expanded) .match-header,
@@ -4071,28 +4094,34 @@
 
             #matches .match-card:not(.mobile-expanded) .match-time-top {
                 min-height: 20px !important;
-                margin-bottom: 9px !important;
+                margin: 0 36px 8px !important;
                 font-size: 12px !important;
                 letter-spacing: .02em !important;
+                text-align: center !important;
             }
 
             #matches .match-card:not(.mobile-expanded) .match-teams,
             #matches .match-card:not(.mobile-expanded).match-card-compact .match-teams {
-                grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr) !important;
-                gap: 6px !important;
+                grid-template-columns: minmax(88px, 1fr) 72px minmax(88px, 1fr) !important;
+                gap: 12px !important;
                 align-items: center !important;
+                justify-items: center !important;
+                width: 100% !important;
+                min-height: 72px !important;
             }
 
             #matches .match-card:not(.mobile-expanded) .match-vs {
                 margin-top: 0 !important;
                 align-self: center !important;
+                justify-self: center !important;
             }
 
             #matches .match-card:not(.mobile-expanded) .score-center,
             #matches .match-card:not(.mobile-expanded) .match-vs .score-center {
-                width: 58px !important;
-                min-width: 58px !important;
+                width: 72px !important;
+                min-width: 72px !important;
                 font-size: 21px !important;
+                justify-content: space-around !important;
             }
 
             #matches .match-card:not(.mobile-expanded) .score-center span {
@@ -4101,18 +4130,25 @@
 
             #matches .match-card:not(.mobile-expanded) .team-flag,
             #matches .match-card:not(.mobile-expanded) .team-flag-placeholder {
-                width: 56px !important;
-                height: 38px !important;
+                width: 60px !important;
+                height: 40px !important;
                 font-size: 11px !important;
             }
 
             #matches .match-card:not(.mobile-expanded) .match-team .team-name {
                 font-size: 12px !important;
                 margin-top: 7px !important;
+                text-align: center !important;
+                min-width: 72px !important;
             }
 
             #matches .match-card.mobile-expanded {
                 cursor: default !important;
+            }
+
+            #matches-grid .match-priority-title {
+                font-size: 30px !important;
+                margin-bottom: 16px !important;
             }
         }
     </style>
@@ -4816,14 +4852,6 @@
             `;
         }
 
-        function renderScheduleLabel() {
-            return `
-                <div class="match-priority-group schedule-label-group">
-                    <div class="match-priority-title">LỊCH THI ĐẤU</div>
-                </div>
-            `;
-        }
-
         function renderMatchCards(games) {
             const grid = document.getElementById('matches-grid');
 
@@ -4844,7 +4872,6 @@
             const rest = games.filter(g => !highlightedIds.has(String(g.id)));
 
             const groupedHtml = [
-                renderScheduleLabel(),
                 renderMatchGroup('ĐANG DIỄN RA', live, 'live-group', true),
                 renderMatchGroup('SẮP DIỄN RA', upcoming, 'upcoming-group', true),
                 renderMatchGroup('YÊU THÍCH', favorites, 'favorite-group')
