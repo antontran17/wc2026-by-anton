@@ -3770,18 +3770,22 @@
         }
 
         .match-card.has-favorite-team {
-            border-color: rgba(255,230,145,.52) !important;
-            overflow: hidden !important;
+            border-color: rgba(255,202,83,.72) !important;
+            overflow: visible !important;
             box-shadow:
                 0 18px 44px rgba(0,0,0,.24),
-                0 0 24px rgba(255,213,92,.36),
-                0 0 58px rgba(237,196,125,.22),
+                0 0 24px rgba(255,211,86,.38),
+                0 0 62px rgba(255,132,38,.22),
                 inset 0 1px 0 rgba(255,255,255,.14) !important;
+            animation: favoriteMatchGoldenBreath 2.7s ease-in-out infinite !important;
         }
 
-        .match-card.has-favorite-team > * {
-            position: relative !important;
-            z-index: 2 !important;
+        .match-card.has-favorite-team .match-fav {
+            position: absolute !important;
+            top: 14px !important;
+            right: 14px !important;
+            left: auto !important;
+            z-index: 12 !important;
         }
 
         .all-group .match-priority-title {
@@ -3807,11 +3811,37 @@
             70% { opacity: .55; transform: scale(1) rotate(-3deg); }
         }
 
+        @keyframes favoriteMatchGoldenBreath {
+            0%, 100% {
+                border-color: rgba(255,202,83,.48);
+                box-shadow:
+                    0 18px 44px rgba(0,0,0,.24),
+                    0 0 14px rgba(255,211,86,.24),
+                    0 0 34px rgba(255,132,38,.16),
+                    inset 0 1px 0 rgba(255,255,255,.12);
+            }
+            50% {
+                border-color: rgba(255,171,54,.94);
+                box-shadow:
+                    0 22px 54px rgba(0,0,0,.30),
+                    0 0 34px rgba(255,224,112,.62),
+                    0 0 82px rgba(255,125,32,.38),
+                    0 0 118px rgba(237,196,125,.18),
+                    inset 0 1px 0 rgba(255,255,255,.18);
+            }
+        }
+
         @media(max-width:640px){
             .match-card:hover,
             .team-card:hover,
             .group-card:hover {
                 transform: translateY(-5px) scale(1.025) !important;
+            }
+
+            .match-card.has-favorite-team .match-fav {
+                top: 12px !important;
+                right: 12px !important;
+                left: auto !important;
             }
         }
     </style>
