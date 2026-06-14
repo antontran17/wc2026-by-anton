@@ -4737,6 +4737,15 @@
             return '';
         }
 
+        function isRecentResult(game) {
+            const start = parseSourceDate(game);
+            if (!start) return false;
+            const now = new Date();
+            const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+            const resultWindowStart = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            return now >= end && end >= resultWindowStart;
+        }
+
         function matchStatusLabel(game) {
             const status = matchStatusClass(game);
             if (status.includes('is-live')) return '<span class="match-status-pill live">LIVE</span>';
@@ -4951,20 +4960,25 @@
 
             const live = sortByStartTime(games.filter(g => matchStatusClass(g).includes('is-live'))).slice(0, 4);
             const upcoming = sortByStartTime(games.filter(g => matchStatusClass(g).includes('is-upcoming') && !live.some(x => String(x.id) === String(g.id)))).slice(0, 4);
+            const results = sortByStartTime(games.filter(g => {
+                const id = String(g.id);
+                return isRecentResult(g) && !live.some(x => String(x.id) === id) && !upcoming.some(x => String(x.id) === id);
+            })).slice(-6).reverse();
             const favorites = sortByStartTime(games.filter(g => {
                 const matchFav = favoriteMatches.has(String(g.id));
                 const teamFav = favoriteTeams.has(String(g.home_team_id)) || favoriteTeams.has(String(g.away_team_id));
-                return (matchFav || teamFav) && !live.some(x => String(x.id) === String(g.id)) && !upcoming.some(x => String(x.id) === String(g.id));
+                return (matchFav || teamFav) && !live.some(x => String(x.id) === String(g.id)) && !upcoming.some(x => String(x.id) === String(g.id)) && !results.some(x => String(x.id) === String(g.id));
             })).slice(0, 6);
 
-            const highlightedIds = new Set([...live, ...upcoming, ...favorites].map(g => String(g.id)));
+            const highlightedIds = new Set([...live, ...upcoming, ...results, ...favorites].map(g => String(g.id)));
             const rest = games.filter(g => !highlightedIds.has(String(g.id)));
 
             const groupedHtml = [
                 renderMatchGroup('ĐANG DIỄN RA', live, 'live-group', true),
                 renderMatchGroup('SẮP DIỄN RA', upcoming, 'upcoming-group', true),
-                renderMatchGroup('YÊU THÍCH', favorites, 'favorite-group')
+                renderMatchGroup('KẾT QUẢ', results, 'results-group', true)
             ].join('');
+            const favoritesHtml = renderMatchGroup('YÊU THÍCH', favorites, 'favorite-group');
 
             const stageBuckets = new Map();
             rest.forEach(game => {
@@ -4981,7 +4995,7 @@
 
             const restHtml = stageKeys.map(key => renderStageScheduleGroup(key, stageBuckets.get(key))).join('');
 
-            grid.innerHTML = groupedHtml + restHtml;
+            grid.innerHTML = groupedHtml + restHtml + favoritesHtml;
         }
 
         // Render Teams
