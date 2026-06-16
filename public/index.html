@@ -4574,6 +4574,12 @@
 
 
         function parseSourceDate(game) {
+            const absoluteDate = String(game.api_utc_date || game.utc_date || game.fixture_date || '').trim();
+            if (absoluteDate) {
+                const parsed = new Date(absoluteDate);
+                if (!Number.isNaN(parsed.getTime())) return parsed;
+            }
+
             const raw = String(game.local_date || '').trim();
             const timeRaw = String(game.local_time || game.time || '').trim();
 
