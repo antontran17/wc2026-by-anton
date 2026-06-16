@@ -4287,9 +4287,10 @@
     <style id="anton-hero-banner-final">
         .clean-hero {
             position: relative !important;
-            padding: 74px 0 18px !important;
+            padding: 0 !important;
             min-height: 0 !important;
             overflow: hidden !important;
+            line-height: 0 !important;
         }
 
         .clean-hero .container {
@@ -4305,6 +4306,7 @@
             margin: 0 auto !important;
             padding: 0 !important;
             text-align: center !important;
+            line-height: 0 !important;
         }
 
         .hero-banner {
@@ -4312,16 +4314,17 @@
             width: 100% !important;
             max-width: 1920px !important;
             margin: 0 auto !important;
-            aspect-ratio: 1920 / 520 !important;
             overflow: hidden !important;
             box-shadow: 0 24px 70px rgba(0,0,0,.28) !important;
+            line-height: 0 !important;
         }
 
         .hero-banner img {
             display: block !important;
             width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
+            height: auto !important;
+            max-height: none !important;
+            object-fit: contain !important;
             object-position: center center !important;
         }
 
@@ -4338,12 +4341,11 @@
 
         @media(max-width:640px){
             .clean-hero {
-                padding: 54px 0 16px !important;
+                padding: 0 !important;
             }
 
             .hero-banner {
                 max-width: none !important;
-                aspect-ratio: 1080 / 900 !important;
                 box-shadow: 0 18px 54px rgba(0,0,0,.30) !important;
             }
         }
