@@ -8,6 +8,10 @@ const APIFOOTBALL_BASE = process.env.APIFOOTBALL_BASE || 'https://v3.football.ap
 const APIFOOTBALL_KEY = process.env.APIFOOTBALL_KEY || process.env.API_FOOTBALL_KEY || '';
 const APIFOOTBALL_LEAGUE = process.env.APIFOOTBALL_LEAGUE || '1';
 const APIFOOTBALL_SEASON = process.env.APIFOOTBALL_SEASON || '2026';
+const FOOTBALL_DATA_BASE = process.env.FOOTBALL_DATA_BASE || 'https://api.football-data.org/v4';
+const FOOTBALL_DATA_TOKEN = process.env.FOOTBALL_DATA_TOKEN || process.env.FOOTBALL_DATA_KEY || '';
+const FOOTBALL_DATA_COMPETITION = process.env.FOOTBALL_DATA_COMPETITION || 'WC';
+const FOOTBALL_DATA_SEASON = process.env.FOOTBALL_DATA_SEASON || APIFOOTBALL_SEASON;
 
 const memoryCache = new Map();
 
@@ -88,7 +92,13 @@ function buildTeamLookup(teams) {
 function findLocalTeam(lookup, apiTeam) {
     const name = apiTeam && apiTeam.name;
     const code = apiTeam && apiTeam.code;
-    return lookup.get(teamAliases(name)) || lookup.get(teamAliases(code)) || null;
+    const tla = apiTeam && apiTeam.tla;
+    const shortName = apiTeam && apiTeam.shortName;
+    return lookup.get(teamAliases(name)) ||
+        lookup.get(teamAliases(shortName)) ||
+        lookup.get(teamAliases(code)) ||
+        lookup.get(teamAliases(tla)) ||
+        null;
 }
 
 function findLocalStadium(stadiums, venue) {
@@ -148,6 +158,38 @@ function apiFootballStatus(status) {
         finished: finished ? 'TRUE' : 'FALSE',
         time_elapsed: finished ? 'finished' : (notStarted ? 'notstarted' : String(status && status.elapsed || short || 'live')),
         status: short
+    };
+}
+
+function footballDataGroup(match, fallbackGroup) {
+    if (fallbackGroup) return fallbackGroup;
+    const group = String(match && match.group || '').toUpperCase();
+    const groupMatch = group.match(/^GROUP_([A-L])$/);
+    if (groupMatch) return groupMatch[1];
+
+    const stage = String(match && match.stage || '').toUpperCase();
+    const labels = {
+        GROUP_STAGE: '',
+        LAST_32: 'R32',
+        ROUND_OF_32: 'R32',
+        LAST_16: 'R16',
+        ROUND_OF_16: 'R16',
+        QUARTER_FINALS: 'QF',
+        SEMI_FINALS: 'SF',
+        THIRD_PLACE: '3RD',
+        FINAL: 'FINAL'
+    };
+    return labels[stage] || '';
+}
+
+function footballDataStatus(status) {
+    const value = String(status || '').toUpperCase();
+    const finished = ['FINISHED', 'AWARDED'].includes(value);
+    const live = ['IN_PLAY', 'PAUSED'].includes(value);
+    return {
+        finished: finished ? 'TRUE' : 'FALSE',
+        time_elapsed: finished ? 'finished' : (live ? 'live' : 'notstarted'),
+        status: value
     };
 }
 
@@ -255,6 +297,97 @@ async function fetchApiFootballGames() {
     }
 }
 
+function mapFootballDataMatch(match, context) {
+    const localHome = findLocalTeam(context.teamLookup, match.homeTeam);
+    const localAway = findLocalTeam(context.teamLookup, match.awayTeam);
+    const localGame = findLocalGame(context.localGames, localHome, localAway, match.utcDate);
+    const status = footballDataStatus(match.status);
+    const fullTime = match.score && match.score.fullTime || {};
+    const homeScore = fullTime.home != null ? fullTime.home : 0;
+    const awayScore = fullTime.away != null ? fullTime.away : 0;
+
+    return {
+        _id: localGame && localGame._id ? localGame._id : { football_data_id: match.id },
+        id: localGame && localGame.id ? String(localGame.id) : String(match.id),
+        football_data_id: match.id,
+        api_utc_date: match.utcDate,
+        home_team_id: localHome ? String(localHome.id) : String(match.homeTeam && match.homeTeam.id || ''),
+        away_team_id: localAway ? String(localAway.id) : String(match.awayTeam && match.awayTeam.id || ''),
+        home_team_name_en: match.homeTeam && (match.homeTeam.shortName || match.homeTeam.name),
+        away_team_name_en: match.awayTeam && (match.awayTeam.shortName || match.awayTeam.name),
+        home_score: String(homeScore),
+        away_score: String(awayScore),
+        home_scorers: localGame && localGame.home_scorers || 'null',
+        away_scorers: localGame && localGame.away_scorers || 'null',
+        group: footballDataGroup(match, localGame && localGame.group),
+        matchday: String(match.matchday || localGame && localGame.matchday || ''),
+        local_date: localGame && localGame.local_date ? localGame.local_date : formatUsDateFromUtc(match.utcDate),
+        stadium_id: localGame && localGame.stadium_id || '',
+        finished: status.finished,
+        time_elapsed: status.time_elapsed,
+        status: status.status,
+        type: localGame && localGame.type || (String(match.stage || '').toUpperCase() === 'GROUP_STAGE' ? 'group' : 'knockout'),
+        source: 'football-data'
+    };
+}
+
+async function fetchFootballDataGames() {
+    if (!FOOTBALL_DATA_TOKEN) {
+        throw new Error('FOOTBALL_DATA_TOKEN is not configured');
+    }
+
+    const endpoint = `/competitions/${encodeURIComponent(FOOTBALL_DATA_COMPETITION)}/matches?season=${encodeURIComponent(FOOTBALL_DATA_SEASON)}`;
+    const cacheKey = `football-data:${endpoint}`;
+    const cached = memoryCache.get(cacheKey);
+    const now = Date.now();
+
+    if (cached && (now - cached.time) < CACHE_TTL_MS) {
+        return cached.payload;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REMOTE_TIMEOUT_MS);
+
+    try {
+        const response = await fetch(`${FOOTBALL_DATA_BASE}${endpoint}`, {
+            signal: controller.signal,
+            headers: {
+                'accept': 'application/json',
+                'X-Auth-Token': FOOTBALL_DATA_TOKEN,
+                'user-agent': 'wc2026-by-anton/1.0'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`football-data.org ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (!Array.isArray(data.matches) || data.matches.length === 0) {
+            throw new Error('football-data.org returned empty matches');
+        }
+
+        const context = {
+            localGames: normalizeLocalPayload('games', readJson('football.matches.json')).games,
+            teams: normalizeLocalPayload('teams', readJson('football.teams.json')).teams
+        };
+        context.teamLookup = buildTeamLookup(context.teams);
+
+        const payload = {
+            games: data.matches.map((match) => mapFootballDataMatch(match, context)),
+            source: 'football-data',
+            competition: FOOTBALL_DATA_COMPETITION,
+            season: FOOTBALL_DATA_SEASON,
+            played: data.resultSet && data.resultSet.played
+        };
+
+        memoryCache.set(cacheKey, { time: now, payload });
+        return payload;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
 async function fetchRemote(endpoint, type) {
     const url = `${REMOTE_BASE}${endpoint}`;
     const cached = memoryCache.get(endpoint);
@@ -323,27 +456,36 @@ async function sendGames(req, res) {
         const apiFootball = await fetchApiFootballGames();
         return res.send(apiFootball);
     } catch (apiFootballErr) {
-        console.log(`API-Football failed for /get/games, trying remote fallback: ${apiFootballErr.message}`);
+        console.log(`API-Football failed for /get/games, trying football-data.org: ${apiFootballErr.message}`);
         try {
-            const remote = await fetchRemote('/get/games', 'games');
-            if (Array.isArray(remote.games) && remote.games.length > 0) {
-                remote.api_football_error = apiFootballErr.message;
-                return res.send(remote);
-            }
-            throw new Error('Remote API returned empty data');
-        } catch (remoteErr) {
-            console.log(`Remote API failed for /get/games, using local fallback: ${remoteErr.message}`);
+            const footballData = await fetchFootballDataGames();
+            footballData.api_football_error = apiFootballErr.message;
+            return res.send(footballData);
+        } catch (footballDataErr) {
+            console.log(`football-data.org failed for /get/games, trying remote fallback: ${footballDataErr.message}`);
             try {
-                const local = normalizeLocalPayload('games', readJson('football.matches.json'));
-                local.api_football_error = apiFootballErr.message;
-                local.remote_error = remoteErr.message;
-                return res.send(local);
-            } catch (localErr) {
-                return res.status(500).send({
-                    games: [],
-                    source: 'error',
-                    error: `API-Football failed: ${apiFootballErr.message}; Remote failed: ${remoteErr.message}; Local failed: ${localErr.message}`
-                });
+                const remote = await fetchRemote('/get/games', 'games');
+                if (Array.isArray(remote.games) && remote.games.length > 0) {
+                    remote.api_football_error = apiFootballErr.message;
+                    remote.football_data_error = footballDataErr.message;
+                    return res.send(remote);
+                }
+                throw new Error('Remote API returned empty data');
+            } catch (remoteErr) {
+                console.log(`Remote API failed for /get/games, using local fallback: ${remoteErr.message}`);
+                try {
+                    const local = normalizeLocalPayload('games', readJson('football.matches.json'));
+                    local.api_football_error = apiFootballErr.message;
+                    local.football_data_error = footballDataErr.message;
+                    local.remote_error = remoteErr.message;
+                    return res.send(local);
+                } catch (localErr) {
+                    return res.status(500).send({
+                        games: [],
+                        source: 'error',
+                        error: `API-Football failed: ${apiFootballErr.message}; football-data.org failed: ${footballDataErr.message}; Remote failed: ${remoteErr.message}; Local failed: ${localErr.message}`
+                    });
+                }
             }
         }
     }
@@ -377,10 +519,23 @@ module.exports = (app) => {
         const results = [];
         for (const [endpoint, type] of checks) {
             try {
-                const data = endpoint === '/get/games' ? await fetchApiFootballGames() : await fetchRemote(endpoint, type);
+                let data;
+                let source = 'remote';
+                if (endpoint === '/get/games') {
+                    try {
+                        data = await fetchApiFootballGames();
+                        source = 'api-football';
+                    } catch (apiFootballErr) {
+                        data = await fetchFootballDataGames();
+                        source = 'football-data';
+                        data.api_football_error = apiFootballErr.message;
+                    }
+                } else {
+                    data = await fetchRemote(endpoint, type);
+                }
                 results.push({
                     endpoint,
-                    source: endpoint === '/get/games' ? 'api-football' : 'remote',
+                    source,
                     count: Array.isArray(data[type]) ? data[type].length : 0
                 });
             } catch (err) {
