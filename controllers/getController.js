@@ -12,6 +12,11 @@ const FOOTBALL_DATA_BASE = process.env.FOOTBALL_DATA_BASE || 'https://api.footba
 const FOOTBALL_DATA_TOKEN = process.env.FOOTBALL_DATA_TOKEN || process.env.FOOTBALL_DATA_KEY || '';
 const FOOTBALL_DATA_COMPETITION = process.env.FOOTBALL_DATA_COMPETITION || 'WC';
 const FOOTBALL_DATA_SEASON = process.env.FOOTBALL_DATA_SEASON || APIFOOTBALL_SEASON;
+const FOOTBALL_DATA_LIVE_TTL_MS = Number(process.env.FOOTBALL_DATA_LIVE_TTL_MS || 60 * 1000);
+const FOOTBALL_DATA_MATCHDAY_TTL_MS = Number(process.env.FOOTBALL_DATA_MATCHDAY_TTL_MS || 5 * 60 * 1000);
+const FOOTBALL_DATA_IDLE_TTL_MS = Number(process.env.FOOTBALL_DATA_IDLE_TTL_MS || 6 * 60 * 60 * 1000);
+const FOOTBALL_DATA_ACTIVE_BEFORE_MS = Number(process.env.FOOTBALL_DATA_ACTIVE_BEFORE_MS || 2 * 60 * 60 * 1000);
+const FOOTBALL_DATA_ACTIVE_AFTER_MS = Number(process.env.FOOTBALL_DATA_ACTIVE_AFTER_MS || 4 * 60 * 60 * 1000);
 
 const memoryCache = new Map();
 
@@ -193,6 +198,33 @@ function footballDataStatus(status) {
     };
 }
 
+function footballDataRefreshTtl(matches, now = Date.now()) {
+    if (!Array.isArray(matches) || matches.length === 0) return FOOTBALL_DATA_IDLE_TTL_MS;
+
+    let nearestDelta = Infinity;
+    let hasLiveWindow = false;
+    let hasMatchdayWindow = false;
+
+    matches.forEach((match) => {
+        const start = new Date(match.utcDate).getTime();
+        if (!Number.isFinite(start)) return;
+
+        const end = start + 2 * 60 * 60 * 1000;
+        const liveWindowStart = start - FOOTBALL_DATA_ACTIVE_BEFORE_MS;
+        const liveWindowEnd = end + FOOTBALL_DATA_ACTIVE_AFTER_MS;
+        const matchdayWindowStart = start - 12 * 60 * 60 * 1000;
+        const matchdayWindowEnd = end + 12 * 60 * 60 * 1000;
+
+        nearestDelta = Math.min(nearestDelta, Math.abs(start - now));
+        if (now >= liveWindowStart && now <= liveWindowEnd) hasLiveWindow = true;
+        if (now >= matchdayWindowStart && now <= matchdayWindowEnd) hasMatchdayWindow = true;
+    });
+
+    if (hasLiveWindow) return FOOTBALL_DATA_LIVE_TTL_MS;
+    if (hasMatchdayWindow || nearestDelta <= 24 * 60 * 60 * 1000) return FOOTBALL_DATA_MATCHDAY_TTL_MS;
+    return FOOTBALL_DATA_IDLE_TTL_MS;
+}
+
 function formatUsDateFromUtc(dateValue) {
     const date = new Date(dateValue);
     if (Number.isNaN(date.getTime())) return '';
@@ -341,7 +373,7 @@ async function fetchFootballDataGames() {
     const cached = memoryCache.get(cacheKey);
     const now = Date.now();
 
-    if (cached && (now - cached.time) < CACHE_TTL_MS) {
+    if (cached && (now - cached.time) < (cached.ttl || CACHE_TTL_MS)) {
         return cached.payload;
     }
 
@@ -373,15 +405,17 @@ async function fetchFootballDataGames() {
         };
         context.teamLookup = buildTeamLookup(context.teams);
 
+        const ttl = footballDataRefreshTtl(data.matches, now);
         const payload = {
             games: data.matches.map((match) => mapFootballDataMatch(match, context)),
             source: 'football-data',
             competition: FOOTBALL_DATA_COMPETITION,
             season: FOOTBALL_DATA_SEASON,
-            played: data.resultSet && data.resultSet.played
+            played: data.resultSet && data.resultSet.played,
+            cache_ttl_ms: ttl
         };
 
-        memoryCache.set(cacheKey, { time: now, payload });
+        memoryCache.set(cacheKey, { time: now, ttl, payload });
         return payload;
     } finally {
         clearTimeout(timeout);
