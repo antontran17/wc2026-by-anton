@@ -4241,6 +4241,49 @@
             }
         }
     </style>
+    <style id="anton-match-click-filter-final">
+        .header-refresh-btn {
+            width: auto !important;
+            height: auto !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            padding: 0 4px !important;
+            margin: 0 !important;
+            font-family: "Google Sans Flex", "Google Sans", "Product Sans", Arial, sans-serif !important;
+            font-size: 12px !important;
+            line-height: 1 !important;
+            font-weight: 700 !important;
+            font-variation-settings: "wght" 700 !important;
+            letter-spacing: 0 !important;
+            text-transform: uppercase !important;
+            vertical-align: middle !important;
+        }
+
+        .match-meta-action {
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            font: inherit !important;
+            font-family: "Google Sans Flex", "Google Sans", "Product Sans", Arial, sans-serif !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0 !important;
+            line-height: 1.1 !important;
+            cursor: pointer !important;
+        }
+
+        .match-meta-action:hover,
+        .match-meta-action:focus-visible {
+            color: #ffffff !important;
+            text-shadow: 0 0 14px rgba(142,162,255,.45) !important;
+            outline: none !important;
+        }
+
+        @media(max-width:640px){
+            .header-refresh-btn {
+                font-size: 11px !important;
+                padding: 0 4px !important;
+            }
+        }
+    </style>
 
 </head>
 <body>
@@ -4406,6 +4449,7 @@
         let favoriteMatches = new Set(JSON.parse(localStorage.getItem('wc2026_fav_matches') || '[]'));
         let favoriteTeams = new Set(JSON.parse(localStorage.getItem('wc2026_fav_teams') || '[]'));
         let currentMatchFilter = 'all';
+        let currentMatchdayFilter = null;
         let currentTeamFilter = 'all';
         let expandedMobileMatchId = null;
 
@@ -4480,7 +4524,7 @@
             id = String(id);
             favoriteMatches.has(id) ? favoriteMatches.delete(id) : favoriteMatches.add(id);
             saveFavorites();
-            renderMatchCards(currentMatchFilter === 'all' ? gamesData : gamesData.filter(g => g.group === currentMatchFilter));
+            renderMatchCards(filteredMatchesForCurrentTab());
         }
 
         function toggleFavoriteTeam(id) {
@@ -4488,7 +4532,7 @@
             favoriteTeams.has(id) ? favoriteTeams.delete(id) : favoriteTeams.add(id);
             saveFavorites();
             renderTeamCards(currentTeamFilter === 'all' ? teamsData : teamsData.filter(t => t.groups === currentTeamFilter));
-            renderMatchCards(currentMatchFilter === 'all' ? gamesData : gamesData.filter(g => g.group === currentMatchFilter));
+            renderMatchCards(filteredMatchesForCurrentTab());
         }
 
         function scrollToTeam(teamId) {
@@ -4723,7 +4767,11 @@
         }
 
         function filteredMatchesForCurrentTab() {
-            return currentMatchFilter === 'all' ? gamesData : gamesData.filter(g => g.group === currentMatchFilter);
+            let matches = currentMatchFilter === 'all' ? gamesData : gamesData.filter(g => g.group === currentMatchFilter);
+            if (currentMatchdayFilter !== null) {
+                matches = matches.filter(g => String(g.matchday || '') === String(currentMatchdayFilter));
+            }
+            return matches;
         }
 
         function scoreCenter(game) {
@@ -4782,11 +4830,12 @@
                 selectContainer.value = currentMatchFilter || 'all';
             }
 
-            renderMatchCards((currentMatchFilter && currentMatchFilter !== 'all') ? games.filter(g => g.group === currentMatchFilter) : games);
+            renderMatchCards(filteredMatchesForCurrentTab());
         }
 
         function filterMatches(group) {
             currentMatchFilter = group || 'all';
+            currentMatchdayFilter = null;
             expandedMobileMatchId = null;
             document.querySelectorAll('#match-tabs .tab-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.getAttribute('onclick') === `filterMatches('${currentMatchFilter}')`);
@@ -4797,6 +4846,25 @@
             const filtered = currentMatchFilter === 'all' ? gamesData : gamesData.filter(g => g.group === currentMatchFilter);
             renderMatchCards(filtered);
             renderGroups(groupsData);
+        }
+
+        function selectMatchGroup(group) {
+            filterMatches(group || 'all');
+            document.getElementById('matches')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function selectMatchday(matchday) {
+            currentMatchFilter = 'all';
+            currentMatchdayFilter = String(matchday || '');
+            expandedMobileMatchId = null;
+            document.querySelectorAll('#match-tabs .tab-btn').forEach(btn => {
+                btn.classList.toggle('active', false);
+            });
+            const selectContainer = document.getElementById('match-filter-select');
+            if (selectContainer) selectContainer.value = 'all';
+            renderMatchCards(filteredMatchesForCurrentTab());
+            renderGroups(groupsData);
+            document.getElementById('matches')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function renderSingleMatchCard(game, compact = false) {
@@ -4820,9 +4888,9 @@
                     <button class="fav-btn match-fav ${favoriteMatches.has(String(game.id)) ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavoriteMatch('${game.id}')" aria-label="Yêu thích trận">★</button>
                     <div class="match-time-top">${dateStr}</div>
                     <div class="match-header">
-                        <span class="match-group">${translations[currentLang].group} ${game.group || '-'}</span>
+                        <button class="match-group match-meta-action" onclick="event.stopPropagation(); selectMatchGroup('${escapeHtml(game.group || 'all')}')" aria-label="Xem ${translations[currentLang].group} ${game.group || '-'}">${translations[currentLang].group} ${game.group || '-'}</button>
                         <span class="match-status-slot">${matchStatusLabel(game)}</span>
-                        <span class="matchday-label">${translations[currentLang].matchday} ${game.matchday || '-'}</span>
+                        <button class="matchday-label match-meta-action" onclick="event.stopPropagation(); selectMatchday('${escapeHtml(game.matchday || '')}')" aria-label="Xem ${translations[currentLang].matchday} ${game.matchday || '-'}">${translations[currentLang].matchday} ${game.matchday || '-'}</button>
                     </div>
                     <div class="match-teams">
                         <div class="match-team">
@@ -4981,8 +5049,8 @@
 
             const groupedHtml = [
                 renderMatchGroup('ĐANG DIỄN RA', live, 'live-group', true),
-                renderMatchGroup('SẮP DIỄN RA', upcoming, 'upcoming-group', true),
-                renderMatchGroup('KẾT QUẢ', results, 'results-group', true)
+                renderMatchGroup('KẾT QUẢ', results, 'results-group', true),
+                renderMatchGroup('SẮP DIỄN RA', upcoming, 'upcoming-group', true)
             ].join('');
             const favoritesHtml = renderMatchGroup('YÊU THÍCH', favorites, 'favorite-group');
 
@@ -5001,7 +5069,7 @@
 
             const restHtml = stageKeys.map(key => renderStageScheduleGroup(key, stageBuckets.get(key))).join('');
 
-            grid.innerHTML = groupedHtml + restHtml + favoritesHtml;
+            grid.innerHTML = groupedHtml + favoritesHtml + restHtml;
         }
 
         // Render Teams
