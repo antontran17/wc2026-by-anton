@@ -217,6 +217,29 @@ app.use((error, req, res, next) => {
     })
 });
 
+function startKeepAlive() {
+    const keepAliveUrl = process.env.KEEP_ALIVE_URL || (process.env.RENDER_EXTERNAL_URL ? `${process.env.RENDER_EXTERNAL_URL}/health` : '');
+    const intervalMs = Number(process.env.KEEP_ALIVE_INTERVAL_MS || 10 * 60 * 1000);
+
+    if (!keepAliveUrl || intervalMs <= 0) return;
+
+    const ping = async () => {
+        try {
+            const response = await fetch(keepAliveUrl, {
+                headers: { 'user-agent': 'wc2026-keepalive/1.0' }
+            });
+            console.log(`Keep-alive ping ${keepAliveUrl} -> ${response.status}`);
+        } catch (err) {
+            console.log(`Keep-alive ping failed: ${err.message}`);
+        }
+    };
+
+    setInterval(ping, intervalMs).unref();
+    setTimeout(ping, 30 * 1000).unref();
+    console.log(`Keep-alive enabled: ${keepAliveUrl} every ${intervalMs}ms`);
+}
+
 app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
+    startKeepAlive();
 });
