@@ -105,6 +105,13 @@ const path = require('path');
 
 app.use(bodyParser.json({ limit: '10kb' })); // Limit body size
 
+app.use('/get', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+});
+
 // Dynamic sitemap - must be before static files middleware
 require('./controllers/seoController')(app);
 
