@@ -4977,11 +4977,22 @@
             return finished === 'true' || finished === '1' || elapsed === 'finished' || elapsed === 'ft' || elapsed === 'fulltime';
         }
 
+        function isTableGame(game) {
+            if (!isGroupStageValue(game.group)) return false;
+            const status = String(game.status || game.time_elapsed || '').trim().toLowerCase();
+            const finished = String(game.finished || '').trim().toLowerCase();
+            const hasScore = Number.isFinite(Number(game.home_score)) && Number.isFinite(Number(game.away_score));
+            if (!hasScore) return false;
+            return finished === 'true' ||
+                finished === '1' ||
+                ['finished', 'ft', 'fulltime', 'in_play', 'live', 'paused', 'halftime', 'half-time', '1h', '2h'].includes(status);
+        }
+
         function headToHeadScore(teamAId, teamBId, groupKey) {
             const score = { aPts: 0, bPts: 0, aGd: 0, bGd: 0, aGf: 0, bGf: 0 };
             gamesData
                 .filter(game => {
-                    if (!isCompletedGame(game)) return false;
+                    if (!isTableGame(game)) return false;
                     if (String(game.group || '') !== String(groupKey || '')) return false;
                     const homeId = String(game.home_team_id || '');
                     const awayId = String(game.away_team_id || '');
@@ -5009,6 +5020,89 @@
                     }
                 });
             return score;
+        }
+
+        function createStanding(teamId) {
+            return { team_id: String(teamId), mp: 0, w: 0, l: 0, d: 0, pts: 0, gf: 0, ga: 0, gd: 0 };
+        }
+
+        function addTeamToGroup(groupMap, groupKey, teamId) {
+            const key = String(groupKey || '').trim();
+            const id = String(teamId || '').trim();
+            if (!isGroupStageValue(key) || !id) return;
+            if (!groupMap.has(key)) groupMap.set(key, new Map());
+            const teams = groupMap.get(key);
+            if (!teams.has(id)) teams.set(id, createStanding(id));
+        }
+
+        function buildGroupStandings(sourceGroups) {
+            const groupMap = new Map();
+
+            (Array.isArray(sourceGroups) ? sourceGroups : []).forEach(group => {
+                const groupKey = String(group.group || group.name || '').trim();
+                (group.teams || []).forEach(team => addTeamToGroup(groupMap, groupKey, team.team_id));
+            });
+
+            teamsData.forEach(team => addTeamToGroup(groupMap, team.groups, team.id));
+
+            gamesData.forEach(game => {
+                addTeamToGroup(groupMap, game.group, game.home_team_id);
+                addTeamToGroup(groupMap, game.group, game.away_team_id);
+            });
+
+            gamesData.filter(isTableGame).forEach(game => {
+                const groupKey = String(game.group || '').trim();
+                const homeId = String(game.home_team_id || '').trim();
+                const awayId = String(game.away_team_id || '').trim();
+                if (!isGroupStageValue(groupKey) || !homeId || !awayId) return;
+
+                addTeamToGroup(groupMap, groupKey, homeId);
+                addTeamToGroup(groupMap, groupKey, awayId);
+
+                const home = groupMap.get(groupKey).get(homeId);
+                const away = groupMap.get(groupKey).get(awayId);
+                const homeScore = statNumber(game.home_score);
+                const awayScore = statNumber(game.away_score);
+
+                home.mp += 1;
+                away.mp += 1;
+                home.gf += homeScore;
+                home.ga += awayScore;
+                away.gf += awayScore;
+                away.ga += homeScore;
+                home.gd = home.gf - home.ga;
+                away.gd = away.gf - away.ga;
+
+                if (homeScore > awayScore) {
+                    home.w += 1;
+                    away.l += 1;
+                    home.pts += 3;
+                } else if (homeScore < awayScore) {
+                    away.w += 1;
+                    home.l += 1;
+                    away.pts += 3;
+                } else {
+                    home.d += 1;
+                    away.d += 1;
+                    home.pts += 1;
+                    away.pts += 1;
+                }
+            });
+
+            return [...groupMap.entries()].map(([group, teams]) => ({
+                group,
+                teams: [...teams.values()].map(team => ({
+                    team_id: team.team_id,
+                    mp: String(team.mp),
+                    w: String(team.w),
+                    l: String(team.l),
+                    d: String(team.d),
+                    pts: String(team.pts),
+                    gf: String(team.gf),
+                    ga: String(team.ga),
+                    gd: String(team.gd)
+                }))
+            }));
         }
 
         function renderMatchGroup(title, items, className = '', compact = false) {
@@ -5154,8 +5248,9 @@
         // Render Groups
         function renderGroups(groups) {
             const grid = document.getElementById('groups-grid');
+            const computedGroups = buildGroupStandings(groups);
 
-            const filteredGroups = groups
+            const filteredGroups = computedGroups
                 .filter(group => {
                     const key = String(group.group || group.name || '').trim();
                     return currentMatchFilter === 'all' || (isGroupStageValue(currentMatchFilter) && key === currentMatchFilter);
