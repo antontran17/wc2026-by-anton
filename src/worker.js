@@ -7,6 +7,7 @@ const FOOTBALL_DATA_BASE = 'https://api.football-data.org/v4';
 const FOOTBALL_DATA_COMPETITION = 'WC';
 const FOOTBALL_DATA_SEASON = '2026';
 const REMOTE_BASE = 'https://worldcup26.ir';
+const ESPN_SCOREBOARD_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
 
 function json(data, init = {}) {
   return new Response(JSON.stringify(data), {
@@ -135,7 +136,65 @@ async function scorerFeed(request, ctx) {
   }
 }
 
+function localTeamName(teamId) {
+  return teams.find((team) => String(team.id) === String(teamId))?.name_en || '';
+}
+
+function espnDate(localDate) {
+  const match = String(localDate || '').match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  return match ? `${match[3]}${match[1]}${match[2]}` : '';
+}
+
+async function espnScorers(id, request, ctx) {
+  const cacheKey = new Request(new URL(`/__wc2026/espn-scorers/${id}`, request.url));
+  const cached = await caches.default.match(cacheKey);
+  if (cached) return cached.json();
+
+  const local = matches.find((item) => String(item.id) === String(id));
+  const date = espnDate(local?.local_date);
+  const homeName = localTeamName(local?.home_team_id);
+  const awayName = localTeamName(local?.away_team_id);
+  if (!date || !homeName || !awayName) return null;
+
+  const scoreboard = await fetch(`${ESPN_SCOREBOARD_BASE}/scoreboard?dates=${date}`, { headers: { accept: 'application/json' } });
+  if (!scoreboard.ok) throw new Error(`ESPN scoreboard ${scoreboard.status}`);
+  const scoreboardData = await scoreboard.json();
+  const event = (scoreboardData.events || []).find((candidate) => {
+    const competitors = candidate.competitions?.[0]?.competitors || [];
+    const home = competitors.find((team) => team.homeAway === 'home')?.team?.displayName;
+    const away = competitors.find((team) => team.homeAway === 'away')?.team?.displayName;
+    return alias(home) === alias(homeName) && alias(away) === alias(awayName);
+  });
+  if (!event?.id) return null;
+
+  const summary = await fetch(`${ESPN_SCOREBOARD_BASE}/summary?event=${event.id}`, { headers: { accept: 'application/json' } });
+  if (!summary.ok) throw new Error(`ESPN summary ${summary.status}`);
+  const summaryData = await summary.json();
+  const homeGoals = [];
+  const awayGoals = [];
+  for (const play of summaryData.keyEvents || []) {
+    if (!play.scoringPlay) continue;
+    const player = play.participants?.[0]?.athlete?.displayName || play.shortText || 'Goal';
+    const minute = play.clock?.displayValue || '';
+    const item = `${player}${minute ? ` ${minute}` : ''}`;
+    if (alias(play.team?.displayName) === alias(homeName)) homeGoals.push(item);
+    if (alias(play.team?.displayName) === alias(awayName)) awayGoals.push(item);
+  }
+
+  const payload = { id: String(id), home_scorers: homeGoals.join(', ') || 'null', away_scorers: awayGoals.join(', ') || 'null', source: 'espn' };
+  const cacheResponse = json(payload, { headers: { 'cache-control': 'public, max-age=300' } });
+  ctx.waitUntil(caches.default.put(cacheKey, cacheResponse.clone()));
+  return payload;
+}
+
 async function scorers(id, request, ctx) {
+  try {
+    const espn = await espnScorers(id, request, ctx);
+    if (espn) return json(espn);
+  } catch (_) {
+    // ESPN is the primary event feed; the legacy feed below remains a fallback.
+  }
+
   try {
     const data = await scorerFeed(request, ctx);
     const game = (data.games || data).find((item) => String(item.id) === String(id));
