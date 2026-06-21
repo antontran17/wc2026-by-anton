@@ -26,10 +26,19 @@ process.on('unhandledRejection', (err) => {
 
 const app = express();
 const PORT = config.PORT;
+const LEGACY_RENDER_REDIRECT = process.env.LEGACY_RENDER_REDIRECT || 'https://wc2026-by-anton.antontran-att.workers.dev';
 
 // Trust proxy - MUST be set when behind nginx/reverse proxy
 // Fixes: ERR_ERL_UNEXPECTED_X_FORWARDED_FOR
 app.set('trust proxy', 1);
+
+// Keep existing Render links usable while the public domain is being activated.
+if (config.isProd && LEGACY_RENDER_REDIRECT) {
+    app.use((req, res, next) => {
+        const target = new URL(req.originalUrl || '/', LEGACY_RENDER_REDIRECT).toString();
+        return res.redirect(302, target);
+    });
+}
 
 // Swagger setup (only in development or if explicitly enabled)
 let swaggerUi, specs;
