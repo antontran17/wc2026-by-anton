@@ -4461,6 +4461,128 @@
             }
         }
     </style>
+    <style id="anton-match-dialog-and-mobile-density">
+        .scorer-dialog-panel {
+            width: min(620px, 100%) !important;
+            max-height: min(86vh, 760px) !important;
+            overflow: auto !important;
+            padding: 0 !important;
+            border: 0 !important;
+            border-radius: 10px !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        .scorer-dialog-panel .match-card {
+            margin: 0 !important;
+            min-height: 0 !important;
+            cursor: default !important;
+        }
+
+        .scorer-dialog-panel .match-card:hover {
+            transform: none !important;
+        }
+
+        .scorer-dialog-panel .match-card .fav-btn,
+        .scorer-dialog-panel .team-flag-jump {
+            pointer-events: none !important;
+        }
+
+        .scorer-dialog-close {
+            z-index: 3 !important;
+            top: 12px !important;
+            right: 12px !important;
+        }
+
+        .scorer-dialog-goals {
+            margin: 10px 0 0 !important;
+            padding: 18px 22px 20px !important;
+            border: 1px solid rgba(142,162,255,.32) !important;
+            border-radius: 8px !important;
+            background: linear-gradient(180deg, rgba(59,50,128,.96), rgba(38,22,78,.98)) !important;
+            box-shadow: 0 16px 42px rgba(0,0,0,.28) !important;
+        }
+
+        @media(max-width:640px) {
+            #matches .match-card-compact:not(.mobile-expanded) {
+                min-height: 124px !important;
+                padding: 11px 13px 10px !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-time-top {
+                min-height: 16px !important;
+                margin-bottom: 3px !important;
+                font-size: 11px !important;
+                line-height: 1.15 !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-header {
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+                align-items: center !important;
+                min-height: 20px !important;
+                margin: 0 0 4px !important;
+                gap: 6px !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-group,
+            #matches .match-card-compact:not(.mobile-expanded) .matchday-label {
+                font-size: 10px !important;
+                line-height: 1 !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-status-slot {
+                display: inline-flex !important;
+                min-width: 0 !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-status-pill {
+                padding: 3px 7px !important;
+                font-size: 9px !important;
+                line-height: 1 !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-teams {
+                grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr) !important;
+                gap: 6px !important;
+                margin: 0 !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-team .team-flag,
+            #matches .match-card-compact:not(.mobile-expanded) .team-flag-placeholder {
+                width: 48px !important;
+                height: 32px !important;
+                border-radius: 5px !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-team .team-name {
+                margin-top: 4px !important;
+                font-size: 11px !important;
+                line-height: 1 !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .score-center,
+            #matches .match-card-compact:not(.mobile-expanded) .match-vs .score-center {
+                width: 58px !important;
+                min-width: 58px !important;
+                height: 28px !important;
+                font-size: 18px !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-info {
+                display: none !important;
+            }
+
+            .scorer-dialog-panel {
+                width: min(100%, 540px) !important;
+                max-height: 88vh !important;
+            }
+
+            .scorer-dialog-goals {
+                padding: 15px 16px 16px !important;
+            }
+        }
+    </style>
 
 </head>
 <body>
@@ -4628,8 +4750,8 @@
         let gamesData = [];
         let stadiumsData = [];
         let groupsData = [];
-        let favoriteMatches = new Set(JSON.parse(localStorage.getItem('wc2026_fav_matches') || '[]'));
-        let favoriteTeams = new Set(JSON.parse(localStorage.getItem('wc2026_fav_teams') || '[]'));
+        let favoriteMatches = new Set(readFavoriteStore('wc2026_fav_matches', 'wc2026_fav_matches_backup'));
+        let favoriteTeams = new Set(readFavoriteStore('wc2026_fav_teams', 'wc2026_fav_teams_backup'));
         let activeScorerMatchId = null;
         let scorerDetails = new Map();
         let currentMatchFilter = 'all';
@@ -4702,9 +4824,34 @@
         }
 
 
+        function readFavoriteStore(storageKey, cookieKey) {
+            try {
+                const local = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                if (Array.isArray(local) && local.length) return local;
+            } catch (_) {}
+
+            const cookie = document.cookie.split('; ').find(item => item.startsWith(`${cookieKey}=`));
+            if (!cookie) return [];
+            try {
+                const backup = JSON.parse(decodeURIComponent(cookie.split('=').slice(1).join('=')));
+                return Array.isArray(backup) ? backup : [];
+            } catch (_) {
+                return [];
+            }
+        }
+
+        function writeFavoriteBackup(cookieKey, values) {
+            const expires = new Date(Date.now() + 400 * 24 * 60 * 60 * 1000).toUTCString();
+            document.cookie = `${cookieKey}=${encodeURIComponent(JSON.stringify(values))}; expires=${expires}; path=/; SameSite=Lax`;
+        }
+
         function saveFavorites() {
-            localStorage.setItem('wc2026_fav_matches', JSON.stringify([...favoriteMatches]));
-            localStorage.setItem('wc2026_fav_teams', JSON.stringify([...favoriteTeams]));
+            const matches = [...favoriteMatches];
+            const teams = [...favoriteTeams];
+            localStorage.setItem('wc2026_fav_matches', JSON.stringify(matches));
+            localStorage.setItem('wc2026_fav_teams', JSON.stringify(teams));
+            writeFavoriteBackup('wc2026_fav_matches_backup', matches);
+            writeFavoriteBackup('wc2026_fav_teams_backup', teams);
         }
 
         function toggleFavoriteMatch(id) {
@@ -5040,12 +5187,6 @@
                 return;
             }
 
-            const homeTeam = teamsData.find(team => String(team.id) === String(game.home_team_id)) || {};
-            const awayTeam = teamsData.find(team => String(team.id) === String(game.away_team_id)) || {};
-            const homeName = homeTeam.id ? teamCode(homeTeam, game.home_team_name_en) : pendingTeamLabel(game.home_team_name_en);
-            const awayName = awayTeam.id ? teamCode(awayTeam, game.away_team_name_en) : pendingTeamLabel(game.away_team_name_en);
-            const homeFlag = String(homeTeam.flag || '').trim();
-            const awayFlag = String(awayTeam.flag || '').trim();
             const detail = scorerDetails.get(String(game.id));
             const scorerData = detail && !detail.loading && !detail.error ? detail : game;
             const homeGoals = scorerEntries(scorerData.home_scorers);
@@ -5054,17 +5195,7 @@
             dialog.innerHTML = `
                 <div class="scorer-dialog-panel" role="dialog" aria-modal="true" aria-label="Chi tiết trận đấu">
                     <button class="scorer-dialog-close" onclick="closeScorerDialog()" aria-label="Đóng">×</button>
-                    <div class="scorer-dialog-score">
-                        <div class="scorer-dialog-side home">
-                            ${homeFlag ? `<img src="${escapeHtml(homeFlag)}" alt="${escapeHtml(homeName)}">` : '<span class="scorer-dialog-flag-placeholder">TBD</span>'}
-                            <span>${escapeHtml(homeName)}</span>
-                        </div>
-                        <strong>${Number(game.home_score || 0)} - ${Number(game.away_score || 0)}</strong>
-                        <div class="scorer-dialog-side away">
-                            ${awayFlag ? `<img src="${escapeHtml(awayFlag)}" alt="${escapeHtml(awayName)}">` : '<span class="scorer-dialog-flag-placeholder">TBD</span>'}
-                            <span>${escapeHtml(awayName)}</span>
-                        </div>
-                    </div>
+                    ${renderMatchCard(game, false)}
                     ${detail && detail.loading ? '<div class="scorer-dialog-state">ĐANG TẢI DIỄN BIẾN...</div>' : ''}
                     ${detail && detail.error ? '<div class="scorer-dialog-state">CHƯA LẤY ĐƯỢC CHI TIẾT TRẬN ĐẤU</div>' : ''}
                     ${!detail?.loading && !detail?.error ? `
