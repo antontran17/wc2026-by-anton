@@ -4607,10 +4607,26 @@
 
         .fav-btn.active,
         .match-fav.active {
-            color: #ad8059 !important;
+            color: #f4c542 !important;
             background: transparent !important;
             border-color: transparent !important;
             box-shadow: none !important;
+        }
+
+        .fav-btn:hover,
+        .match-fav:hover,
+        .team-fav:hover,
+        .fav-btn:focus,
+        .match-fav:focus,
+        .team-fav:focus,
+        .fav-btn:focus-visible,
+        .match-fav:focus-visible,
+        .team-fav:focus-visible {
+            background: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+            outline: 0 !important;
+            transform: none !important;
         }
 
         .score-center,
@@ -4668,7 +4684,7 @@
             }
 
             .clean-hero {
-                padding-top: 42px !important;
+                padding: 0 !important;
             }
 
             #matches .match-card-compact:not(.mobile-expanded) .matchday-label {
