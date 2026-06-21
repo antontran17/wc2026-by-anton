@@ -4333,73 +4333,106 @@
         }
     </style>
     <style id="anton-scorers-final">
-        .match-scorers-wrap {
-            display: flex !important;
-            flex-direction: column !important;
+        #scorer-dialog {
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 1000 !important;
+            display: none !important;
             align-items: center !important;
-            gap: 8px !important;
-            margin-top: 10px !important;
+            justify-content: center !important;
+            padding: 24px !important;
+            background: rgba(4,6,28,.68) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
         }
 
-        .match-scorers-toggle {
-            appearance: none !important;
+        #scorer-dialog.active {
+            display: flex !important;
+        }
+
+        .scorer-dialog-panel {
+            position: relative !important;
+            width: min(540px, 100%) !important;
+            padding: 32px 28px 26px !important;
+            border: 1px solid rgba(142,162,255,.42) !important;
+            border-radius: 8px !important;
+            background: linear-gradient(145deg, rgba(20,24,79,.98), rgba(47,25,99,.96)) !important;
+            box-shadow: 0 26px 72px rgba(0,0,0,.48), 0 0 40px rgba(123,220,255,.15) !important;
+        }
+
+        .scorer-dialog-close {
+            position: absolute !important;
+            top: 10px !important;
+            right: 12px !important;
+            width: 32px !important;
+            height: 32px !important;
             border: 0 !important;
-            background: transparent !important;
-            color: rgba(238,243,255,.72) !important;
-            font-family: "Google Sans Flex", "Google Sans", Arial, sans-serif !important;
-            font-size: 11px !important;
-            font-weight: 700 !important;
-            letter-spacing: 0 !important;
+            border-radius: 50% !important;
+            background: rgba(255,255,255,.09) !important;
+            color: #ffffff !important;
+            font-size: 24px !important;
             line-height: 1 !important;
-            padding: 4px 0 !important;
             cursor: pointer !important;
         }
 
-        .match-scorers-toggle:hover,
-        .match-scorers-toggle:focus-visible {
-            color: #ffffff !important;
-            outline: none !important;
-            text-shadow: 0 0 12px rgba(142,162,255,.55) !important;
-        }
-
-        .match-scorers {
+        .scorer-dialog-score {
             display: grid !important;
-            width: 100% !important;
-            gap: 5px !important;
-            padding: 10px 12px !important;
-            border-top: 1px solid rgba(255,255,255,.10) !important;
-            color: rgba(246,247,255,.9) !important;
-            text-align: left !important;
-        }
-
-        .match-scorer-row {
-            display: grid !important;
-            grid-template-columns: 44px minmax(0, 1fr) !important;
-            gap: 9px !important;
-            align-items: baseline !important;
-            font-size: 12px !important;
-            line-height: 1.35 !important;
-        }
-
-        .match-scorer-row b {
-            color: #edc47d !important;
+            grid-template-columns: 1fr auto 1fr !important;
+            gap: 16px !important;
+            align-items: center !important;
+            color: rgba(238,243,255,.78) !important;
+            font-size: 14px !important;
             font-weight: 700 !important;
+            text-transform: uppercase !important;
         }
 
-        .match-scorers-state {
-            color: rgba(238,243,255,.62) !important;
-            font-size: 10px !important;
+        .scorer-dialog-score span:first-child { text-align: left !important; }
+        .scorer-dialog-score span:last-child { text-align: right !important; }
+        .scorer-dialog-score strong { color: #ffffff !important; font-size: 25px !important; }
+
+        .scorer-dialog-goals {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 24px !important;
+            margin-top: 22px !important;
+            padding-top: 18px !important;
+            border-top: 1px solid rgba(255,255,255,.12) !important;
+        }
+
+        .scorer-dialog-team {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 9px !important;
+            min-height: 24px !important;
+            color: #ffffff !important;
+            font-size: 14px !important;
+            line-height: 1.3 !important;
+        }
+
+        .scorer-dialog-team.home { align-items: flex-start !important; text-align: left !important; }
+        .scorer-dialog-team.away { align-items: flex-end !important; text-align: right !important; }
+        .scorer-empty { color: rgba(238,243,255,.38) !important; }
+
+        .scorer-dialog-state {
+            padding-top: 26px !important;
+            color: rgba(238,243,255,.70) !important;
+            font-size: 12px !important;
             font-weight: 700 !important;
             text-align: center !important;
         }
 
         @media(max-width:640px) {
-            .match-scorers-wrap {
-                margin-top: 8px !important;
-            }
-
-            .match-scorer-row {
-                font-size: 11px !important;
+            #scorer-dialog { padding: 18px !important; }
+            .scorer-dialog-panel { padding: 30px 20px 22px !important; }
+            .scorer-dialog-score { gap: 8px !important; font-size: 12px !important; }
+            .scorer-dialog-score strong { font-size: 22px !important; }
+            .scorer-dialog-goals { gap: 14px !important; }
+            .scorer-dialog-team { font-size: 13px !important; }
+            #matches-grid .results-group .match-priority-title {
+                font-size: 23px !important;
+                line-height: 1.24 !important;
+                padding: 6px 0 4px !important;
+                margin: 26px 0 7px !important;
             }
         }
     </style>
@@ -4506,6 +4539,7 @@
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
+    <div id="scorer-dialog" onclick="if (event.target === this) closeScorerDialog()"></div>
     <a id="bottom-anton-credit" class="bottom-anton-credit" href="https://www.facebook.com/kassleo.AT" target="_blank" rel="noopener noreferrer">BY ANTON</a>
 
     <!-- Footer -->
@@ -4571,7 +4605,7 @@
         let groupsData = [];
         let favoriteMatches = new Set(JSON.parse(localStorage.getItem('wc2026_fav_matches') || '[]'));
         let favoriteTeams = new Set(JSON.parse(localStorage.getItem('wc2026_fav_teams') || '[]'));
-        let expandedScorerMatches = new Set();
+        let activeScorerMatchId = null;
         let scorerDetails = new Map();
         let currentMatchFilter = 'all';
         let currentTeamFilter = 'all';
@@ -4917,47 +4951,56 @@
             return isCompletedGame(game) || ['in_play', 'live', 'paused', 'halftime', 'half-time'].includes(status);
         }
 
-        function renderScorerDetails(game, homeName, awayName) {
-            if (!canShowScorers(game)) return '';
+        function renderScorerDialog() {
+            const dialog = document.getElementById('scorer-dialog');
+            if (!dialog) return;
 
-            const id = String(game.id);
-            const isOpen = expandedScorerMatches.has(id);
-            const detail = scorerDetails.get(id);
+            const game = gamesData.find(item => String(item.id) === String(activeScorerMatchId));
+            if (!game) {
+                dialog.classList.remove('active');
+                return;
+            }
+
+            const homeTeam = teamsData.find(team => String(team.id) === String(game.home_team_id)) || {};
+            const awayTeam = teamsData.find(team => String(team.id) === String(game.away_team_id)) || {};
+            const homeName = homeTeam.id ? teamCode(homeTeam, game.home_team_name_en) : pendingTeamLabel(game.home_team_name_en);
+            const awayName = awayTeam.id ? teamCode(awayTeam, game.away_team_name_en) : pendingTeamLabel(game.away_team_name_en);
+            const detail = scorerDetails.get(String(game.id));
             const scorerData = detail && !detail.loading && !detail.error ? detail : game;
             const homeGoals = scorerEntries(scorerData.home_scorers);
             const awayGoals = scorerEntries(scorerData.away_scorers);
-            const hasGoals = homeGoals.length > 0 || awayGoals.length > 0;
 
-            return `
-                <div class="match-scorers-wrap">
-                    <button class="match-scorers-toggle" onclick="event.stopPropagation(); toggleScorerDetails('${escapeHtml(id)}')" aria-expanded="${isOpen}" aria-label="Xem người ghi bàn">
-                        ${isOpen ? 'ẨN BÀN THẮNG' : 'BÀN THẮNG'}
-                    </button>
-                    ${isOpen ? `
-                        <div class="match-scorers">
-                            ${detail && detail.loading ? '<span class="match-scorers-state">ĐANG TẢI...</span>' : ''}
-                            ${detail && detail.error ? '<span class="match-scorers-state">CHƯA LẤY ĐƯỢC CHI TIẾT BÀN THẮNG</span>' : ''}
-                            ${!detail?.loading && !detail?.error && !hasGoals ? '<span class="match-scorers-state">CHƯA CÓ THÔNG TIN NGƯỜI GHI BÀN</span>' : ''}
-                            ${homeGoals.map(goal => `<span class="match-scorer-row"><b>${escapeHtml(homeName)}</b><span>${escapeHtml(goal)}</span></span>`).join('')}
-                            ${awayGoals.map(goal => `<span class="match-scorer-row"><b>${escapeHtml(awayName)}</b><span>${escapeHtml(goal)}</span></span>`).join('')}
+            dialog.innerHTML = `
+                <div class="scorer-dialog-panel" role="dialog" aria-modal="true" aria-label="Chi tiết trận đấu">
+                    <button class="scorer-dialog-close" onclick="closeScorerDialog()" aria-label="Đóng">×</button>
+                    <div class="scorer-dialog-score">
+                        <span>${escapeHtml(homeName)}</span>
+                        <strong>${Number(game.home_score || 0)} - ${Number(game.away_score || 0)}</strong>
+                        <span>${escapeHtml(awayName)}</span>
+                    </div>
+                    ${detail && detail.loading ? '<div class="scorer-dialog-state">ĐANG TẢI DIỄN BIẾN...</div>' : ''}
+                    ${detail && detail.error ? '<div class="scorer-dialog-state">CHƯA LẤY ĐƯỢC CHI TIẾT TRẬN ĐẤU</div>' : ''}
+                    ${!detail?.loading && !detail?.error ? `
+                        <div class="scorer-dialog-goals">
+                            <div class="scorer-dialog-team home">
+                                ${homeGoals.length ? homeGoals.map(goal => `<span>${escapeHtml(goal)}</span>`).join('') : '<span class="scorer-empty">-</span>'}
+                            </div>
+                            <div class="scorer-dialog-team away">
+                                ${awayGoals.length ? awayGoals.map(goal => `<span>${escapeHtml(goal)}</span>`).join('') : '<span class="scorer-empty">-</span>'}
+                            </div>
                         </div>
                     ` : ''}
                 </div>
             `;
+            dialog.classList.add('active');
         }
 
-        async function toggleScorerDetails(id) {
+        async function openScorerDialog(id) {
             id = String(id);
-            if (expandedScorerMatches.has(id)) {
-                expandedScorerMatches.delete(id);
-                renderMatchCards(filteredMatchesForCurrentTab());
-                return;
-            }
-
-            expandedScorerMatches.add(id);
+            activeScorerMatchId = id;
             if (!scorerDetails.has(id)) {
                 scorerDetails.set(id, { loading: true });
-                renderMatchCards(filteredMatchesForCurrentTab());
+                renderScorerDialog();
                 try {
                     const response = await fetch(`${API_BASE}/get/games/${encodeURIComponent(id)}/scorers?fresh=${Date.now()}`, { cache: 'no-store' });
                     if (!response.ok) throw new Error('Scorer request failed');
@@ -4966,7 +5009,21 @@
                     scorerDetails.set(id, { error: true });
                 }
             }
-            renderMatchCards(filteredMatchesForCurrentTab());
+            renderScorerDialog();
+        }
+
+        function closeScorerDialog() {
+            activeScorerMatchId = null;
+            document.getElementById('scorer-dialog')?.classList.remove('active');
+        }
+
+        function handleMatchCardClick(id) {
+            const game = gamesData.find(item => String(item.id) === String(id));
+            if (game && canShowScorers(game)) {
+                openScorerDialog(id);
+                return;
+            }
+            toggleMobileMatch(id);
         }
 
         function matchStatusClass(game) {
@@ -5053,7 +5110,7 @@
             const isMobileExpanded = String(game.id) === String(expandedMobileMatchId);
 
             return `
-                <div class="match-card${matchStatusClass(game)} ${compact ? 'match-card-compact' : ''} ${hasFavoriteTeam ? 'has-favorite-team' : ''} ${isMobileExpanded ? 'mobile-expanded' : ''}" data-match-id="${escapeHtml(game.id)}" onclick="toggleMobileMatch('${game.id}')">
+                <div class="match-card${matchStatusClass(game)} ${compact ? 'match-card-compact' : ''} ${hasFavoriteTeam ? 'has-favorite-team' : ''} ${isMobileExpanded ? 'mobile-expanded' : ''}" data-match-id="${escapeHtml(game.id)}" onclick="handleMatchCardClick('${game.id}')">
                     <button class="fav-btn match-fav ${favoriteMatches.has(String(game.id)) ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavoriteMatch('${game.id}')" aria-label="Yêu thích trận">★</button>
                     <div class="match-time-top">${dateStr}</div>
                     <div class="match-header">
@@ -5079,7 +5136,6 @@
                     <div class="match-info">
                         <span class="match-stadium">${stadiumName}</span>
                     </div>
-                    ${renderScorerDetails(game, homeName, awayName)}
                 </div>
             `;
         }
