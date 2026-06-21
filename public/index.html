@@ -4505,14 +4505,18 @@
 
         @media(max-width:640px) {
             #matches .match-card-compact:not(.mobile-expanded) {
-                min-height: 124px !important;
-                padding: 11px 13px 10px !important;
+                display: grid !important;
+                grid-template-rows: 18px 24px minmax(0, 1fr) !important;
+                gap: 0 !important;
+                height: 150px !important;
+                min-height: 150px !important;
+                padding: 11px 14px 10px !important;
             }
 
             #matches .match-card-compact:not(.mobile-expanded) .match-time-top {
-                min-height: 16px !important;
-                margin-bottom: 3px !important;
-                font-size: 11px !important;
+                min-height: 18px !important;
+                margin: 0 !important;
+                font-size: 13px !important;
                 line-height: 1.15 !important;
             }
 
@@ -4520,14 +4524,14 @@
                 display: grid !important;
                 grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
                 align-items: center !important;
-                min-height: 20px !important;
-                margin: 0 0 4px !important;
+                min-height: 24px !important;
+                margin: 0 !important;
                 gap: 6px !important;
             }
 
             #matches .match-card-compact:not(.mobile-expanded) .match-group,
             #matches .match-card-compact:not(.mobile-expanded) .matchday-label {
-                font-size: 10px !important;
+                font-size: 12px !important;
                 line-height: 1 !important;
             }
 
@@ -4537,8 +4541,8 @@
             }
 
             #matches .match-card-compact:not(.mobile-expanded) .match-status-pill {
-                padding: 3px 7px !important;
-                font-size: 9px !important;
+                padding: 3px 8px !important;
+                font-size: 10px !important;
                 line-height: 1 !important;
             }
 
@@ -4546,18 +4550,20 @@
                 grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr) !important;
                 gap: 6px !important;
                 margin: 0 !important;
+                height: 82px !important;
+                align-self: stretch !important;
             }
 
             #matches .match-card-compact:not(.mobile-expanded) .match-team .team-flag,
             #matches .match-card-compact:not(.mobile-expanded) .team-flag-placeholder {
-                width: 48px !important;
-                height: 32px !important;
+                width: 52px !important;
+                height: 35px !important;
                 border-radius: 5px !important;
             }
 
             #matches .match-card-compact:not(.mobile-expanded) .match-team .team-name {
-                margin-top: 4px !important;
-                font-size: 11px !important;
+                margin-top: 5px !important;
+                font-size: 13px !important;
                 line-height: 1 !important;
             }
 
@@ -4566,7 +4572,7 @@
                 width: 58px !important;
                 min-width: 58px !important;
                 height: 28px !important;
-                font-size: 18px !important;
+                font-size: 23px !important;
             }
 
             #matches .match-card-compact:not(.mobile-expanded) .match-info {
