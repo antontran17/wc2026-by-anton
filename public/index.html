@@ -4636,6 +4636,7 @@
         let currentTeamFilter = 'all';
         let expandedMobileMatchId = null;
         let liveRefreshInFlight = false;
+        let nextKickoffTimer = null;
 
         const API_BASE = window.location.origin;
 
@@ -4797,13 +4798,37 @@
                 renderTeams(teamsData);
                 renderMatches(gamesData);
                 renderGroups(groupsData);
+                scheduleNextLiveCheck();
             } catch (err) {
                 console.error('Error loading data:', err);
             }
         }
 
-        async function refreshLiveScores() {
+        function isActualLiveMatch(game) {
+            const status = String(game.status || '').trim().toUpperCase();
+            const elapsed = String(game.time_elapsed || '').trim().toLowerCase();
+            return ['IN_PLAY', 'PAUSED', 'LIVE', '1H', '2H', 'HT'].includes(status) ||
+                ['live', 'in_play', 'paused', '1h', '2h', 'ht', 'halftime', 'half-time'].includes(elapsed);
+        }
+
+        function scheduleNextLiveCheck() {
+            if (nextKickoffTimer) clearTimeout(nextKickoffTimer);
+            if (gamesData.some(isActualLiveMatch)) return;
+
+            const now = Date.now();
+            const nextStart = gamesData
+                .map(parseSourceDate)
+                .filter(date => date && date.getTime() > now)
+                .sort((a, b) => a.getTime() - b.getTime())[0];
+
+            if (!nextStart) return;
+            const delay = Math.max(0, nextStart.getTime() - now + 60 * 1000);
+            nextKickoffTimer = setTimeout(() => refreshLiveScores(true), delay);
+        }
+
+        async function refreshLiveScores(force = false) {
             if (document.hidden || liveRefreshInFlight) return;
+            if (!force && !gamesData.some(isActualLiveMatch)) return;
             liveRefreshInFlight = true;
             try {
                 const response = await fetch(`${API_BASE}/get/games?fresh=${Date.now()}`, { cache: 'no-store' });
@@ -4813,6 +4838,7 @@
                 renderMatches(gamesData);
                 renderGroups(groupsData);
                 if (activeScorerMatchId) renderScorerDialog();
+                scheduleNextLiveCheck();
             } catch (err) {
                 console.warn('Live score refresh skipped:', err.message);
             } finally {
@@ -4823,7 +4849,7 @@
         function startLiveRefresh() {
             setInterval(refreshLiveScores, 60 * 1000);
             document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) refreshLiveScores();
+                if (!document.hidden) refreshLiveScores(true);
             });
         }
 
@@ -5098,13 +5124,9 @@
         }
 
         function liveMinute(game) {
-            if (!matchStatusClass(game).includes('is-live')) return '';
-            const start = parseSourceDate(game);
-            if (!start) return '';
-            const elapsed = Math.max(0, Math.floor((Date.now() - start.getTime()) / 60000));
-            if (elapsed <= 45) return `${elapsed}'`;
-            if (elapsed <= 60) return 'HT';
-            return `${Math.min(90, elapsed - 15)}'`;
+            const raw = String(game.minute || game.elapsed || game.time_elapsed || '').trim();
+            const minute = raw.match(/^\d{1,3}$/);
+            return minute ? `${minute[0]}'` : '';
         }
 
         function isRecentResult(game) {
@@ -5118,7 +5140,7 @@
 
         function matchStatusLabel(game) {
             const status = matchStatusClass(game);
-            if (status.includes('is-live')) return `<span class="match-status-pill live">LIVE ${liveMinute(game)}</span>`;
+            if (status.includes('is-live')) return `<span class="match-status-pill live">LIVE${liveMinute(game) ? ` ${liveMinute(game)}` : ''}</span>`;
             if (status.includes('is-upcoming')) return '<span class="match-status-pill upcoming">SẮP ĐÁ</span>';
             return '';
         }
