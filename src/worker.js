@@ -253,7 +253,9 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });
-    if (url.protocol === 'http:' && url.hostname === 'attak.online') {
+    const visitorScheme = request.headers.get('cf-visitor')?.match(/"scheme"\s*:\s*"([^"]+)"/i)?.[1];
+    const forwardedScheme = request.headers.get('x-forwarded-proto');
+    if (url.hostname === 'attak.online' && (url.protocol === 'http:' || visitorScheme === 'http' || forwardedScheme === 'http')) {
       return Response.redirect(`https://attak.online${url.pathname}${url.search}`, 308);
     }
     if (url.pathname === '/sw.js') {
