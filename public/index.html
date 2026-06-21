@@ -4590,40 +4590,27 @@
         }
     </style>
     <style id="anton-mobile-menu-and-match-scale">
-        .notification-toggle {
-            margin: 12px auto 0 !important;
-            min-height: 36px !important;
-            padding: 0 15px !important;
-            border: 1px solid rgba(142,162,255,.46) !important;
-            border-radius: 999px !important;
-            background: rgba(16,18,65,.52) !important;
-            color: #edf1ff !important;
-            font-family: "Google Sans Flex", "Google Sans", Arial, sans-serif !important;
-            font-size: 12px !important;
-            font-weight: 700 !important;
-            letter-spacing: 0 !important;
-            cursor: pointer !important;
-        }
-
-        .notification-toggle.enabled {
-            border-color: rgba(109,235,174,.72) !important;
-            background: rgba(59,193,129,.15) !important;
-            color: #aaffd1 !important;
-        }
-
         .fav-btn,
         .match-fav {
-            width: 42px !important;
-            height: 42px !important;
-            font-size: 23px !important;
+            width: 32px !important;
+            height: 32px !important;
+            padding: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            color: rgba(242, 246, 255, .86) !important;
+            font-size: 30px !important;
             line-height: 1 !important;
+            text-shadow: 0 2px 10px rgba(5, 8, 35, .46) !important;
         }
 
         .fav-btn.active,
         .match-fav.active {
             color: #ffd85a !important;
-            background: linear-gradient(135deg, rgba(255,197,69,.40), rgba(255,93,56,.25)) !important;
-            border-color: rgba(255,216,90,.78) !important;
+            background: transparent !important;
+            border-color: transparent !important;
+            box-shadow: 0 0 15px rgba(255, 194, 67, .38) !important;
         }
 
         .score-center,
@@ -4645,12 +4632,6 @@
         }
 
         @media(max-width:640px) {
-            .notification-toggle {
-                width: 100% !important;
-                margin-top: 10px !important;
-                min-height: 40px !important;
-                font-size: 13px !important;
-            }
             header {
                 min-height: 42px !important;
             }
@@ -4695,7 +4676,18 @@
             }
 
             #matches .match-card-compact:not(.mobile-expanded) .match-header {
-                grid-template-columns: minmax(0, 1fr) auto 0 !important;
+                grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+                gap: 0 !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-group {
+                grid-column: 1 !important;
+                justify-self: start !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-status-slot {
+                grid-column: 2 !important;
+                justify-self: center !important;
             }
 
             #matches .match-card-compact:not(.mobile-expanded) .score-center,
@@ -4711,11 +4703,11 @@
             }
 
             #matches .match-card-compact:not(.mobile-expanded) .match-fav {
-                top: 9px !important;
+                top: 7px !important;
                 right: 10px !important;
-                width: 38px !important;
-                height: 38px !important;
-                font-size: 21px !important;
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 29px !important;
             }
         }
     </style>
@@ -4769,7 +4761,6 @@
                 <select class="mobile-filter-select" id="match-filter-select" onchange="filterMatches(this.value)" aria-label="Chọn bảng hoặc vòng">
                     <option value="all">TẤT CẢ TRẬN</option>
                 </select>
-                <button id="notification-toggle" class="notification-toggle" type="button" onclick="toggleMatchNotifications()">BẬT NHẮC TRẬN</button>
             </div>
             
             <div class="tabs" id="match-tabs">
@@ -4997,17 +4988,21 @@
 
         function toggleFavoriteMatch(id) {
             id = String(id);
+            const isAdding = !favoriteMatches.has(id);
             favoriteMatches.has(id) ? favoriteMatches.delete(id) : favoriteMatches.add(id);
             saveFavorites();
             renderMatchCards(filteredMatchesForCurrentTab());
+            if (isAdding) ensureFavoriteNotifications();
         }
 
         function toggleFavoriteTeam(id) {
             id = String(id);
+            const isAdding = !favoriteTeams.has(id);
             favoriteTeams.has(id) ? favoriteTeams.delete(id) : favoriteTeams.add(id);
             saveFavorites();
             renderTeamCards(currentTeamFilter === 'all' ? teamsData : teamsData.filter(t => t.groups === currentTeamFilter));
             renderMatchCards(filteredMatchesForCurrentTab());
+            if (isAdding) ensureFavoriteNotifications();
         }
 
         function scrollToTeam(teamId) {
@@ -5149,7 +5144,6 @@
         }
 
         async function initializeMatchNotifications() {
-            updateNotificationToggle();
             if ('serviceWorker' in navigator) {
                 try {
                     notificationRegistration = await navigator.serviceWorker.register('/sw.js');
@@ -5157,33 +5151,19 @@
                     notificationRegistration = null;
                 }
             }
+            scheduleMatchNotifications();
         }
 
-        function updateNotificationToggle() {
-            const button = document.getElementById('notification-toggle');
-            if (!button) return;
-            const enabled = 'Notification' in window && Notification.permission === 'granted';
-            button.classList.toggle('enabled', enabled);
-            button.textContent = enabled ? 'NHẮC TRẬN ĐANG BẬT' : 'BẬT NHẮC TRẬN';
-        }
-
-        async function toggleMatchNotifications() {
-            if (!('Notification' in window)) {
-                showToast('TRÌNH DUYỆT CHƯA HỖ TRỢ THÔNG BÁO', 'error');
-                return;
+        async function ensureFavoriteNotifications() {
+            if (!('Notification' in window) || Notification.permission === 'denied') return;
+            if (Notification.permission === 'default') {
+                try {
+                    await Notification.requestPermission();
+                } catch (_) {
+                    return;
+                }
             }
-            if (Notification.permission === 'denied') {
-                showToast('HÃY BẬT THÔNG BÁO TRONG CÀI ĐẶT TRÌNH DUYỆT', 'error');
-                return;
-            }
-            if (Notification.permission !== 'granted') {
-                await Notification.requestPermission();
-            }
-            updateNotificationToggle();
-            if (Notification.permission === 'granted') {
-                scheduleMatchNotifications();
-                showToast('ĐÃ BẬT NHẮC TRƯỚC 15 PHÚT', 'success');
-            }
+            if (Notification.permission === 'granted') scheduleMatchNotifications();
         }
 
         async function sendMatchNotification(game, minutesUntil) {
@@ -5206,6 +5186,10 @@
             const now = Date.now();
             const leadMs = MATCH_NOTIFICATION_LEAD_MINUTES * 60 * 1000;
             gamesData.forEach((game) => {
+                const isFavorite = favoriteMatches.has(String(game.id)) ||
+                    favoriteTeams.has(String(game.home_team_id)) ||
+                    favoriteTeams.has(String(game.away_team_id));
+                if (!isFavorite) return;
                 const start = parseSourceDate(game);
                 if (!start) return;
                 const delta = start.getTime() - now;
