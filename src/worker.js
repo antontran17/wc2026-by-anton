@@ -8,6 +8,17 @@ const FOOTBALL_DATA_COMPETITION = 'WC';
 const FOOTBALL_DATA_SEASON = '2026';
 const REMOTE_BASE = 'https://worldcup26.ir';
 const ESPN_SCOREBOARD_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
+const SERVICE_WORKER = `
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+    const existing = clients.find((client) => 'focus' in client);
+    return existing ? existing.focus() : self.clients.openWindow('/#matches');
+  }));
+});
+`;
 
 function json(data, init = {}) {
   return new Response(JSON.stringify(data), {
@@ -218,6 +229,9 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });
+    if (url.pathname === '/sw.js') {
+      return new Response(SERVICE_WORKER, { headers: { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'no-cache' } });
+    }
     if (url.pathname === '/health') return json({ ok: true, service: 'wc2026-by-anton' });
     if (url.pathname === '/get/games') return liveGames(request, env, ctx);
     if (url.pathname === '/get/teams') return json({ teams, source: 'local' });
