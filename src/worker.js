@@ -113,13 +113,46 @@ async function liveGames(request, env, ctx) {
   }
 }
 
-async function scorers(id) {
-  const response = await fetch(`${REMOTE_BASE}/get/games`, { headers: { accept: 'application/json' } });
-  if (!response.ok) return json({ error: 'Scorer details are temporarily unavailable' }, { status: 502 });
-  const data = await response.json();
-  const game = (data.games || data).find((item) => String(item.id) === String(id));
-  if (!game) return json({ error: 'Scorer details are not available for this match' }, { status: 404 });
-  return json({ id: String(game.id), home_scorers: game.home_scorers || 'null', away_scorers: game.away_scorers || 'null', source: 'worldcup26.ir' });
+async function scorerFeed(request, ctx) {
+  const cacheKey = new Request(new URL('/__wc2026/scorer-feed', request.url));
+  const cached = await caches.default.match(cacheKey);
+  if (cached) return cached.json();
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  try {
+    const response = await fetch(`${REMOTE_BASE}/get/games`, {
+      signal: controller.signal,
+      headers: { accept: 'application/json' }
+    });
+    if (!response.ok) throw new Error(`Scorer source ${response.status}`);
+    const data = await response.json();
+    const cacheResponse = json(data, { headers: { 'cache-control': 'public, max-age=300' } });
+    ctx.waitUntil(caches.default.put(cacheKey, cacheResponse.clone()));
+    return data;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function scorers(id, request, ctx) {
+  try {
+    const data = await scorerFeed(request, ctx);
+    const game = (data.games || data).find((item) => String(item.id) === String(id));
+    if (game) {
+      return json({ id: String(game.id), home_scorers: game.home_scorers || 'null', away_scorers: game.away_scorers || 'null', source: 'worldcup26.ir' });
+    }
+  } catch (_) {
+    // Fall through to the local schedule so a slow scorer source never breaks the popup.
+  }
+
+  const local = matches.find((item) => String(item.id) === String(id));
+  return json({
+    id: String(id),
+    home_scorers: local?.home_scorers || 'null',
+    away_scorers: local?.away_scorers || 'null',
+    source: 'local-fallback'
+  });
 }
 
 export default {
@@ -133,7 +166,7 @@ export default {
     if (url.pathname === '/get/stadiums') return json({ stadiums, source: 'local' });
     if (url.pathname === '/get/source-status') return json({ results: [{ endpoint: '/get/games', source: env.FOOTBALL_DATA_TOKEN ? 'football-data' : 'local' }, { endpoint: '/get/teams', source: 'local' }, { endpoint: '/get/groups', source: 'local' }, { endpoint: '/get/stadiums', source: 'local' }] });
     const scorerMatch = url.pathname.match(/^\/get\/games\/([^/]+)\/scorers$/);
-    if (scorerMatch) return scorers(decodeURIComponent(scorerMatch[1]));
+    if (scorerMatch) return scorers(decodeURIComponent(scorerMatch[1]), request, ctx);
     return env.ASSETS.fetch(request);
   }
 };
