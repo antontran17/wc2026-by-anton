@@ -4607,16 +4607,16 @@
 
         .fav-btn.active,
         .match-fav.active {
-            color: #ffd85a !important;
+            color: #bd8a52 !important;
             background: transparent !important;
             border-color: transparent !important;
-            box-shadow: 0 0 15px rgba(255, 194, 67, .38) !important;
+            box-shadow: 0 0 13px rgba(189, 138, 82, .30) !important;
         }
 
         .score-center,
         .match-card .score-center,
         .match-vs .score-center {
-            font-size: 34px !important;
+            font-size: 20px !important;
             font-variation-settings: "wght" 700 !important;
         }
 
@@ -4692,14 +4692,14 @@
 
             #matches .match-card-compact:not(.mobile-expanded) .score-center,
             #matches .match-card-compact:not(.mobile-expanded) .match-vs .score-center {
-                font-size: 34px !important;
-                width: 70px !important;
-                min-width: 70px !important;
-                height: 36px !important;
+                font-size: 20px !important;
+                width: 58px !important;
+                min-width: 58px !important;
+                height: 28px !important;
             }
 
             #matches .match-card-compact:not(.mobile-expanded) .match-teams {
-                grid-template-columns: minmax(0, 1fr) 70px minmax(0, 1fr) !important;
+                grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr) !important;
             }
 
             #matches .match-card-compact:not(.mobile-expanded) .match-fav {
@@ -5571,7 +5571,7 @@
 
             return `
                 <div class="match-card${matchStatusClass(game)} ${compact ? 'match-card-compact' : ''} ${hasFavoriteTeam ? 'has-favorite-team' : ''} ${isMobileExpanded ? 'mobile-expanded' : ''}" data-match-id="${escapeHtml(game.id)}" onclick="handleMatchCardClick('${game.id}')">
-                    <button class="fav-btn match-fav ${favoriteMatches.has(String(game.id)) ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavoriteMatch('${game.id}')" aria-label="Yêu thích trận">♥</button>
+                    <button class="fav-btn match-fav ${favoriteMatches.has(String(game.id)) ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavoriteMatch('${game.id}')" aria-label="Yêu thích trận">${favoriteMatches.has(String(game.id)) ? '★' : '☆'}</button>
                     <div class="match-time-top">${dateStr}</div>
                     <div class="match-header">
                         <span class="match-group">${translations[currentLang].group} ${game.group || '-'}</span>
@@ -5894,7 +5894,7 @@
 
             grid.innerHTML = sortedTeams.map(team => `
                 <div class="team-card ${favoriteTeams.has(String(team.id)) ? 'favorite-team-card' : ''}" id="team-card-${team.id}" data-team-id="${team.id}">
-                    <button class="fav-btn team-fav ${favoriteTeams.has(String(team.id)) ? 'active' : ''}" onclick="toggleFavoriteTeam('${team.id}')" aria-label="Yêu thích đội">♥</button>
+                    <button class="fav-btn team-fav ${favoriteTeams.has(String(team.id)) ? 'active' : ''}" onclick="toggleFavoriteTeam('${team.id}')" aria-label="Yêu thích đội">${favoriteTeams.has(String(team.id)) ? '★' : '☆'}</button>
                     <img class="team-flag ${favoriteTeams.has(String(team.id)) ? 'favorite-flag' : ''}" src="${team.flag || ''}" alt="${team.name_en}" onerror="this.src='https://via.placeholder.com/80x55?text=Flag'">
                     <span class="team-name">${team.name_en}</span>
                     <span class="team-group">${translations[currentLang].group} ${team.groups || '-'}</span>
