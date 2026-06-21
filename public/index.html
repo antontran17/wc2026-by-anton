@@ -4590,6 +4590,27 @@
         }
     </style>
     <style id="anton-mobile-menu-and-match-scale">
+        .notification-toggle {
+            margin: 12px auto 0 !important;
+            min-height: 36px !important;
+            padding: 0 15px !important;
+            border: 1px solid rgba(142,162,255,.46) !important;
+            border-radius: 999px !important;
+            background: rgba(16,18,65,.52) !important;
+            color: #edf1ff !important;
+            font-family: "Google Sans Flex", "Google Sans", Arial, sans-serif !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0 !important;
+            cursor: pointer !important;
+        }
+
+        .notification-toggle.enabled {
+            border-color: rgba(109,235,174,.72) !important;
+            background: rgba(59,193,129,.15) !important;
+            color: #aaffd1 !important;
+        }
+
         .fav-btn,
         .match-fav {
             width: 42px !important;
@@ -4624,6 +4645,12 @@
         }
 
         @media(max-width:640px) {
+            .notification-toggle {
+                width: 100% !important;
+                margin-top: 10px !important;
+                min-height: 40px !important;
+                font-size: 13px !important;
+            }
             header {
                 min-height: 42px !important;
             }
@@ -4742,6 +4769,7 @@
                 <select class="mobile-filter-select" id="match-filter-select" onchange="filterMatches(this.value)" aria-label="Chọn bảng hoặc vòng">
                     <option value="all">TẤT CẢ TRẬN</option>
                 </select>
+                <button id="notification-toggle" class="notification-toggle" type="button" onclick="toggleMatchNotifications()">BẬT NHẮC TRẬN</button>
             </div>
             
             <div class="tabs" id="match-tabs">
@@ -4869,6 +4897,9 @@
         let liveRefreshInFlight = false;
         let nextKickoffTimer = null;
         const LIVE_REFRESH_INTERVAL_MS = 30 * 1000;
+        const MATCH_NOTIFICATION_LEAD_MINUTES = 15;
+        const PROVISIONAL_LIVE_WINDOW_MS = 3 * 60 * 60 * 1000;
+        let notificationRegistration = null;
 
         const API_BASE = window.location.origin;
 
@@ -4880,6 +4911,7 @@
             
             loadAllData();
             startLiveRefresh();
+            initializeMatchNotifications();
         });
 
         // Set Language
@@ -5056,6 +5088,7 @@
                 renderMatches(gamesData);
                 renderGroups(groupsData);
                 scheduleNextLiveCheck();
+                scheduleMatchNotifications();
             } catch (err) {
                 console.error('Error loading data:', err);
             }
@@ -5064,8 +5097,12 @@
         function isActualLiveMatch(game) {
             const status = String(game.status || '').trim().toUpperCase();
             const elapsed = String(game.time_elapsed || '').trim().toLowerCase();
-            return ['IN_PLAY', 'PAUSED', 'LIVE', '1H', '2H', 'HT', 'ET'].includes(status) ||
-                ['live', 'in_play', 'paused', '1h', '2h', 'ht', 'et', 'halftime', 'half-time'].includes(elapsed);
+            if (['IN_PLAY', 'PAUSED', 'LIVE', '1H', '2H', 'HT', 'ET'].includes(status) ||
+                ['live', 'in_play', 'paused', '1h', '2h', 'ht', 'et', 'halftime', 'half-time'].includes(elapsed)) {
+                return true;
+            }
+            const start = parseSourceDate(game);
+            return Boolean(start && Date.now() >= start.getTime() && Date.now() < start.getTime() + PROVISIONAL_LIVE_WINDOW_MS);
         }
 
         function scheduleNextLiveCheck() {
@@ -5105,8 +5142,78 @@
 
         function startLiveRefresh() {
             setInterval(refreshLiveScores, LIVE_REFRESH_INTERVAL_MS);
+            setInterval(scheduleMatchNotifications, 60 * 1000);
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) refreshLiveScores(true);
+            });
+        }
+
+        async function initializeMatchNotifications() {
+            updateNotificationToggle();
+            if ('serviceWorker' in navigator) {
+                try {
+                    notificationRegistration = await navigator.serviceWorker.register('/sw.js');
+                } catch (_) {
+                    notificationRegistration = null;
+                }
+            }
+        }
+
+        function updateNotificationToggle() {
+            const button = document.getElementById('notification-toggle');
+            if (!button) return;
+            const enabled = 'Notification' in window && Notification.permission === 'granted';
+            button.classList.toggle('enabled', enabled);
+            button.textContent = enabled ? 'NHẮC TRẬN ĐANG BẬT' : 'BẬT NHẮC TRẬN';
+        }
+
+        async function toggleMatchNotifications() {
+            if (!('Notification' in window)) {
+                showToast('TRÌNH DUYỆT CHƯA HỖ TRỢ THÔNG BÁO', 'error');
+                return;
+            }
+            if (Notification.permission === 'denied') {
+                showToast('HÃY BẬT THÔNG BÁO TRONG CÀI ĐẶT TRÌNH DUYỆT', 'error');
+                return;
+            }
+            if (Notification.permission !== 'granted') {
+                await Notification.requestPermission();
+            }
+            updateNotificationToggle();
+            if (Notification.permission === 'granted') {
+                scheduleMatchNotifications();
+                showToast('ĐÃ BẬT NHẮC TRƯỚC 15 PHÚT', 'success');
+            }
+        }
+
+        async function sendMatchNotification(game, minutesUntil) {
+            const home = teamCode(teamsData.find(team => String(team.id) === String(game.home_team_id)) || {}, game.home_team_name_en || 'TBD');
+            const away = teamCode(teamsData.find(team => String(team.id) === String(game.away_team_id)) || {}, game.away_team_name_en || 'TBD');
+            const options = {
+                body: `${home} - ${away} bắt đầu sau ${minutesUntil} phút.`,
+                tag: `wc2026-match-${game.id}`,
+                renotify: false
+            };
+            if (notificationRegistration) {
+                await notificationRegistration.showNotification('WC2026 | CALENDAR', options);
+            } else {
+                new Notification('WC2026 | CALENDAR', options);
+            }
+        }
+
+        function scheduleMatchNotifications() {
+            if (!('Notification' in window) || Notification.permission !== 'granted') return;
+            const now = Date.now();
+            const leadMs = MATCH_NOTIFICATION_LEAD_MINUTES * 60 * 1000;
+            gamesData.forEach((game) => {
+                const start = parseSourceDate(game);
+                if (!start) return;
+                const delta = start.getTime() - now;
+                const key = `wc2026_notified_${game.id}_${start.getTime()}`;
+                if (delta > 0 && delta <= leadMs && !localStorage.getItem(key)) {
+                    localStorage.setItem(key, '1');
+                    sendMatchNotification(game, Math.max(1, Math.ceil(delta / 60000))).catch(() => {});
+                }
             });
         }
 
@@ -5365,6 +5472,9 @@
             const start = parseSourceDate(game);
             if (!start) return '';
             const now = new Date();
+            if (now.getTime() >= start.getTime() && now.getTime() < start.getTime() + PROVISIONAL_LIVE_WINDOW_MS) {
+                return ' is-live';
+            }
             const soon = new Date(start.getTime() - 17 * 60 * 60 * 1000);
             if (now >= soon && now < start) return ' is-upcoming';
             return '';
@@ -5388,7 +5498,7 @@
             if (status === 'BT') return 'GIỮA HIỆP PHỤ';
             if (['P', 'PENALTY'].includes(status)) return 'LUÂN LƯU';
             if (status === 'IN_PLAY' || String(game.time_elapsed || '').toLowerCase() === 'live') return 'ĐANG DIỄN RA';
-            return 'LIVE';
+            return 'ĐANG DIỄN RA';
         }
 
         function isRecentResult(game) {
@@ -6104,7 +6214,7 @@
         }
         
         // Close modal on outside click
-        document.getElementById('paymentModal').addEventListener('click', (e) => {
+        document.getElementById('paymentModal')?.addEventListener('click', (e) => {
             if (e.target.id === 'paymentModal') {
                 closePaymentModal();
             }
