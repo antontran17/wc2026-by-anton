@@ -2,7 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "wc2026-by-anton",
   "main": "src/worker.js",
-  "compatibility_date": "2026-06-22",
+  "compatibility_date": "2026-06-21",
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
