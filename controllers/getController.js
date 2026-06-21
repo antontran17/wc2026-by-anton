@@ -18,8 +18,10 @@ const FOOTBALL_DATA_IDLE_TTL_MS = Number(process.env.FOOTBALL_DATA_IDLE_TTL_MS |
 const FOOTBALL_DATA_ACTIVE_BEFORE_MS = Number(process.env.FOOTBALL_DATA_ACTIVE_BEFORE_MS || 2 * 60 * 60 * 1000);
 const FOOTBALL_DATA_ACTIVE_AFTER_MS = Number(process.env.FOOTBALL_DATA_ACTIVE_AFTER_MS || 4 * 60 * 60 * 1000);
 const REMOTE_SCORERS_TIMEOUT_MS = Number(process.env.REMOTE_SCORERS_TIMEOUT_MS || 30 * 1000);
+const REMOTE_SCORERS_CACHE_TTL_MS = Number(process.env.REMOTE_SCORERS_CACHE_TTL_MS || 60 * 1000);
 
 const memoryCache = new Map();
+let remoteScorerFeedPromise = null;
 
 function readJson(filename) {
     const full = path.join(__dirname, '..', filename);
@@ -417,6 +419,7 @@ async function fetchFootballDataGames() {
         };
 
         memoryCache.set(cacheKey, { time: now, ttl, payload });
+        preloadRemoteScorers();
         return payload;
     } finally {
         clearTimeout(timeout);
@@ -457,48 +460,66 @@ async function fetchRemote(endpoint, type) {
     }
 }
 
-async function fetchRemoteScorers(gameId) {
-    const cacheKey = `remote-scorers:${gameId}`;
+async function fetchRemoteScorerFeed() {
+    const cacheKey = 'remote-scorer-feed';
     const cached = memoryCache.get(cacheKey);
     const now = Date.now();
 
-    if (cached && (now - cached.time) < FOOTBALL_DATA_IDLE_TTL_MS) {
+    if (cached && (now - cached.time) < REMOTE_SCORERS_CACHE_TTL_MS) {
         return cached.payload;
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), REMOTE_SCORERS_TIMEOUT_MS);
+    if (remoteScorerFeedPromise) return remoteScorerFeedPromise;
+
+    remoteScorerFeedPromise = (async () => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), REMOTE_SCORERS_TIMEOUT_MS);
+
+        try {
+            const response = await fetch(`${REMOTE_BASE}/get/games`, {
+                signal: controller.signal,
+                headers: {
+                    accept: 'application/json',
+                    'user-agent': 'wc2026-by-anton/1.0'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Scorer source ${response.status} ${response.statusText}`);
+            }
+
+            const payload = normalizeRemotePayload('games', await response.json());
+            const scorers = new Map(payload.games.map((game) => [String(game.id), {
+                id: String(game.id),
+                home_scorers: game.home_scorers || 'null',
+                away_scorers: game.away_scorers || 'null',
+                source: 'worldcup26.ir'
+            }]));
+            memoryCache.set(cacheKey, { time: now, payload: scorers });
+            return scorers;
+        } finally {
+            clearTimeout(timeout);
+        }
+    })();
 
     try {
-        const response = await fetch(`${REMOTE_BASE}/get/games`, {
-            signal: controller.signal,
-            headers: {
-                accept: 'application/json',
-                'user-agent': 'wc2026-by-anton/1.0'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`Scorer source ${response.status} ${response.statusText}`);
-        }
-
-        const payload = normalizeRemotePayload('games', await response.json());
-        const game = payload.games.find((item) => String(item.id) === String(gameId));
-        if (!game) {
-            throw new Error('Scorer details are not available for this match');
-        }
-
-        const scorers = {
-            id: String(game.id),
-            home_scorers: game.home_scorers || 'null',
-            away_scorers: game.away_scorers || 'null',
-            source: 'worldcup26.ir'
-        };
-        memoryCache.set(cacheKey, { time: now, payload: scorers });
-        return scorers;
+        return await remoteScorerFeedPromise;
     } finally {
-        clearTimeout(timeout);
+        remoteScorerFeedPromise = null;
     }
+}
+
+async function fetchRemoteScorers(gameId) {
+    const scorerFeed = await fetchRemoteScorerFeed();
+    const scorers = scorerFeed.get(String(gameId));
+    if (!scorers) throw new Error('Scorer details are not available for this match');
+    return scorers;
+}
+
+function preloadRemoteScorers() {
+    fetchRemoteScorerFeed().catch((err) => {
+        console.warn(`Scorer preload failed: ${err.message}`);
+    });
 }
 
 async function sendRemoteFirst(req, res, endpoint, type, localFile) {
