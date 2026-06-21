@@ -5092,6 +5092,10 @@
         function isActualLiveMatch(game) {
             const status = String(game.status || '').trim().toUpperCase();
             const elapsed = String(game.time_elapsed || '').trim().toLowerCase();
+            const finished = String(game.finished || '').trim().toLowerCase();
+            if (finished === 'true' || finished === '1' || ['FINISHED', 'AWARDED', 'CANCELLED', 'POSTPONED'].includes(status)) {
+                return false;
+            }
             if (['IN_PLAY', 'PAUSED', 'LIVE', '1H', '2H', 'HT', 'ET'].includes(status) ||
                 ['live', 'in_play', 'paused', '1h', '2h', 'ht', 'et', 'halftime', 'half-time'].includes(elapsed)) {
                 return true;
