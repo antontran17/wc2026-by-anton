@@ -5194,7 +5194,6 @@
 
             dialog.innerHTML = `
                 <div class="scorer-dialog-panel" role="dialog" aria-modal="true" aria-label="Chi tiết trận đấu">
-                    <button class="scorer-dialog-close" onclick="closeScorerDialog()" aria-label="Đóng">×</button>
                     ${renderSingleMatchCard(game, false)}
                     ${detail && detail.loading ? '<div class="scorer-dialog-state">ĐANG TẢI DIỄN BIẾN...</div>' : ''}
                     ${detail && detail.error ? '<div class="scorer-dialog-state">CHƯA LẤY ĐƯỢC CHI TIẾT TRẬN ĐẤU</div>' : ''}
