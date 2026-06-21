@@ -4332,6 +4332,77 @@
             }
         }
     </style>
+    <style id="anton-scorers-final">
+        .match-scorers-wrap {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 8px !important;
+            margin-top: 10px !important;
+        }
+
+        .match-scorers-toggle {
+            appearance: none !important;
+            border: 0 !important;
+            background: transparent !important;
+            color: rgba(238,243,255,.72) !important;
+            font-family: "Google Sans Flex", "Google Sans", Arial, sans-serif !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0 !important;
+            line-height: 1 !important;
+            padding: 4px 0 !important;
+            cursor: pointer !important;
+        }
+
+        .match-scorers-toggle:hover,
+        .match-scorers-toggle:focus-visible {
+            color: #ffffff !important;
+            outline: none !important;
+            text-shadow: 0 0 12px rgba(142,162,255,.55) !important;
+        }
+
+        .match-scorers {
+            display: grid !important;
+            width: 100% !important;
+            gap: 5px !important;
+            padding: 10px 12px !important;
+            border-top: 1px solid rgba(255,255,255,.10) !important;
+            color: rgba(246,247,255,.9) !important;
+            text-align: left !important;
+        }
+
+        .match-scorer-row {
+            display: grid !important;
+            grid-template-columns: 44px minmax(0, 1fr) !important;
+            gap: 9px !important;
+            align-items: baseline !important;
+            font-size: 12px !important;
+            line-height: 1.35 !important;
+        }
+
+        .match-scorer-row b {
+            color: #edc47d !important;
+            font-weight: 700 !important;
+        }
+
+        .match-scorers-state {
+            color: rgba(238,243,255,.62) !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            text-align: center !important;
+        }
+
+        @media(max-width:640px) {
+            .match-scorers-wrap {
+                margin-top: 8px !important;
+            }
+
+            .match-scorer-row {
+                font-size: 11px !important;
+            }
+        }
+    </style>
 
 </head>
 <body>
@@ -4500,6 +4571,8 @@
         let groupsData = [];
         let favoriteMatches = new Set(JSON.parse(localStorage.getItem('wc2026_fav_matches') || '[]'));
         let favoriteTeams = new Set(JSON.parse(localStorage.getItem('wc2026_fav_teams') || '[]'));
+        let expandedScorerMatches = new Set();
+        let scorerDetails = new Map();
         let currentMatchFilter = 'all';
         let currentTeamFilter = 'all';
         let expandedMobileMatchId = null;
@@ -4828,6 +4901,74 @@
             return `<span class="score-center"><span>${hs}</span><span>${as}</span></span>`;
         }
 
+        function scorerEntries(value) {
+            const raw = String(value || '').trim();
+            if (!raw || raw.toLowerCase() === 'null') return [];
+            return raw
+                .replace(/[{}[\]]/g, '')
+                .replace(/[“”"]/g, '')
+                .split(/\s*[,;]\s*/)
+                .map(item => item.trim())
+                .filter(Boolean);
+        }
+
+        function canShowScorers(game) {
+            const status = String(game.status || game.time_elapsed || '').trim().toLowerCase();
+            return isCompletedGame(game) || ['in_play', 'live', 'paused', 'halftime', 'half-time'].includes(status);
+        }
+
+        function renderScorerDetails(game, homeName, awayName) {
+            if (!canShowScorers(game)) return '';
+
+            const id = String(game.id);
+            const isOpen = expandedScorerMatches.has(id);
+            const detail = scorerDetails.get(id);
+            const scorerData = detail && !detail.loading && !detail.error ? detail : game;
+            const homeGoals = scorerEntries(scorerData.home_scorers);
+            const awayGoals = scorerEntries(scorerData.away_scorers);
+            const hasGoals = homeGoals.length > 0 || awayGoals.length > 0;
+
+            return `
+                <div class="match-scorers-wrap">
+                    <button class="match-scorers-toggle" onclick="event.stopPropagation(); toggleScorerDetails('${escapeHtml(id)}')" aria-expanded="${isOpen}" aria-label="Xem người ghi bàn">
+                        ${isOpen ? 'ẨN BÀN THẮNG' : 'BÀN THẮNG'}
+                    </button>
+                    ${isOpen ? `
+                        <div class="match-scorers">
+                            ${detail && detail.loading ? '<span class="match-scorers-state">ĐANG TẢI...</span>' : ''}
+                            ${detail && detail.error ? '<span class="match-scorers-state">CHƯA LẤY ĐƯỢC CHI TIẾT BÀN THẮNG</span>' : ''}
+                            ${!detail?.loading && !detail?.error && !hasGoals ? '<span class="match-scorers-state">CHƯA CÓ THÔNG TIN NGƯỜI GHI BÀN</span>' : ''}
+                            ${homeGoals.map(goal => `<span class="match-scorer-row"><b>${escapeHtml(homeName)}</b><span>${escapeHtml(goal)}</span></span>`).join('')}
+                            ${awayGoals.map(goal => `<span class="match-scorer-row"><b>${escapeHtml(awayName)}</b><span>${escapeHtml(goal)}</span></span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        async function toggleScorerDetails(id) {
+            id = String(id);
+            if (expandedScorerMatches.has(id)) {
+                expandedScorerMatches.delete(id);
+                renderMatchCards(filteredMatchesForCurrentTab());
+                return;
+            }
+
+            expandedScorerMatches.add(id);
+            if (!scorerDetails.has(id)) {
+                scorerDetails.set(id, { loading: true });
+                renderMatchCards(filteredMatchesForCurrentTab());
+                try {
+                    const response = await fetch(`${API_BASE}/get/games/${encodeURIComponent(id)}/scorers?fresh=${Date.now()}`, { cache: 'no-store' });
+                    if (!response.ok) throw new Error('Scorer request failed');
+                    scorerDetails.set(id, await response.json());
+                } catch (error) {
+                    scorerDetails.set(id, { error: true });
+                }
+            }
+            renderMatchCards(filteredMatchesForCurrentTab());
+        }
+
         function matchStatusClass(game) {
             const start = parseSourceDate(game);
             if (!start) return '';
@@ -4938,6 +5079,7 @@
                     <div class="match-info">
                         <span class="match-stadium">${stadiumName}</span>
                     </div>
+                    ${renderScorerDetails(game, homeName, awayName)}
                 </div>
             `;
         }

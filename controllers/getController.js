@@ -17,6 +17,7 @@ const FOOTBALL_DATA_MATCHDAY_TTL_MS = Number(process.env.FOOTBALL_DATA_MATCHDAY_
 const FOOTBALL_DATA_IDLE_TTL_MS = Number(process.env.FOOTBALL_DATA_IDLE_TTL_MS || 6 * 60 * 60 * 1000);
 const FOOTBALL_DATA_ACTIVE_BEFORE_MS = Number(process.env.FOOTBALL_DATA_ACTIVE_BEFORE_MS || 2 * 60 * 60 * 1000);
 const FOOTBALL_DATA_ACTIVE_AFTER_MS = Number(process.env.FOOTBALL_DATA_ACTIVE_AFTER_MS || 4 * 60 * 60 * 1000);
+const REMOTE_SCORERS_TIMEOUT_MS = Number(process.env.REMOTE_SCORERS_TIMEOUT_MS || 30 * 1000);
 
 const memoryCache = new Map();
 
@@ -456,6 +457,50 @@ async function fetchRemote(endpoint, type) {
     }
 }
 
+async function fetchRemoteScorers(gameId) {
+    const cacheKey = `remote-scorers:${gameId}`;
+    const cached = memoryCache.get(cacheKey);
+    const now = Date.now();
+
+    if (cached && (now - cached.time) < FOOTBALL_DATA_IDLE_TTL_MS) {
+        return cached.payload;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REMOTE_SCORERS_TIMEOUT_MS);
+
+    try {
+        const response = await fetch(`${REMOTE_BASE}/get/games`, {
+            signal: controller.signal,
+            headers: {
+                accept: 'application/json',
+                'user-agent': 'wc2026-by-anton/1.0'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Scorer source ${response.status} ${response.statusText}`);
+        }
+
+        const payload = normalizeRemotePayload('games', await response.json());
+        const game = payload.games.find((item) => String(item.id) === String(gameId));
+        if (!game) {
+            throw new Error('Scorer details are not available for this match');
+        }
+
+        const scorers = {
+            id: String(game.id),
+            home_scorers: game.home_scorers || 'null',
+            away_scorers: game.away_scorers || 'null',
+            source: 'worldcup26.ir'
+        };
+        memoryCache.set(cacheKey, { time: now, payload: scorers });
+        return scorers;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
 async function sendRemoteFirst(req, res, endpoint, type, localFile) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cache-Control', 'public, max-age=60');
@@ -532,6 +577,17 @@ module.exports = (app) => {
 
     app.get('/get/games', (req, res) => {
         return sendGames(req, res);
+    });
+
+    app.get('/get/games/:id/scorers', async (req, res) => {
+        try {
+            res.send(await fetchRemoteScorers(req.params.id));
+        } catch (err) {
+            res.status(502).send({
+                error: 'Scorer details are temporarily unavailable',
+                message: err.message
+            });
+        }
     });
 
     app.get('/get/stadiums', (req, res) => {
