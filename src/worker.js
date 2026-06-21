@@ -105,31 +105,55 @@ function mapMatch(match) {
   };
 }
 
+function isFinishedMatch(match) {
+  const status = String(match?.status || '').toUpperCase();
+  return String(match?.finished || '').toUpperCase() === 'TRUE' || ['FINISHED', 'AWARDED'].includes(status);
+}
+
+function completedMatchCacheKey(match, request) {
+  return new Request(new URL(`/__wc2026/final-match/${encodeURIComponent(match.id)}`, request.url));
+}
+
+async function cacheCompletedMatches(games, request) {
+  await Promise.all(games.filter(isFinishedMatch).map(async (game) => {
+    const key = completedMatchCacheKey(game, request);
+    if (await caches.default.match(key)) return;
+    const snapshot = json(game, { headers: { 'cache-control': 'public, max-age=2592000, immutable' } });
+    await caches.default.put(key, snapshot);
+  }));
+}
+
+async function completedScheduleFallback(request) {
+  const snapshots = await Promise.all(matches.map(async (match) => {
+    const cached = await caches.default.match(completedMatchCacheKey(match, request));
+    return cached ? cached.json() : null;
+  }));
+  const byId = new Map(snapshots.filter(Boolean).map((match) => [String(match.id), match]));
+  return matches.map((match) => byId.has(String(match.id)) ? { ...match, ...byId.get(String(match.id)) } : match);
+}
+
+function freshGamesResponse(data) {
+  return json(data, { headers: { 'cache-control': 'no-store, max-age=0, must-revalidate', 'cdn-cache-control': 'no-store' } });
+}
+
 async function liveGames(request, env, ctx) {
-  const cacheKey = new Request(new URL('/__wc2026/games', request.url));
-  const cached = await caches.default.match(cacheKey);
-  if (cached) return cached;
-  if (!env.FOOTBALL_DATA_TOKEN) return json({ games: matches, source: 'local', error: 'FOOTBALL_DATA_TOKEN is not configured' });
+  if (!env.FOOTBALL_DATA_TOKEN) return freshGamesResponse({ games: await completedScheduleFallback(request), source: 'local', error: 'FOOTBALL_DATA_TOKEN is not configured', cache_ttl_ms: 0 });
   try {
     const source = await fetch(`${FOOTBALL_DATA_BASE}/competitions/${FOOTBALL_DATA_COMPETITION}/matches?season=${FOOTBALL_DATA_SEASON}`, {
-      headers: { accept: 'application/json', 'X-Auth-Token': env.FOOTBALL_DATA_TOKEN }
+      headers: { accept: 'application/json', 'X-Auth-Token': env.FOOTBALL_DATA_TOKEN, 'cache-control': 'no-cache' }
     });
     if (!source.ok) throw new Error(`football-data.org ${source.status}`);
     const data = await source.json();
     if (!Array.isArray(data.matches) || !data.matches.length) throw new Error('Empty fixtures response');
-    const response = json({ games: data.matches.map(mapMatch), source: 'football-data', cache_ttl_ms: 30000 }, { headers: { 'cache-control': 'public, max-age=30' } });
-    ctx.waitUntil(caches.default.put(cacheKey, response.clone()));
-    return response;
+    const mappedGames = data.matches.map(mapMatch);
+    ctx.waitUntil(cacheCompletedMatches(mappedGames, request));
+    return freshGamesResponse({ games: mappedGames, source: 'football-data', cache_ttl_ms: 0 });
   } catch (error) {
-    return json({ games: matches, source: 'local', remote_error: error.message });
+    return freshGamesResponse({ games: await completedScheduleFallback(request), source: 'local', remote_error: error.message, cache_ttl_ms: 0 });
   }
 }
 
 async function scorerFeed(request, ctx) {
-  const cacheKey = new Request(new URL('/__wc2026/scorer-feed', request.url));
-  const cached = await caches.default.match(cacheKey);
-  if (cached) return cached.json();
-
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000);
   try {
@@ -138,10 +162,7 @@ async function scorerFeed(request, ctx) {
       headers: { accept: 'application/json' }
     });
     if (!response.ok) throw new Error(`Scorer source ${response.status}`);
-    const data = await response.json();
-    const cacheResponse = json(data, { headers: { 'cache-control': 'public, max-age=300' } });
-    ctx.waitUntil(caches.default.put(cacheKey, cacheResponse.clone()));
-    return data;
+    return response.json();
   } finally {
     clearTimeout(timeout);
   }
@@ -158,10 +179,11 @@ function espnDate(localDate) {
 
 async function espnScorers(id, request, ctx) {
   const cacheKey = new Request(new URL(`/__wc2026/espn-scorers/${id}`, request.url));
-  const cached = await caches.default.match(cacheKey);
-  if (cached) return cached.json();
-
   const local = matches.find((item) => String(item.id) === String(id));
+  if (isFinishedMatch(local)) {
+    const cached = await caches.default.match(cacheKey);
+    if (cached) return cached.json();
+  }
   const date = espnDate(local?.local_date);
   const homeName = localTeamName(local?.home_team_id);
   const awayName = localTeamName(local?.away_team_id);
@@ -193,8 +215,10 @@ async function espnScorers(id, request, ctx) {
   }
 
   const payload = { id: String(id), home_scorers: homeGoals.join(', ') || 'null', away_scorers: awayGoals.join(', ') || 'null', source: 'espn' };
-  const cacheResponse = json(payload, { headers: { 'cache-control': 'public, max-age=300' } });
-  ctx.waitUntil(caches.default.put(cacheKey, cacheResponse.clone()));
+  if (event.status?.type?.completed) {
+    const cacheResponse = json(payload, { headers: { 'cache-control': 'public, max-age=2592000, immutable' } });
+    ctx.waitUntil(caches.default.put(cacheKey, cacheResponse.clone()));
+  }
   return payload;
 }
 
@@ -229,6 +253,9 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });
+    if (url.protocol === 'http:' && url.hostname === 'attak.online') {
+      return Response.redirect(`https://attak.online${url.pathname}${url.search}`, 308);
+    }
     if (url.pathname === '/sw.js') {
       return new Response(SERVICE_WORKER, { headers: { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'no-cache' } });
     }
