@@ -4637,6 +4637,7 @@
         let expandedMobileMatchId = null;
         let liveRefreshInFlight = false;
         let nextKickoffTimer = null;
+        const LIVE_REFRESH_INTERVAL_MS = 30 * 1000;
 
         const API_BASE = window.location.origin;
 
@@ -4807,8 +4808,8 @@
         function isActualLiveMatch(game) {
             const status = String(game.status || '').trim().toUpperCase();
             const elapsed = String(game.time_elapsed || '').trim().toLowerCase();
-            return ['IN_PLAY', 'PAUSED', 'LIVE', '1H', '2H', 'HT'].includes(status) ||
-                ['live', 'in_play', 'paused', '1h', '2h', 'ht', 'halftime', 'half-time'].includes(elapsed);
+            return ['IN_PLAY', 'PAUSED', 'LIVE', '1H', '2H', 'HT', 'ET'].includes(status) ||
+                ['live', 'in_play', 'paused', '1h', '2h', 'ht', 'et', 'halftime', 'half-time'].includes(elapsed);
         }
 
         function scheduleNextLiveCheck() {
@@ -4847,7 +4848,7 @@
         }
 
         function startLiveRefresh() {
-            setInterval(refreshLiveScores, 60 * 1000);
+            setInterval(refreshLiveScores, LIVE_REFRESH_INTERVAL_MS);
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) refreshLiveScores(true);
             });
@@ -5026,7 +5027,7 @@
 
         function canShowScorers(game) {
             const status = String(game.status || game.time_elapsed || '').trim().toLowerCase();
-            return isCompletedGame(game) || ['in_play', 'live', 'paused', 'halftime', 'half-time'].includes(status);
+            return isCompletedGame(game) || ['in_play', 'live', 'paused', 'et', 'halftime', 'half-time'].includes(status);
         }
 
         function renderScorerDialog() {
@@ -5113,12 +5114,19 @@
         }
 
         function matchStatusClass(game) {
+            if (isCompletedGame(game)) return '';
+
+            const status = String(game.status || '').trim().toUpperCase();
+            const elapsed = String(game.time_elapsed || '').trim().toLowerCase();
+            if (['IN_PLAY', 'PAUSED', 'LIVE', '1H', '2H', 'ET', 'HT'].includes(status) ||
+                ['live', 'in_play', 'paused', '1h', '2h', 'et', 'ht', 'halftime', 'half-time'].includes(elapsed)) {
+                return ' is-live';
+            }
+
             const start = parseSourceDate(game);
             if (!start) return '';
             const now = new Date();
-            const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
             const soon = new Date(start.getTime() - 17 * 60 * 60 * 1000);
-            if (now >= start && now <= end) return ' is-live';
             if (now >= soon && now < start) return ' is-upcoming';
             return '';
         }
@@ -5130,16 +5138,30 @@
         }
 
         function isRecentResult(game) {
+            if (!isCompletedGame(game)) return false;
             const start = parseSourceDate(game);
             if (!start) return false;
             const now = new Date();
-            const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
             const resultWindowStart = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-            return now >= end && end >= resultWindowStart;
+            return start.getTime() >= resultWindowStart && start.getTime() <= now;
         }
 
         function matchStatusLabel(game) {
             const status = matchStatusClass(game);
+            const apiStatus = String(game.status || '').trim().toUpperCase();
+            const elapsed = String(game.time_elapsed || '').trim().toLowerCase();
+            if (isCompletedGame(game)) {
+                const duration = String(game.score_duration || '').toUpperCase();
+                if (duration.includes('PENALTY')) return '<span class="match-status-pill">PEN</span>';
+                if (duration.includes('EXTRA')) return '<span class="match-status-pill">AET</span>';
+                if (apiStatus === 'PEN') return '<span class="match-status-pill">PEN</span>';
+                if (apiStatus === 'AET') return '<span class="match-status-pill">AET</span>';
+                return '<span class="match-status-pill">FT</span>';
+            }
+            if (apiStatus === 'PAUSED' || apiStatus === 'HT' || ['ht', 'halftime', 'half-time'].includes(elapsed)) {
+                return '<span class="match-status-pill">HT</span>';
+            }
+            if (apiStatus === 'ET' || elapsed === 'et') return '<span class="match-status-pill live">ET</span>';
             if (status.includes('is-live')) return `<span class="match-status-pill live">LIVE${liveMinute(game) ? ` ${liveMinute(game)}` : ''}</span>`;
             if (status.includes('is-upcoming')) return '<span class="match-status-pill upcoming">SẮP ĐÁ</span>';
             return '';

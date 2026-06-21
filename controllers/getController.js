@@ -12,7 +12,7 @@ const FOOTBALL_DATA_BASE = process.env.FOOTBALL_DATA_BASE || 'https://api.footba
 const FOOTBALL_DATA_TOKEN = process.env.FOOTBALL_DATA_TOKEN || process.env.FOOTBALL_DATA_KEY || '';
 const FOOTBALL_DATA_COMPETITION = process.env.FOOTBALL_DATA_COMPETITION || 'WC';
 const FOOTBALL_DATA_SEASON = process.env.FOOTBALL_DATA_SEASON || APIFOOTBALL_SEASON;
-const FOOTBALL_DATA_LIVE_TTL_MS = Number(process.env.FOOTBALL_DATA_LIVE_TTL_MS || 60 * 1000);
+const FOOTBALL_DATA_LIVE_TTL_MS = Number(process.env.FOOTBALL_DATA_LIVE_TTL_MS || 30 * 1000);
 const FOOTBALL_DATA_MATCHDAY_TTL_MS = Number(process.env.FOOTBALL_DATA_MATCHDAY_TTL_MS || 5 * 60 * 1000);
 const FOOTBALL_DATA_IDLE_TTL_MS = Number(process.env.FOOTBALL_DATA_IDLE_TTL_MS || 6 * 60 * 60 * 1000);
 const FOOTBALL_DATA_ACTIVE_BEFORE_MS = Number(process.env.FOOTBALL_DATA_ACTIVE_BEFORE_MS || 2 * 60 * 60 * 1000);
@@ -338,6 +338,7 @@ function mapFootballDataMatch(match, context) {
     const localGame = findLocalGame(context.localGames, localHome, localAway, match.utcDate);
     const status = footballDataStatus(match.status);
     const fullTime = match.score && match.score.fullTime || {};
+    const penalties = match.score && match.score.penalties || {};
     const homeScore = fullTime.home != null ? fullTime.home : 0;
     const awayScore = fullTime.away != null ? fullTime.away : 0;
 
@@ -352,6 +353,9 @@ function mapFootballDataMatch(match, context) {
         away_team_name_en: match.awayTeam && (match.awayTeam.shortName || match.awayTeam.name),
         home_score: String(homeScore),
         away_score: String(awayScore),
+        score_duration: match.score && match.score.duration || '',
+        home_penalties: penalties.home != null ? String(penalties.home) : '',
+        away_penalties: penalties.away != null ? String(penalties.away) : '',
         home_scorers: localGame && localGame.home_scorers || 'null',
         away_scorers: localGame && localGame.away_scorers || 'null',
         group: footballDataGroup(match, localGame && localGame.group),
