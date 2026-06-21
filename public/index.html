@@ -5137,6 +5137,21 @@
             return minute ? `${minute[0]}'` : '';
         }
 
+        function matchPhaseLabel(game) {
+            const status = String(game.status || '').trim().toUpperCase();
+            const elapsed = Number(String(game.minute || game.elapsed || game.time_elapsed || '').trim());
+            const hasElapsed = Number.isFinite(elapsed);
+
+            if (status === '1H') return 'HIỆP 1';
+            if (status === 'HT' || status === 'PAUSED') return 'GIỮA GIỜ';
+            if (status === '2H') return 'HIỆP 2';
+            if (status === 'ET') return hasElapsed && elapsed > 105 ? 'HIỆP PHỤ 2' : 'HIỆP PHỤ 1';
+            if (status === 'BT') return 'GIỮA HIỆP PHỤ';
+            if (['P', 'PENALTY'].includes(status)) return 'LUÂN LƯU';
+            if (status === 'IN_PLAY' || String(game.time_elapsed || '').toLowerCase() === 'live') return 'ĐANG DIỄN RA';
+            return 'LIVE';
+        }
+
         function isRecentResult(game) {
             if (!isCompletedGame(game)) return false;
             const start = parseSourceDate(game);
@@ -5158,11 +5173,9 @@
                 if (apiStatus === 'AET') return '<span class="match-status-pill">AET</span>';
                 return '<span class="match-status-pill">FT</span>';
             }
-            if (apiStatus === 'PAUSED' || apiStatus === 'HT' || ['ht', 'halftime', 'half-time'].includes(elapsed)) {
-                return '<span class="match-status-pill">HT</span>';
+            if (status.includes('is-live')) {
+                return `<span class="match-status-pill live">${matchPhaseLabel(game)}${liveMinute(game) ? ` ${liveMinute(game)}` : ''}</span>`;
             }
-            if (apiStatus === 'ET' || elapsed === 'et') return '<span class="match-status-pill live">ET</span>';
-            if (status.includes('is-live')) return `<span class="match-status-pill live">LIVE${liveMinute(game) ? ` ${liveMinute(game)}` : ''}</span>`;
             if (status.includes('is-upcoming')) return '<span class="match-status-pill upcoming">SẮP ĐÁ</span>';
             return '';
         }
