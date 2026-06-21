@@ -33,7 +33,7 @@ const LEGACY_RENDER_REDIRECT = process.env.LEGACY_RENDER_REDIRECT || 'https://wc
 app.set('trust proxy', 1);
 
 // Keep existing Render links usable while the public domain is being activated.
-if (config.isProd && LEGACY_RENDER_REDIRECT) {
+if ((config.isProd || process.env.RENDER || process.env.RENDER_EXTERNAL_URL) && LEGACY_RENDER_REDIRECT) {
     app.use((req, res, next) => {
         const target = new URL(req.originalUrl || '/', LEGACY_RENDER_REDIRECT).toString();
         return res.redirect(302, target);
