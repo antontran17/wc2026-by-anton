@@ -4386,8 +4386,32 @@
             text-transform: uppercase !important;
         }
 
-        .scorer-dialog-score span:first-child { text-align: left !important; }
-        .scorer-dialog-score span:last-child { text-align: right !important; }
+        .scorer-dialog-side {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 7px !important;
+            min-width: 0 !important;
+        }
+
+        .scorer-dialog-side.home { align-items: flex-start !important; text-align: left !important; }
+        .scorer-dialog-side.away { align-items: flex-end !important; text-align: right !important; }
+
+        .scorer-dialog-side img,
+        .scorer-dialog-flag-placeholder {
+            width: 48px !important;
+            height: 32px !important;
+            border-radius: 5px !important;
+            object-fit: cover !important;
+            background: rgba(255,255,255,.10) !important;
+        }
+
+        .scorer-dialog-flag-placeholder {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 9px !important;
+        }
+
         .scorer-dialog-score strong { color: #ffffff !important; font-size: 25px !important; }
 
         .scorer-dialog-goals {
@@ -4426,6 +4450,7 @@
             .scorer-dialog-panel { padding: 30px 20px 22px !important; }
             .scorer-dialog-score { gap: 8px !important; font-size: 12px !important; }
             .scorer-dialog-score strong { font-size: 22px !important; }
+            .scorer-dialog-side img, .scorer-dialog-flag-placeholder { width: 42px !important; height: 28px !important; }
             .scorer-dialog-goals { gap: 14px !important; }
             .scorer-dialog-team { font-size: 13px !important; }
             #matches-grid .results-group .match-priority-title {
@@ -4610,6 +4635,7 @@
         let currentMatchFilter = 'all';
         let currentTeamFilter = 'all';
         let expandedMobileMatchId = null;
+        let liveRefreshInFlight = false;
 
         const API_BASE = window.location.origin;
 
@@ -4620,6 +4646,7 @@
             setLanguage(savedLang);
             
             loadAllData();
+            startLiveRefresh();
         });
 
         // Set Language
@@ -4773,6 +4800,31 @@
             } catch (err) {
                 console.error('Error loading data:', err);
             }
+        }
+
+        async function refreshLiveScores() {
+            if (document.hidden || liveRefreshInFlight) return;
+            liveRefreshInFlight = true;
+            try {
+                const response = await fetch(`${API_BASE}/get/games?fresh=${Date.now()}`, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Live score refresh failed');
+                const games = await response.json();
+                gamesData = games.games || (Array.isArray(games) ? games : []);
+                renderMatches(gamesData);
+                renderGroups(groupsData);
+                if (activeScorerMatchId) renderScorerDialog();
+            } catch (err) {
+                console.warn('Live score refresh skipped:', err.message);
+            } finally {
+                liveRefreshInFlight = false;
+            }
+        }
+
+        function startLiveRefresh() {
+            setInterval(refreshLiveScores, 60 * 1000);
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) refreshLiveScores();
+            });
         }
 
 
@@ -4965,6 +5017,8 @@
             const awayTeam = teamsData.find(team => String(team.id) === String(game.away_team_id)) || {};
             const homeName = homeTeam.id ? teamCode(homeTeam, game.home_team_name_en) : pendingTeamLabel(game.home_team_name_en);
             const awayName = awayTeam.id ? teamCode(awayTeam, game.away_team_name_en) : pendingTeamLabel(game.away_team_name_en);
+            const homeFlag = String(homeTeam.flag || '').trim();
+            const awayFlag = String(awayTeam.flag || '').trim();
             const detail = scorerDetails.get(String(game.id));
             const scorerData = detail && !detail.loading && !detail.error ? detail : game;
             const homeGoals = scorerEntries(scorerData.home_scorers);
@@ -4974,9 +5028,15 @@
                 <div class="scorer-dialog-panel" role="dialog" aria-modal="true" aria-label="Chi tiết trận đấu">
                     <button class="scorer-dialog-close" onclick="closeScorerDialog()" aria-label="Đóng">×</button>
                     <div class="scorer-dialog-score">
-                        <span>${escapeHtml(homeName)}</span>
+                        <div class="scorer-dialog-side home">
+                            ${homeFlag ? `<img src="${escapeHtml(homeFlag)}" alt="${escapeHtml(homeName)}">` : '<span class="scorer-dialog-flag-placeholder">TBD</span>'}
+                            <span>${escapeHtml(homeName)}</span>
+                        </div>
                         <strong>${Number(game.home_score || 0)} - ${Number(game.away_score || 0)}</strong>
-                        <span>${escapeHtml(awayName)}</span>
+                        <div class="scorer-dialog-side away">
+                            ${awayFlag ? `<img src="${escapeHtml(awayFlag)}" alt="${escapeHtml(awayName)}">` : '<span class="scorer-dialog-flag-placeholder">TBD</span>'}
+                            <span>${escapeHtml(awayName)}</span>
+                        </div>
                     </div>
                     ${detail && detail.loading ? '<div class="scorer-dialog-state">ĐANG TẢI DIỄN BIẾN...</div>' : ''}
                     ${detail && detail.error ? '<div class="scorer-dialog-state">CHƯA LẤY ĐƯỢC CHI TIẾT TRẬN ĐẤU</div>' : ''}
@@ -5037,6 +5097,16 @@
             return '';
         }
 
+        function liveMinute(game) {
+            if (!matchStatusClass(game).includes('is-live')) return '';
+            const start = parseSourceDate(game);
+            if (!start) return '';
+            const elapsed = Math.max(0, Math.floor((Date.now() - start.getTime()) / 60000));
+            if (elapsed <= 45) return `${elapsed}'`;
+            if (elapsed <= 60) return 'HT';
+            return `${Math.min(90, elapsed - 15)}'`;
+        }
+
         function isRecentResult(game) {
             const start = parseSourceDate(game);
             if (!start) return false;
@@ -5048,7 +5118,7 @@
 
         function matchStatusLabel(game) {
             const status = matchStatusClass(game);
-            if (status.includes('is-live')) return '<span class="match-status-pill live">LIVE</span>';
+            if (status.includes('is-live')) return `<span class="match-status-pill live">LIVE ${liveMinute(game)}</span>`;
             if (status.includes('is-upcoming')) return '<span class="match-status-pill upcoming">SẮP ĐÁ</span>';
             return '';
         }
