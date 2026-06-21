@@ -4589,6 +4589,109 @@
             }
         }
     </style>
+    <style id="anton-mobile-menu-and-match-scale">
+        .fav-btn,
+        .match-fav {
+            width: 42px !important;
+            height: 42px !important;
+            font-size: 23px !important;
+            line-height: 1 !important;
+        }
+
+        .fav-btn.active,
+        .match-fav.active {
+            color: #ffd85a !important;
+            background: linear-gradient(135deg, rgba(255,197,69,.40), rgba(255,93,56,.25)) !important;
+            border-color: rgba(255,216,90,.78) !important;
+        }
+
+        .score-center,
+        .match-card .score-center,
+        .match-vs .score-center {
+            font-size: 34px !important;
+            font-variation-settings: "wght" 700 !important;
+        }
+
+        @media(min-width:641px) {
+            nav a,
+            .header-refresh-btn {
+                font-size: 15px !important;
+            }
+
+            nav {
+                gap: 24px !important;
+            }
+        }
+
+        @media(max-width:640px) {
+            header {
+                min-height: 42px !important;
+            }
+
+            .header-content {
+                min-height: 42px !important;
+                height: 42px !important;
+                padding: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            nav {
+                height: 42px !important;
+                width: 100% !important;
+                margin: 0 !important;
+                gap: 0 !important;
+                display: grid !important;
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                align-items: center !important;
+                justify-items: center !important;
+            }
+
+            nav a,
+            .header-refresh-btn {
+                width: 100% !important;
+                min-width: 0 !important;
+                padding: 0 3px !important;
+                font-size: 12px !important;
+                line-height: 42px !important;
+                text-align: center !important;
+                white-space: nowrap !important;
+            }
+
+            .clean-hero {
+                padding-top: 42px !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .matchday-label {
+                display: none !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-header {
+                grid-template-columns: minmax(0, 1fr) auto 0 !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .score-center,
+            #matches .match-card-compact:not(.mobile-expanded) .match-vs .score-center {
+                font-size: 34px !important;
+                width: 70px !important;
+                min-width: 70px !important;
+                height: 36px !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-teams {
+                grid-template-columns: minmax(0, 1fr) 70px minmax(0, 1fr) !important;
+            }
+
+            #matches .match-card-compact:not(.mobile-expanded) .match-fav {
+                top: 9px !important;
+                right: 10px !important;
+                width: 38px !important;
+                height: 38px !important;
+                font-size: 21px !important;
+            }
+        }
+    </style>
 
 </head>
 <body>
@@ -5374,7 +5477,7 @@
 
             return `
                 <div class="match-card${matchStatusClass(game)} ${compact ? 'match-card-compact' : ''} ${hasFavoriteTeam ? 'has-favorite-team' : ''} ${isMobileExpanded ? 'mobile-expanded' : ''}" data-match-id="${escapeHtml(game.id)}" onclick="handleMatchCardClick('${game.id}')">
-                    <button class="fav-btn match-fav ${favoriteMatches.has(String(game.id)) ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavoriteMatch('${game.id}')" aria-label="Yêu thích trận">★</button>
+                    <button class="fav-btn match-fav ${favoriteMatches.has(String(game.id)) ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavoriteMatch('${game.id}')" aria-label="Yêu thích trận">♥</button>
                     <div class="match-time-top">${dateStr}</div>
                     <div class="match-header">
                         <span class="match-group">${translations[currentLang].group} ${game.group || '-'}</span>
@@ -5697,7 +5800,7 @@
 
             grid.innerHTML = sortedTeams.map(team => `
                 <div class="team-card ${favoriteTeams.has(String(team.id)) ? 'favorite-team-card' : ''}" id="team-card-${team.id}" data-team-id="${team.id}">
-                    <button class="fav-btn team-fav ${favoriteTeams.has(String(team.id)) ? 'active' : ''}" onclick="toggleFavoriteTeam('${team.id}')" aria-label="Yêu thích đội">★</button>
+                    <button class="fav-btn team-fav ${favoriteTeams.has(String(team.id)) ? 'active' : ''}" onclick="toggleFavoriteTeam('${team.id}')" aria-label="Yêu thích đội">♥</button>
                     <img class="team-flag ${favoriteTeams.has(String(team.id)) ? 'favorite-flag' : ''}" src="${team.flag || ''}" alt="${team.name_en}" onerror="this.src='https://via.placeholder.com/80x55?text=Flag'">
                     <span class="team-name">${team.name_en}</span>
                     <span class="team-group">${translations[currentLang].group} ${team.groups || '-'}</span>
