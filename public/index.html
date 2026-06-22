@@ -5372,6 +5372,12 @@
             return Boolean(teamsData.find(t => t.id === game.home_team_id) || teamsData.find(t => t.id === game.away_team_id));
         }
 
+        function hasRenderableParticipants(game) {
+            const home = String(game.home_team_id || game.home_team_name_en || game.home_team_label || '').trim();
+            const away = String(game.away_team_id || game.away_team_name_en || game.away_team_label || '').trim();
+            return Boolean(home && away);
+        }
+
         function filteredMatchesForCurrentTab() {
             return currentMatchFilter === 'all' ? gamesData : gamesData.filter(g => g.group === currentMatchFilter);
         }
@@ -5575,6 +5581,7 @@
         }
 
         function renderSingleMatchCard(game, compact = false) {
+            if (!hasRenderableParticipants(game)) return '';
             const homeTeam = teamsData.find(t => t.id === game.home_team_id) || {};
             const awayTeam = teamsData.find(t => t.id === game.away_team_id) || {};
             const stadium = stadiumsData.find(s => s.id === game.stadium_id) || {};
@@ -5833,13 +5840,14 @@
                 return;
             }
 
-            const live = sortByStartTime(games.filter(g => matchStatusClass(g).includes('is-live'))).slice(0, 4);
-            const upcoming = sortByStartTime(games.filter(g => matchStatusClass(g).includes('is-upcoming') && !live.some(x => String(x.id) === String(g.id)))).slice(0, 4);
-            const results = sortByStartTime(games.filter(g => {
+            const displayGames = games.filter(hasRenderableParticipants);
+            const live = sortByStartTime(displayGames.filter(g => matchStatusClass(g).includes('is-live'))).slice(0, 4);
+            const upcoming = sortByStartTime(displayGames.filter(g => matchStatusClass(g).includes('is-upcoming') && !live.some(x => String(x.id) === String(g.id)))).slice(0, 4);
+            const results = sortByStartTime(displayGames.filter(g => {
                 const id = String(g.id);
                 return isRecentResult(g) && !live.some(x => String(x.id) === id) && !upcoming.some(x => String(x.id) === id);
             })).slice(-6).reverse();
-            const favorites = sortByStartTime(games.filter(g => {
+            const favorites = sortByStartTime(displayGames.filter(g => {
                 const matchFav = favoriteMatches.has(String(g.id));
                 const teamFav = favoriteTeams.has(String(g.home_team_id)) || favoriteTeams.has(String(g.away_team_id));
                 return (matchFav || teamFav) && !live.some(x => String(x.id) === String(g.id)) && !upcoming.some(x => String(x.id) === String(g.id)) && !results.some(x => String(x.id) === String(g.id));
