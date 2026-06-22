@@ -150,6 +150,62 @@ async function fetchLatestGames(env) {
   }
 }
 
+function espnScoreboardDate(date) {
+  return `${date.getUTCFullYear()}${String(date.getUTCMonth() + 1).padStart(2, '0')}${String(date.getUTCDate()).padStart(2, '0')}`;
+}
+
+function espnMatchStatus(event) {
+  const type = event?.status?.type || {};
+  const name = String(type.name || '').toUpperCase();
+  const completed = Boolean(type.completed) || /FINAL|POST/.test(name);
+  const live = String(type.state || '').toLowerCase() === 'in' || /HALF|OVERTIME|PENALT/.test(name);
+  return { completed, live, status: completed ? 'FINISHED' : (live ? 'IN_PLAY' : 'TIMED') };
+}
+
+async function fetchEspnFallbackGames() {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LIVE_SOURCE_TIMEOUT_MS);
+  try {
+    const today = new Date();
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+    const responses = await Promise.all([today, yesterday].map((date) => fetch(`${ESPN_SCOREBOARD_BASE}/scoreboard?dates=${espnScoreboardDate(date)}`, {
+      signal: controller.signal,
+      headers: { accept: 'application/json', 'cache-control': 'no-cache' }
+    })));
+    const payloads = await Promise.all(responses.filter((response) => response.ok).map((response) => response.json()));
+    const events = payloads.flatMap((payload) => payload.events || []);
+    const games = events.map((event) => {
+      const competitors = event.competitions?.[0]?.competitors || [];
+      const home = competitors.find((team) => team.homeAway === 'home');
+      const away = competitors.find((team) => team.homeAway === 'away');
+      const homeTeam = localTeam({ name: home?.team?.displayName, shortName: home?.team?.shortDisplayName, tla: home?.team?.abbreviation });
+      const awayTeam = localTeam({ name: away?.team?.displayName, shortName: away?.team?.shortDisplayName, tla: away?.team?.abbreviation });
+      const local = localMatch(homeTeam, awayTeam, event.date);
+      const matchStatus = espnMatchStatus(event);
+      if (!local || (!matchStatus.live && !matchStatus.completed)) return null;
+      return {
+        ...local,
+        home_score: String(home?.score ?? 0),
+        away_score: String(away?.score ?? 0),
+        api_utc_date: event.date || local.api_utc_date,
+        finished: matchStatus.completed ? 'TRUE' : 'FALSE',
+        time_elapsed: matchStatus.completed ? 'finished' : 'live',
+        status: matchStatus.status,
+        score_duration: event.status?.type?.detail || '',
+        source: 'espn'
+      };
+    }).filter(Boolean);
+    return [...new Map(games.map((game) => [String(game.id), game])).values()];
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function mergeGameOverrides(schedule, overrides) {
+  const byId = new Map(overrides.map((game) => [String(game.id), game]));
+  return schedule.map((game) => byId.has(String(game.id)) ? { ...game, ...byId.get(String(game.id)) } : game);
+}
+
 async function liveGames(request, env, ctx) {
   if (!env.FOOTBALL_DATA_TOKEN) return freshGamesResponse({ games: await completedScheduleFallback(request), source: 'local', error: 'FOOTBALL_DATA_TOKEN is not configured', cache_ttl_ms: 0 });
   try {
@@ -160,7 +216,16 @@ async function liveGames(request, env, ctx) {
     ctx.waitUntil(cacheCompletedMatches(mappedGames, request));
     return freshGamesResponse({ games: mappedGames, source: 'football-data', cache_ttl_ms: 0 });
   } catch (error) {
-    return freshGamesResponse({ games: await completedScheduleFallback(request), source: 'local', remote_error: error.message, cache_ttl_ms: 0 });
+    const localSchedule = await completedScheduleFallback(request);
+    try {
+      const espnGames = await fetchEspnFallbackGames();
+      if (espnGames.length) {
+        return freshGamesResponse({ games: mergeGameOverrides(localSchedule, espnGames), source: 'espn-fallback', remote_error: error.message, cache_ttl_ms: 0 });
+      }
+    } catch (_) {
+      // Fall through to the saved final scores and bundled schedule.
+    }
+    return freshGamesResponse({ games: localSchedule, source: 'local', remote_error: error.message, cache_ttl_ms: 0 });
   }
 }
 
