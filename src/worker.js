@@ -434,7 +434,8 @@ async function tournamentStatistics() {
     const assistLeaders = leaders('assistsLeaders');
     const goalValues = new Map(goalLeaders.map((leader) => [String(leader.athlete?.id || ''), Number(leader.value) || 0]));
     const assistValues = new Map(assistLeaders.map((leader) => [String(leader.athlete?.id || ''), Number(leader.value) || 0]));
-    const rows = (source, secondaryValues) => source.map((leader) => {
+    const rows = (source, secondaryValues) => {
+      const ordered = source.map((leader) => {
       const athlete = leader.athlete || {};
       const espnTeam = athlete.team || {};
       const local = localTeam({ name: espnTeam.displayName, shortName: espnTeam.name, tla: espnTeam.abbreviation });
@@ -448,10 +449,15 @@ async function tournamentStatistics() {
         value: Number(leader.value) || 0,
         secondary: secondaryValues.get(id) || 0
       };
-    }).sort((a, b) => b.value - a.value || b.secondary - a.secondary || a.name.localeCompare(b.name)).map((player, index, list) => ({
-      ...player,
-      rank: index && player.value === list[index - 1].value && player.secondary === list[index - 1].secondary ? list[index - 1].rank : index + 1
-    })).slice(0, 7);
+      }).sort((a, b) => b.value - a.value || b.secondary - a.secondary || a.name.localeCompare(b.name));
+      let previous = null;
+      let rank = 0;
+      return ordered.map((player, index) => {
+        if (!previous || player.value !== previous.value || player.secondary !== previous.secondary) rank = index + 1;
+        previous = player;
+        return { ...player, rank };
+      }).slice(0, 7);
+    };
     return { goals: rows(goalLeaders, assistValues), assists: rows(assistLeaders, goalValues), source: 'espn', updated_at: data.timestamp || new Date().toISOString() };
   } finally {
     clearTimeout(timeout);
