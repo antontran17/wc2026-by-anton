@@ -295,15 +295,36 @@ async function espnScorers(id) {
 }
 
 function finalScorerCacheKey(id, request) {
-  return new Request(new URL(`/__wc2026/final-scorers/${encodeURIComponent(id)}`, request.url));
+  // Versioning discards event payloads cached before score completeness was checked.
+  return new Request(new URL(`/__wc2026/final-scorers-v2/${encodeURIComponent(id)}`, request.url));
+}
+
+function scorerCount(value) {
+  const raw = String(value || '').trim();
+  if (!raw || raw.toLowerCase() === 'null') return 0;
+  return raw.split(/\s*[,;]\s*/).map((item) => item.trim()).filter(Boolean).length;
+}
+
+function scorerPayloadMatchesScore(payload, expectedHome, expectedAway) {
+  if (!Number.isFinite(expectedHome) || !Number.isFinite(expectedAway)) return true;
+  return scorerCount(payload?.home_scorers) >= expectedHome
+    && scorerCount(payload?.away_scorers) >= expectedAway;
 }
 
 async function scorers(id, request, ctx) {
-  const isFinal = new URL(request.url).searchParams.get('final') === '1';
+  const url = new URL(request.url);
+  const isFinal = url.searchParams.get('final') === '1';
+  const expectedHome = url.searchParams.has('home') ? Number(url.searchParams.get('home')) : null;
+  const expectedAway = url.searchParams.has('away') ? Number(url.searchParams.get('away')) : null;
   const cacheKey = finalScorerCacheKey(id, request);
   if (isFinal) {
     const cached = await caches.default.match(cacheKey);
-    if (cached) return json(await cached.json());
+    if (cached) {
+      const cachedPayload = await cached.json();
+      if (scorerPayloadMatchesScore(cachedPayload, expectedHome, expectedAway)) return json(cachedPayload);
+      // Never retain a partial scorer list as the final record for a match.
+      await caches.default.delete(cacheKey);
+    }
   }
 
   let payload;
@@ -328,7 +349,7 @@ async function scorers(id, request, ctx) {
     payload = { id: String(id), home_scorers: local?.home_scorers || 'null', away_scorers: local?.away_scorers || 'null', source: 'local-fallback' };
   }
 
-  if (isFinal) {
+  if (isFinal && scorerPayloadMatchesScore(payload, expectedHome, expectedAway)) {
     const cacheResponse = json(payload, { headers: { 'cache-control': 'public, max-age=2592000, immutable' } });
     ctx.waitUntil(caches.default.put(cacheKey, cacheResponse.clone()));
   }
