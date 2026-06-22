@@ -4465,7 +4465,10 @@
         .scorer-dialog-panel {
             width: min(620px, 100%) !important;
             max-height: min(86vh, 760px) !important;
-            overflow: auto !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
             padding: 0 !important;
             border: 0 !important;
             border-radius: 10px !important;
@@ -5424,7 +5427,7 @@
                     ${renderSingleMatchCard(game, false)}
                     ${detail && detail.loading ? '<div class="scorer-dialog-state">ĐANG TẢI DIỄN BIẾN...</div>' : ''}
                     ${detail && detail.error ? '<div class="scorer-dialog-state">CHƯA LẤY ĐƯỢC CHI TIẾT TRẬN ĐẤU</div>' : ''}
-                    ${!detail?.loading && !detail?.error ? `
+                    ${!detail?.loading && !detail?.error && (homeGoals.length || awayGoals.length) ? `
                         <div class="scorer-dialog-goals">
                             <div class="scorer-dialog-team home">
                                 ${homeGoals.length ? homeGoals.map(goal => `<span>${escapeHtml(goal)}</span>`).join('') : '<span class="scorer-empty">-</span>'}
