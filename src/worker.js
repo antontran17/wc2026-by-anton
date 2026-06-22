@@ -319,15 +319,34 @@ async function espnScorers(id) {
     const summaryData = await summary.json();
     const homeGoals = [];
     const awayGoals = [];
+    const homeGoalDetails = [];
+    const awayGoalDetails = [];
     for (const play of summaryData.keyEvents || []) {
       if (!play.scoringPlay) continue;
       const player = play.participants?.[0]?.athlete?.displayName || play.shortText || 'Goal';
       const minute = play.clock?.displayValue || '';
+      const textAssist = String(play.text || '').match(/assisted by\s+([^\.]+)/i)?.[1]?.trim();
+      const participantAssist = play.participants?.[1]?.athlete?.displayName || '';
+      const assist = textAssist || participantAssist;
       const item = `${player}${minute ? ` ${minute}` : ''}`;
-      if (espnTeamAlias(play.team?.displayName) === espnTeamAlias(homeName)) homeGoals.push(item);
-      if (espnTeamAlias(play.team?.displayName) === espnTeamAlias(awayName)) awayGoals.push(item);
+      const detail = { scorer: player, minute, assist };
+      if (espnTeamAlias(play.team?.displayName) === espnTeamAlias(homeName)) {
+        homeGoals.push(item);
+        homeGoalDetails.push(detail);
+      }
+      if (espnTeamAlias(play.team?.displayName) === espnTeamAlias(awayName)) {
+        awayGoals.push(item);
+        awayGoalDetails.push(detail);
+      }
     }
-    return { id: String(id), home_scorers: homeGoals.join(', ') || 'null', away_scorers: awayGoals.join(', ') || 'null', source: 'espn' };
+    return {
+      id: String(id),
+      home_scorers: homeGoals.join(', ') || 'null',
+      away_scorers: awayGoals.join(', ') || 'null',
+      home_goal_details: homeGoalDetails,
+      away_goal_details: awayGoalDetails,
+      source: 'espn'
+    };
   } finally {
     clearTimeout(timeout);
   }
@@ -335,7 +354,7 @@ async function espnScorers(id) {
 
 function finalScorerCacheKey(id, request) {
   // Versioning discards event payloads cached before score completeness was checked.
-  return new Request(new URL(`/__wc2026/final-scorers-v2/${encodeURIComponent(id)}`, request.url));
+  return new Request(new URL(`/__wc2026/final-scorers-v3/${encodeURIComponent(id)}`, request.url));
 }
 
 function scorerCount(value) {
