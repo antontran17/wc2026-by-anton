@@ -8,6 +8,7 @@ const FOOTBALL_DATA_COMPETITION = 'WC';
 const FOOTBALL_DATA_SEASON = '2026';
 const REMOTE_BASE = 'https://worldcup26.ir';
 const ESPN_SCOREBOARD_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
+const ESPN_STATISTICS_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/statistics?season=2026';
 const LIVE_SOURCE_TIMEOUT_MS = 6500;
 const SCORER_SOURCE_TIMEOUT_MS = 5000;
 const CACHE_ORIGIN = 'https://attak.online';
@@ -418,52 +419,33 @@ async function scorers(id, request, ctx) {
   return json(payload);
 }
 
-function statisticsEntryKey(playerId, playerName, teamId) {
-  return `${playerId || playerName}::${teamId || ''}`;
-}
-
-function addStatistic(map, player, teamId) {
-  if (!player?.name) return;
-  const key = statisticsEntryKey(player.id, player.name, teamId);
-  const team = teams.find((item) => String(item.id) === String(teamId));
-  const current = map.get(key) || {
-    id: String(player.id || ''),
-    name: player.name,
-    team_id: String(teamId || ''),
-    team: team?.fifa_code || team?.name_en || '',
-    flag: team?.flag || '',
-    value: 0
-  };
-  current.value += 1;
-  map.set(key, current);
-}
-
-function orderedStatistics(map) {
-  return [...map.values()]
-    .sort((a, b) => b.value - a.value || a.name.localeCompare(b.name))
-    .slice(0, 12);
-}
-
-async function tournamentStatistics(request) {
-  const completed = (await completedScheduleFallback(request)).filter(isFinishedMatch);
-  const goals = new Map();
-  const assists = new Map();
-  for (const game of completed) {
-    const cached = await caches.default.match(finalScorerCacheKey(game.id, request));
-    if (!cached) continue;
-    const details = await cached.json();
-    const homeGoals = Array.isArray(details.home_goal_details) ? details.home_goal_details : [];
-    const awayGoals = Array.isArray(details.away_goal_details) ? details.away_goal_details : [];
-    for (const goal of homeGoals) {
-      addStatistic(goals, { id: goal.scorer_id, name: goal.scorer }, game.home_team_id);
-      addStatistic(assists, { id: goal.assist_id, name: goal.assist }, game.home_team_id);
-    }
-    for (const goal of awayGoals) {
-      addStatistic(goals, { id: goal.scorer_id, name: goal.scorer }, game.away_team_id);
-      addStatistic(assists, { id: goal.assist_id, name: goal.assist }, game.away_team_id);
-    }
+async function tournamentStatistics() {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LIVE_SOURCE_TIMEOUT_MS);
+  try {
+    const response = await fetch(ESPN_STATISTICS_ENDPOINT, {
+      signal: controller.signal,
+      headers: { accept: 'application/json', 'cache-control': 'no-cache' }
+    });
+    if (!response.ok) throw new Error(`ESPN statistics ${response.status}`);
+    const data = await response.json();
+    const rows = (name) => (data.stats || []).find((stat) => stat.name === name)?.leaders?.slice(0, 7).map((leader) => {
+      const athlete = leader.athlete || {};
+      const espnTeam = athlete.team || {};
+      const local = localTeam({ name: espnTeam.displayName, shortName: espnTeam.name, tla: espnTeam.abbreviation });
+      return {
+        id: String(athlete.id || ''),
+        name: athlete.displayName || 'Unknown',
+        team_id: String(local?.id || ''),
+        team: local?.fifa_code || espnTeam.abbreviation || espnTeam.displayName || '',
+        flag: local?.flag || espnTeam.logos?.[0]?.href || '',
+        value: Number(leader.value) || 0
+      };
+    }) || [];
+    return { goals: rows('goalsLeaders'), assists: rows('assistsLeaders'), source: 'espn', updated_at: data.timestamp || new Date().toISOString() };
+  } finally {
+    clearTimeout(timeout);
   }
-  return { goals: orderedStatistics(goals), assists: orderedStatistics(assists), updated_at: new Date().toISOString() };
 }
 
 function playerAgeCacheKey(id, request) {
@@ -605,7 +587,7 @@ export default {
     if (url.pathname === '/get/teams') return json({ teams, source: 'local' });
     if (url.pathname === '/get/groups') return json({ groups, source: 'local' });
     if (url.pathname === '/get/stadiums') return json({ stadiums, source: 'local' });
-    if (url.pathname === '/get/statistics') return json(await tournamentStatistics(request));
+    if (url.pathname === '/get/statistics') return json(await tournamentStatistics(), { headers: { 'cache-control': 'no-store, max-age=0, must-revalidate' } });
     if (url.pathname === '/get/player-ages') return playerAges(request, ctx);
     if (url.pathname === '/get/source-status') return json({ results: [{ endpoint: '/get/games', source: env.FOOTBALL_DATA_TOKEN ? 'football-data' : 'local' }, { endpoint: '/get/teams', source: 'local' }, { endpoint: '/get/groups', source: 'local' }, { endpoint: '/get/stadiums', source: 'local' }] });
     const scorerMatch = url.pathname.match(/^\/get\/games\/([^/]+)\/scorers$/);
