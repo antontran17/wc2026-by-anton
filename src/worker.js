@@ -329,7 +329,8 @@ async function espnScorers(id) {
       const textAssist = String(play.text || '').match(/assisted by\s+([^\.]+)/i)?.[1]?.trim();
       const participantAssist = play.participants?.[1]?.athlete?.displayName || '';
       const assistId = String(play.participants?.[1]?.athlete?.id || '');
-      const assist = textAssist || participantAssist;
+      // ESPN occasionally appends play-by-play prose to the text; the participant is the clean player name.
+      const assist = participantAssist || textAssist;
       const penalty = !play.shootout && /penalty/i.test(`${play.type?.text || ''} ${play.shortText || ''}`);
       const item = `${player}${minute ? ` ${minute}` : ''}${penalty ? ' (P)' : ''}`;
       const detail = { scorer: player, scorer_id: scorerId, minute, assist, assist_id: assistId, penalty };
@@ -357,7 +358,7 @@ async function espnScorers(id) {
 
 function finalScorerCacheKey(id, request) {
   // Versioning discards event payloads cached before score completeness was checked.
-  return new Request(new URL(`/__wc2026/final-scorers-v4/${encodeURIComponent(id)}`, request.url));
+  return new Request(new URL(`/__wc2026/final-scorers-v5/${encodeURIComponent(id)}`, request.url));
 }
 
 function scorerCount(value) {
