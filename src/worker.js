@@ -273,6 +273,8 @@ function espnTeamAlias(value) {
     unitedstates: 'unitedstates',
     czechrepublic: 'czechia',
     czechia: 'czechia',
+    turkey: 'turkiye',
+    turkiye: 'turkiye',
     bosniaandherzegovina: 'bosnia',
     bosniaherzegovina: 'bosnia',
     bosnia: 'bosnia',
