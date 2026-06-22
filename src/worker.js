@@ -429,67 +429,33 @@ async function tournamentStatistics() {
     });
     if (!response.ok) throw new Error(`ESPN statistics ${response.status}`);
     const data = await response.json();
-    const rows = (name) => (data.stats || []).find((stat) => stat.name === name)?.leaders?.slice(0, 7).map((leader) => {
+    const leaders = (name) => (data.stats || []).find((stat) => stat.name === name)?.leaders || [];
+    const goalLeaders = leaders('goalsLeaders');
+    const assistLeaders = leaders('assistsLeaders');
+    const goalValues = new Map(goalLeaders.map((leader) => [String(leader.athlete?.id || ''), Number(leader.value) || 0]));
+    const assistValues = new Map(assistLeaders.map((leader) => [String(leader.athlete?.id || ''), Number(leader.value) || 0]));
+    const rows = (source, secondaryValues) => source.map((leader) => {
       const athlete = leader.athlete || {};
       const espnTeam = athlete.team || {};
       const local = localTeam({ name: espnTeam.displayName, shortName: espnTeam.name, tla: espnTeam.abbreviation });
+      const id = String(athlete.id || '');
       return {
-        id: String(athlete.id || ''),
+        id,
         name: athlete.displayName || 'Unknown',
         team_id: String(local?.id || ''),
         team: local?.fifa_code || espnTeam.abbreviation || espnTeam.displayName || '',
         flag: local?.flag || espnTeam.logos?.[0]?.href || '',
-        value: Number(leader.value) || 0
+        value: Number(leader.value) || 0,
+        secondary: secondaryValues.get(id) || 0
       };
-    }) || [];
-    return { goals: rows('goalsLeaders'), assists: rows('assistsLeaders'), source: 'espn', updated_at: data.timestamp || new Date().toISOString() };
+    }).sort((a, b) => b.value - a.value || b.secondary - a.secondary || a.name.localeCompare(b.name)).map((player, index, list) => ({
+      ...player,
+      rank: index && player.value === list[index - 1].value && player.secondary === list[index - 1].secondary ? list[index - 1].rank : index + 1
+    })).slice(0, 7);
+    return { goals: rows(goalLeaders, assistValues), assists: rows(assistLeaders, goalValues), source: 'espn', updated_at: data.timestamp || new Date().toISOString() };
   } finally {
     clearTimeout(timeout);
   }
-}
-
-function playerAgeCacheKey(id, request) {
-  return new Request(new URL(`/__wc2026/player-age-v1/${encodeURIComponent(id)}`, request.url));
-}
-
-async function playerAge(id, request, ctx) {
-  if (!id) return null;
-  const cacheKey = playerAgeCacheKey(id, request);
-  const cached = await caches.default.match(cacheKey);
-  if (cached) return cached.json();
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), SCORER_SOURCE_TIMEOUT_MS);
-    const response = await fetch(`${ESPN_SCOREBOARD_BASE.replace('/site/v2', '/common/v3')}/athletes/${encodeURIComponent(id)}`, {
-      signal: controller.signal,
-      headers: { accept: 'application/json' }
-    });
-    clearTimeout(timeout);
-    if (!response.ok) return null;
-    const data = await response.json();
-    const age = Number(data?.athlete?.age);
-    if (!Number.isFinite(age)) return null;
-    const payload = { id: String(id), age };
-    ctx.waitUntil(caches.default.put(cacheKey, json(payload, { headers: { 'cache-control': 'public, max-age=15552000, immutable' } })));
-    return payload;
-  } catch (_) {
-    return null;
-  }
-}
-
-async function playerAges(request, ctx) {
-  const ids = [...new Set((new URL(request.url).searchParams.get('ids') || '').split(',').map((id) => id.trim()).filter(Boolean))].slice(0, 24);
-  const queue = [...ids];
-  const output = {};
-  const worker = async () => {
-    while (queue.length) {
-      const id = queue.shift();
-      const value = await playerAge(id, request, ctx);
-      if (value) output[id] = value.age;
-    }
-  };
-  await Promise.all([worker(), worker(), worker()]);
-  return json({ ages: output });
 }
 
 function scheduledMatchDate(match) {
@@ -588,7 +554,6 @@ export default {
     if (url.pathname === '/get/groups') return json({ groups, source: 'local' });
     if (url.pathname === '/get/stadiums') return json({ stadiums, source: 'local' });
     if (url.pathname === '/get/statistics') return json(await tournamentStatistics(), { headers: { 'cache-control': 'no-store, max-age=0, must-revalidate' } });
-    if (url.pathname === '/get/player-ages') return playerAges(request, ctx);
     if (url.pathname === '/get/source-status') return json({ results: [{ endpoint: '/get/games', source: env.FOOTBALL_DATA_TOKEN ? 'football-data' : 'local' }, { endpoint: '/get/teams', source: 'local' }, { endpoint: '/get/groups', source: 'local' }, { endpoint: '/get/stadiums', source: 'local' }] });
     const scorerMatch = url.pathname.match(/^\/get\/games\/([^/]+)\/scorers$/);
     if (scorerMatch) return scorers(decodeURIComponent(scorerMatch[1]), request, ctx);
