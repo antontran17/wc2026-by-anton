@@ -9,6 +9,7 @@ const FOOTBALL_DATA_SEASON = '2026';
 const REMOTE_BASE = 'https://worldcup26.ir';
 const ESPN_SCOREBOARD_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
 const LIVE_SOURCE_TIMEOUT_MS = 6500;
+const SCORER_SOURCE_TIMEOUT_MS = 5000;
 let gamesFetchInFlight = null;
 const SERVICE_WORKER = `
 self.addEventListener('install', () => self.skipWaiting());
@@ -253,76 +254,85 @@ function espnDate(localDate) {
   return match ? `${match[3]}${match[1]}${match[2]}` : '';
 }
 
-async function espnScorers(id, request, ctx) {
-  const cacheKey = new Request(new URL(`/__wc2026/espn-scorers/${id}`, request.url));
+async function espnScorers(id) {
   const local = matches.find((item) => String(item.id) === String(id));
-  if (isFinishedMatch(local)) {
-    const cached = await caches.default.match(cacheKey);
-    if (cached) return cached.json();
-  }
   const date = espnDate(local?.local_date);
   const homeName = localTeamName(local?.home_team_id);
   const awayName = localTeamName(local?.away_team_id);
   if (!date || !homeName || !awayName) return null;
 
-  const scoreboard = await fetch(`${ESPN_SCOREBOARD_BASE}/scoreboard?dates=${date}`, { headers: { accept: 'application/json' } });
-  if (!scoreboard.ok) throw new Error(`ESPN scoreboard ${scoreboard.status}`);
-  const scoreboardData = await scoreboard.json();
-  const event = (scoreboardData.events || []).find((candidate) => {
-    const competitors = candidate.competitions?.[0]?.competitors || [];
-    const home = competitors.find((team) => team.homeAway === 'home')?.team?.displayName;
-    const away = competitors.find((team) => team.homeAway === 'away')?.team?.displayName;
-    return alias(home) === alias(homeName) && alias(away) === alias(awayName);
-  });
-  if (!event?.id) return null;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), SCORER_SOURCE_TIMEOUT_MS);
+  try {
+    const scoreboard = await fetch(`${ESPN_SCOREBOARD_BASE}/scoreboard?dates=${date}`, { signal: controller.signal, headers: { accept: 'application/json' } });
+    if (!scoreboard.ok) throw new Error(`ESPN scoreboard ${scoreboard.status}`);
+    const scoreboardData = await scoreboard.json();
+    const event = (scoreboardData.events || []).find((candidate) => {
+      const competitors = candidate.competitions?.[0]?.competitors || [];
+      const home = competitors.find((team) => team.homeAway === 'home')?.team?.displayName;
+      const away = competitors.find((team) => team.homeAway === 'away')?.team?.displayName;
+      return alias(home) === alias(homeName) && alias(away) === alias(awayName);
+    });
+    if (!event?.id) return null;
 
-  const summary = await fetch(`${ESPN_SCOREBOARD_BASE}/summary?event=${event.id}`, { headers: { accept: 'application/json' } });
-  if (!summary.ok) throw new Error(`ESPN summary ${summary.status}`);
-  const summaryData = await summary.json();
-  const homeGoals = [];
-  const awayGoals = [];
-  for (const play of summaryData.keyEvents || []) {
-    if (!play.scoringPlay) continue;
-    const player = play.participants?.[0]?.athlete?.displayName || play.shortText || 'Goal';
-    const minute = play.clock?.displayValue || '';
-    const item = `${player}${minute ? ` ${minute}` : ''}`;
-    if (alias(play.team?.displayName) === alias(homeName)) homeGoals.push(item);
-    if (alias(play.team?.displayName) === alias(awayName)) awayGoals.push(item);
+    const summary = await fetch(`${ESPN_SCOREBOARD_BASE}/summary?event=${event.id}`, { signal: controller.signal, headers: { accept: 'application/json' } });
+    if (!summary.ok) throw new Error(`ESPN summary ${summary.status}`);
+    const summaryData = await summary.json();
+    const homeGoals = [];
+    const awayGoals = [];
+    for (const play of summaryData.keyEvents || []) {
+      if (!play.scoringPlay) continue;
+      const player = play.participants?.[0]?.athlete?.displayName || play.shortText || 'Goal';
+      const minute = play.clock?.displayValue || '';
+      const item = `${player}${minute ? ` ${minute}` : ''}`;
+      if (alias(play.team?.displayName) === alias(homeName)) homeGoals.push(item);
+      if (alias(play.team?.displayName) === alias(awayName)) awayGoals.push(item);
+    }
+    return { id: String(id), home_scorers: homeGoals.join(', ') || 'null', away_scorers: awayGoals.join(', ') || 'null', source: 'espn' };
+  } finally {
+    clearTimeout(timeout);
   }
+}
 
-  const payload = { id: String(id), home_scorers: homeGoals.join(', ') || 'null', away_scorers: awayGoals.join(', ') || 'null', source: 'espn' };
-  if (event.status?.type?.completed) {
-    const cacheResponse = json(payload, { headers: { 'cache-control': 'public, max-age=2592000, immutable' } });
-    ctx.waitUntil(caches.default.put(cacheKey, cacheResponse.clone()));
-  }
-  return payload;
+function finalScorerCacheKey(id, request) {
+  return new Request(new URL(`/__wc2026/final-scorers/${encodeURIComponent(id)}`, request.url));
 }
 
 async function scorers(id, request, ctx) {
+  const isFinal = new URL(request.url).searchParams.get('final') === '1';
+  const cacheKey = finalScorerCacheKey(id, request);
+  if (isFinal) {
+    const cached = await caches.default.match(cacheKey);
+    if (cached) return json(await cached.json());
+  }
+
+  let payload;
   try {
-    const espn = await espnScorers(id, request, ctx);
-    if (espn) return json(espn);
+    payload = await espnScorers(id);
   } catch (_) {
     // ESPN is the primary event feed; the legacy feed below remains a fallback.
   }
 
-  try {
+  if (!payload) try {
     const data = await scorerFeed(request, ctx);
     const game = (data.games || data).find((item) => String(item.id) === String(id));
     if (game) {
-      return json({ id: String(game.id), home_scorers: game.home_scorers || 'null', away_scorers: game.away_scorers || 'null', source: 'worldcup26.ir' });
+      payload = { id: String(game.id), home_scorers: game.home_scorers || 'null', away_scorers: game.away_scorers || 'null', source: 'worldcup26.ir' };
     }
   } catch (_) {
     // Fall through to the local schedule so a slow scorer source never breaks the popup.
   }
 
-  const local = matches.find((item) => String(item.id) === String(id));
-  return json({
-    id: String(id),
-    home_scorers: local?.home_scorers || 'null',
-    away_scorers: local?.away_scorers || 'null',
-    source: 'local-fallback'
-  });
+  if (!payload) {
+    const local = matches.find((item) => String(item.id) === String(id));
+    payload = { id: String(id), home_scorers: local?.home_scorers || 'null', away_scorers: local?.away_scorers || 'null', source: 'local-fallback' };
+  }
+
+  if (isFinal) {
+    const cacheResponse = json(payload, { headers: { 'cache-control': 'public, max-age=2592000, immutable' } });
+    ctx.waitUntil(caches.default.put(cacheKey, cacheResponse.clone()));
+  }
+  return json(payload);
 }
 
 export default {
