@@ -4478,12 +4478,83 @@
 
         .scorer-dialog-panel .match-card {
             margin: 0 !important;
-            min-height: 0 !important;
+            min-height: 238px !important;
+            padding: 16px 18px 14px !important;
             cursor: default !important;
+            display: grid !important;
+            grid-template-rows: 22px 28px minmax(112px, 1fr) 30px !important;
+            gap: 4px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
 
         .scorer-dialog-panel .match-card:hover {
             transform: none !important;
+        }
+
+        .scorer-dialog-panel .match-time-top {
+            min-height: 0 !important;
+            margin: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .scorer-dialog-panel .match-header {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+            align-items: center !important;
+            gap: 8px !important;
+            margin: 0 !important;
+        }
+
+        .scorer-dialog-panel .match-group { justify-self: start !important; }
+        .scorer-dialog-panel .match-status-slot { justify-self: center !important; }
+        .scorer-dialog-panel .matchday-label { justify-self: end !important; }
+
+        .scorer-dialog-panel .match-teams,
+        .scorer-dialog-panel .match-card .match-teams {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) 78px minmax(0, 1fr) !important;
+            align-items: center !important;
+            gap: 12px !important;
+            width: 100% !important;
+            min-height: 112px !important;
+            margin: 0 !important;
+            order: initial !important;
+        }
+
+        .scorer-dialog-panel .match-team {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 0 !important;
+        }
+
+        .scorer-dialog-panel .match-vs {
+            width: 78px !important;
+            min-width: 78px !important;
+            height: auto !important;
+            align-self: center !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transform: none !important;
+        }
+
+        .scorer-dialog-panel .score-center {
+            width: 58px !important;
+            min-width: 58px !important;
+            height: 30px !important;
+            font-size: 20px !important;
+        }
+
+        .scorer-dialog-panel .match-info {
+            display: flex !important;
+            align-items: flex-end !important;
+            justify-content: center !important;
+            margin: 0 !important;
         }
 
         .scorer-dialog-panel .match-card .fav-btn,
