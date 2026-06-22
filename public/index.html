@@ -4818,6 +4818,29 @@
         }
     </style>
 
+    <style id="anton-statistics">
+        #statistics { padding: 34px 0 18px; }
+        .statistics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+        .statistics-panel { border: 1px solid rgba(145, 161, 255, .30); border-radius: 8px; background: rgba(32, 26, 83, .72); overflow: hidden; }
+        .statistics-panel h3 { margin: 0; padding: 15px 18px 12px; font-size: 18px; font-weight: 700; color: #fff; }
+        .statistics-table { min-height: 86px; }
+        .statistics-row { display: grid; grid-template-columns: minmax(0, 1fr) 42px 42px 42px; align-items: center; gap: 8px; min-height: 48px; padding: 7px 16px; border-top: 1px solid rgba(255,255,255,.08); }
+        .statistics-row.head { min-height: 34px; color: rgba(239,243,255,.60); font-size: 10px; font-weight: 700; }
+        .statistics-player { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; font-size: 14px; font-weight: 700; }
+        .statistics-flag { width: 28px; height: 19px; object-fit: cover; border-radius: 3px; }
+        .statistics-value, .statistics-age { color: #fff; font-size: 15px; font-weight: 700; text-align: center; }
+        .statistics-loading, .statistics-empty { display: block; padding: 20px 16px; color: rgba(239,243,255,.58); font-size: 13px; font-weight: 600; }
+        @media (max-width: 640px) {
+            .header-content nav { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+            .header-content nav a, .header-content .header-refresh-btn { font-size: 10px !important; padding: 0 1px !important; }
+            #statistics { padding: 24px 0 10px; }
+            .statistics-grid { grid-template-columns: 1fr; gap: 12px; }
+            .statistics-panel h3 { padding: 13px 14px 10px; font-size: 16px; }
+            .statistics-row { grid-template-columns: minmax(0, 1fr) 38px 34px 34px; min-height: 44px; padding: 6px 12px; gap: 6px; }
+            .statistics-player { font-size: 13px; }
+            .statistics-value, .statistics-age { font-size: 14px; }
+        }
+    </style>
 </head>
 <body>
     <!-- SEO fallback content for crawlers that don't execute JavaScript -->
@@ -4837,6 +4860,7 @@
                     <a href="#matches" data-i18n="nav_matches">LỊCH ĐẤU</a>
                     <a href="#groups" data-i18n="nav_groups">BẢNG ĐẤU</a>
                     <a href="#teams" data-i18n="nav_teams">ĐỘI TUYỂN</a>
+                    <a href="#statistics">THỐNG KÊ</a>
                     <button id="header-refresh-btn" class="header-refresh-btn" onclick="refreshData()" aria-label="Tải lại">TẢI LẠI</button></nav>
             </div>
         </div>
@@ -4893,6 +4917,25 @@
                 <div class="loading">
                     <div class="spinner"></div>
                     <span data-i18n="loading">ĐANG TẢI...</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section id="statistics">
+        <div class="container">
+            <div class="section-header">
+                <h2>THỐNG KÊ</h2>
+            </div>
+            <div class="statistics-grid">
+                <div class="statistics-panel">
+                    <h3>VUA PHÁ LƯỚI</h3>
+                    <div class="statistics-table" id="goals-statistics"><span class="statistics-loading">ĐANG TẢI...</span></div>
+                </div>
+                <div class="statistics-panel">
+                    <h3>VUA KIẾN TẠO</h3>
+                    <div class="statistics-table" id="assists-statistics"><span class="statistics-loading">ĐANG TẢI...</span></div>
                 </div>
             </div>
         </div>
@@ -5193,11 +5236,53 @@
                 renderTeams(teamsData);
                 renderMatches(gamesData);
                 renderGroups(groupsData);
+                loadStatistics();
                 scheduleNextLiveCheck();
                 scheduleMatchNotifications();
                 prefetchScorerDetails();
             } catch (err) {
                 console.error('Error loading data:', err);
+            }
+        }
+
+        function renderStatisticsTable(elementId, players, label, ages) {
+            const target = document.getElementById(elementId);
+            if (!target) return;
+            if (!players.length) {
+                target.innerHTML = '<span class="statistics-empty">CHƯA CÓ DỮ LIỆU</span>';
+                return;
+            }
+            target.innerHTML = `
+                <div class="statistics-row head"><span>CẦU THỦ</span><span>ĐỘI</span><span>${label}</span><span>TUỔI</span></div>
+                ${players.map(player => `
+                    <div class="statistics-row">
+                        <span class="statistics-player" title="${escapeHtml(player.name)}">${escapeHtml(player.name)}</span>
+                        ${player.flag ? `<img class="statistics-flag" src="${escapeHtml(player.flag)}" alt="${escapeHtml(player.team)}">` : `<span>${escapeHtml(player.team || '-')}</span>`}
+                        <span class="statistics-value">${Number(player.value) || 0}</span>
+                        <span class="statistics-age">${ages[String(player.id)] || '–'}</span>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        async function loadStatistics() {
+            try {
+                const response = await fetch(`${API_BASE}/get/statistics?fresh=${Date.now()}`, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Statistics request failed');
+                const data = await response.json();
+                const goals = data.goals || [];
+                const assists = data.assists || [];
+                const ids = [...new Set([...goals, ...assists].map(player => String(player.id || '')).filter(Boolean))];
+                let ages = {};
+                if (ids.length) {
+                    const ageResponse = await fetch(`${API_BASE}/get/player-ages?ids=${encodeURIComponent(ids.join(','))}`, { cache: 'no-store' });
+                    if (ageResponse.ok) ages = (await ageResponse.json()).ages || {};
+                }
+                renderStatisticsTable('goals-statistics', goals, 'BÀN', ages);
+                renderStatisticsTable('assists-statistics', assists, 'KT', ages);
+            } catch (_) {
+                document.getElementById('goals-statistics').innerHTML = '<span class="statistics-empty">CHƯA LẤY ĐƯỢC DỮ LIỆU</span>';
+                document.getElementById('assists-statistics').innerHTML = '<span class="statistics-empty">CHƯA LẤY ĐƯỢC DỮ LIỆU</span>';
             }
         }
 
@@ -5497,7 +5582,7 @@
         function goalEntries(details, legacyScorers) {
             if (Array.isArray(details) && details.length) {
                 return details.map(item => ({
-                    label: `${item.scorer || 'Goal'}${item.minute ? ` ${item.minute}` : ''}`,
+                    label: `${item.scorer || 'Goal'}${item.minute ? ` ${item.minute}` : ''}${item.penalty ? ' (P)' : ''}`,
                     assist: String(item.assist || '').trim()
                 }));
             }
@@ -5514,17 +5599,17 @@
         }
 
         function scorerStorageKey(id) {
-            return `wc2026_scorers_v3_${id}`;
+            return `wc2026_scorers_v4_${id}`;
         }
 
         function resetLegacyScorerCache() {
             try {
                 const versionKey = 'wc2026_scorers_cache_version';
-                if (localStorage.getItem(versionKey) === 'v3') return;
+                if (localStorage.getItem(versionKey) === 'v4') return;
                 Object.keys(localStorage)
                     .filter(key => key.startsWith('wc2026_scorers_'))
                     .forEach(key => localStorage.removeItem(key));
-                localStorage.setItem(versionKey, 'v3');
+                localStorage.setItem(versionKey, 'v4');
             } catch (_) {
                 // The in-memory cache remains available when browser storage is unavailable.
             }
