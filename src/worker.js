@@ -8,6 +8,8 @@ const FOOTBALL_DATA_COMPETITION = 'WC';
 const FOOTBALL_DATA_SEASON = '2026';
 const REMOTE_BASE = 'https://worldcup26.ir';
 const ESPN_SCOREBOARD_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
+const LIVE_SOURCE_TIMEOUT_MS = 6500;
+let gamesFetchInFlight = null;
 const SERVICE_WORKER = `
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
@@ -110,25 +112,20 @@ function isFinishedMatch(match) {
   return String(match?.finished || '').toUpperCase() === 'TRUE' || ['FINISHED', 'AWARDED'].includes(status);
 }
 
-function completedMatchCacheKey(match, request) {
-  return new Request(new URL(`/__wc2026/final-match/${encodeURIComponent(match.id)}`, request.url));
+function completedScheduleCacheKey(request) {
+  return new Request(new URL('/__wc2026/completed-games', request.url));
 }
 
 async function cacheCompletedMatches(games, request) {
-  await Promise.all(games.filter(isFinishedMatch).map(async (game) => {
-    const key = completedMatchCacheKey(game, request);
-    if (await caches.default.match(key)) return;
-    const snapshot = json(game, { headers: { 'cache-control': 'public, max-age=2592000, immutable' } });
-    await caches.default.put(key, snapshot);
-  }));
+  const completed = games.filter(isFinishedMatch);
+  const snapshot = json({ games: completed }, { headers: { 'cache-control': 'public, max-age=2592000, immutable' } });
+  await caches.default.put(completedScheduleCacheKey(request), snapshot);
 }
 
 async function completedScheduleFallback(request) {
-  const snapshots = await Promise.all(matches.map(async (match) => {
-    const cached = await caches.default.match(completedMatchCacheKey(match, request));
-    return cached ? cached.json() : null;
-  }));
-  const byId = new Map(snapshots.filter(Boolean).map((match) => [String(match.id), match]));
+  const cached = await caches.default.match(completedScheduleCacheKey(request));
+  const snapshot = cached ? await cached.json() : { games: [] };
+  const byId = new Map((snapshot.games || []).map((match) => [String(match.id), match]));
   return matches.map((match) => byId.has(String(match.id)) ? { ...match, ...byId.get(String(match.id)) } : match);
 }
 
@@ -136,16 +133,30 @@ function freshGamesResponse(data) {
   return json(data, { headers: { 'cache-control': 'no-store, max-age=0, must-revalidate', 'cdn-cache-control': 'no-store' } });
 }
 
-async function liveGames(request, env, ctx) {
-  if (!env.FOOTBALL_DATA_TOKEN) return freshGamesResponse({ games: await completedScheduleFallback(request), source: 'local', error: 'FOOTBALL_DATA_TOKEN is not configured', cache_ttl_ms: 0 });
+async function fetchLatestGames(env) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LIVE_SOURCE_TIMEOUT_MS);
   try {
     const source = await fetch(`${FOOTBALL_DATA_BASE}/competitions/${FOOTBALL_DATA_COMPETITION}/matches?season=${FOOTBALL_DATA_SEASON}`, {
+      signal: controller.signal,
       headers: { accept: 'application/json', 'X-Auth-Token': env.FOOTBALL_DATA_TOKEN, 'cache-control': 'no-cache' }
     });
     if (!source.ok) throw new Error(`football-data.org ${source.status}`);
     const data = await source.json();
     if (!Array.isArray(data.matches) || !data.matches.length) throw new Error('Empty fixtures response');
-    const mappedGames = data.matches.map(mapMatch);
+    return data.matches.map(mapMatch);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function liveGames(request, env, ctx) {
+  if (!env.FOOTBALL_DATA_TOKEN) return freshGamesResponse({ games: await completedScheduleFallback(request), source: 'local', error: 'FOOTBALL_DATA_TOKEN is not configured', cache_ttl_ms: 0 });
+  try {
+    if (!gamesFetchInFlight) {
+      gamesFetchInFlight = fetchLatestGames(env).finally(() => { gamesFetchInFlight = null; });
+    }
+    const mappedGames = await gamesFetchInFlight;
     ctx.waitUntil(cacheCompletedMatches(mappedGames, request));
     return freshGamesResponse({ games: mappedGames, source: 'football-data', cache_ttl_ms: 0 });
   } catch (error) {
