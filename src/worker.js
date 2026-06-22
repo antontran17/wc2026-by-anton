@@ -254,25 +254,58 @@ function espnDate(localDate) {
   return match ? `${match[3]}${match[1]}${match[2]}` : '';
 }
 
+function espnDateCandidates(localDate) {
+  const match = String(localDate || '').match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if (!match) return [];
+  const [, month, day, year] = match;
+  const base = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+  return [0, 1, -1].map((offset) => {
+    const value = new Date(base);
+    value.setUTCDate(value.getUTCDate() + offset);
+    return value.toISOString().slice(0, 10).replaceAll('-', '');
+  });
+}
+
+function espnTeamAlias(value) {
+  const normalized = alias(value);
+  const aliases = {
+    usa: 'unitedstates',
+    unitedstates: 'unitedstates',
+    czechrepublic: 'czechia',
+    czechia: 'czechia',
+    bosniaandherzegovina: 'bosnia',
+    bosniaherzegovina: 'bosnia',
+    bosnia: 'bosnia',
+    democraticrepublicofthecongo: 'drcongo',
+    congodr: 'drcongo',
+    drcongo: 'drcongo'
+  };
+  return aliases[normalized] || normalized;
+}
+
 async function espnScorers(id) {
   const local = matches.find((item) => String(item.id) === String(id));
-  const date = espnDate(local?.local_date);
+  const dates = espnDateCandidates(local?.local_date);
   const homeName = localTeamName(local?.home_team_id);
   const awayName = localTeamName(local?.away_team_id);
-  if (!date || !homeName || !awayName) return null;
+  if (!dates.length || !homeName || !awayName) return null;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), SCORER_SOURCE_TIMEOUT_MS);
   try {
-    const scoreboard = await fetch(`${ESPN_SCOREBOARD_BASE}/scoreboard?dates=${date}`, { signal: controller.signal, headers: { accept: 'application/json' } });
-    if (!scoreboard.ok) throw new Error(`ESPN scoreboard ${scoreboard.status}`);
-    const scoreboardData = await scoreboard.json();
-    const event = (scoreboardData.events || []).find((candidate) => {
-      const competitors = candidate.competitions?.[0]?.competitors || [];
-      const home = competitors.find((team) => team.homeAway === 'home')?.team?.displayName;
-      const away = competitors.find((team) => team.homeAway === 'away')?.team?.displayName;
-      return alias(home) === alias(homeName) && alias(away) === alias(awayName);
-    });
+    let event = null;
+    for (const date of dates) {
+      const scoreboard = await fetch(`${ESPN_SCOREBOARD_BASE}/scoreboard?dates=${date}`, { signal: controller.signal, headers: { accept: 'application/json' } });
+      if (!scoreboard.ok) continue;
+      const scoreboardData = await scoreboard.json();
+      event = (scoreboardData.events || []).find((candidate) => {
+        const competitors = candidate.competitions?.[0]?.competitors || [];
+        const home = competitors.find((team) => team.homeAway === 'home')?.team?.displayName;
+        const away = competitors.find((team) => team.homeAway === 'away')?.team?.displayName;
+        return espnTeamAlias(home) === espnTeamAlias(homeName) && espnTeamAlias(away) === espnTeamAlias(awayName);
+      });
+      if (event) break;
+    }
     if (!event?.id) return null;
 
     const summary = await fetch(`${ESPN_SCOREBOARD_BASE}/summary?event=${event.id}`, { signal: controller.signal, headers: { accept: 'application/json' } });
@@ -285,8 +318,8 @@ async function espnScorers(id) {
       const player = play.participants?.[0]?.athlete?.displayName || play.shortText || 'Goal';
       const minute = play.clock?.displayValue || '';
       const item = `${player}${minute ? ` ${minute}` : ''}`;
-      if (alias(play.team?.displayName) === alias(homeName)) homeGoals.push(item);
-      if (alias(play.team?.displayName) === alias(awayName)) awayGoals.push(item);
+      if (espnTeamAlias(play.team?.displayName) === espnTeamAlias(homeName)) homeGoals.push(item);
+      if (espnTeamAlias(play.team?.displayName) === espnTeamAlias(awayName)) awayGoals.push(item);
     }
     return { id: String(id), home_scorers: homeGoals.join(', ') || 'null', away_scorers: awayGoals.join(', ') || 'null', source: 'espn' };
   } finally {
