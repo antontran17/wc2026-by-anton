@@ -4977,12 +4977,17 @@
         let favoriteTeams = new Set(readFavoriteStore('wc2026_fav_teams', 'wc2026_fav_teams_backup'));
         let activeScorerMatchId = null;
         let scorerDetails = new Map();
+        let scorerLoadRequests = new Map();
+        let scorerPrefetchStarted = false;
         let currentMatchFilter = 'all';
         let currentTeamFilter = 'all';
         let expandedMobileMatchId = null;
         let liveRefreshInFlight = false;
         let nextKickoffTimer = null;
         const LIVE_REFRESH_INTERVAL_MS = 15 * 1000;
+        const SCORER_FINAL_CACHE_MS = 30 * 24 * 60 * 60 * 1000;
+        const SCORER_LIVE_CACHE_MS = 20 * 1000;
+        const SCORER_PREFETCH_LIMIT = 6;
         const MATCH_NOTIFICATION_LEAD_MINUTES = 15;
         const PROVISIONAL_LIVE_WINDOW_MS = 3 * 60 * 60 * 1000;
         let notificationRegistration = null;
@@ -5179,6 +5184,7 @@
                 renderGroups(groupsData);
                 scheduleNextLiveCheck();
                 scheduleMatchNotifications();
+                prefetchScorerDetails();
             } catch (err) {
                 console.error('Error loading data:', err);
             }
@@ -5477,6 +5483,99 @@
                 .filter(Boolean);
         }
 
+        function scorerStorageKey(id) {
+            return `wc2026_scorers_v1_${id}`;
+        }
+
+        function scorerCacheLifetime(game) {
+            return isCompletedGame(game) ? SCORER_FINAL_CACHE_MS : SCORER_LIVE_CACHE_MS;
+        }
+
+        function readCachedScorerDetail(game) {
+            try {
+                const raw = localStorage.getItem(scorerStorageKey(game.id));
+                if (!raw) return null;
+                const cached = JSON.parse(raw);
+                if (!cached?.data || Number(cached.expiresAt) <= Date.now()) {
+                    localStorage.removeItem(scorerStorageKey(game.id));
+                    return null;
+                }
+                return { ...cached.data, _expiresAt: Number(cached.expiresAt) };
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function saveCachedScorerDetail(game, detail) {
+            const expiresAt = Date.now() + scorerCacheLifetime(game);
+            const cached = { ...detail, _expiresAt: expiresAt };
+            scorerDetails.set(String(game.id), cached);
+            try {
+                localStorage.setItem(scorerStorageKey(game.id), JSON.stringify({ data: detail, expiresAt }));
+            } catch (_) {
+                // Private browsing can disable storage; the in-memory cache still works.
+            }
+            return cached;
+        }
+
+        async function loadScorerDetail(game) {
+            const id = String(game.id);
+            const existing = scorerDetails.get(id);
+            if (existing && !existing.loading && !existing.error && (isCompletedGame(game) || Number(existing._expiresAt || 0) > Date.now())) {
+                return existing;
+            }
+
+            const stored = readCachedScorerDetail(game);
+            if (stored) {
+                scorerDetails.set(id, stored);
+                return stored;
+            }
+
+            if (scorerLoadRequests.has(id)) return scorerLoadRequests.get(id);
+
+            const request = (async () => {
+                const finalParam = isCompletedGame(game) ? '&final=1' : '';
+                const response = await fetch(`${API_BASE}/get/games/${encodeURIComponent(id)}/scorers?fresh=${Date.now()}${finalParam}`, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Scorer request failed');
+                return saveCachedScorerDetail(game, await response.json());
+            })();
+            scorerLoadRequests.set(id, request);
+            try {
+                return await request;
+            } finally {
+                scorerLoadRequests.delete(id);
+            }
+        }
+
+        function prefetchScorerDetails() {
+            if (scorerPrefetchStarted) return;
+            scorerPrefetchStarted = true;
+
+            const recentResults = sortByStartTime(gamesData.filter(game => hasRenderableParticipants(game) && isRecentResult(game))).reverse();
+            const liveGames = gamesData.filter(game => hasRenderableParticipants(game) && isActualLiveMatch(game));
+            const candidates = [...liveGames, ...recentResults]
+                .filter((game, index, list) => list.findIndex(item => String(item.id) === String(game.id)) === index)
+                .filter(game => !readCachedScorerDetail(game))
+                .slice(0, SCORER_PREFETCH_LIMIT);
+
+            const run = async () => {
+                const queue = [...candidates];
+                const worker = async () => {
+                    while (queue.length) {
+                        const game = queue.shift();
+                        try { await loadScorerDetail(game); } catch (_) { /* Open-on-click remains available. */ }
+                    }
+                };
+                await Promise.all([worker(), worker()]);
+            };
+
+            if ('requestIdleCallback' in window) {
+                window.requestIdleCallback(() => { run(); }, { timeout: 2500 });
+            } else {
+                setTimeout(run, 600);
+            }
+        }
+
         function canShowScorers(game) {
             const status = String(game.status || game.time_elapsed || '').trim().toLowerCase();
             return isCompletedGame(game) || ['in_play', 'live', 'paused', 'et', 'halftime', 'half-time'].includes(status);
@@ -5520,13 +5619,13 @@
         async function openScorerDialog(id) {
             id = String(id);
             activeScorerMatchId = id;
-            if (!scorerDetails.has(id)) {
+            const game = gamesData.find(item => String(item.id) === id);
+            const detail = game ? scorerDetails.get(id) : null;
+            if (game && (!detail || detail.loading || detail.error || (!isCompletedGame(game) && Number(detail._expiresAt || 0) <= Date.now()))) {
                 scorerDetails.set(id, { loading: true });
                 renderScorerDialog();
                 try {
-                    const response = await fetch(`${API_BASE}/get/games/${encodeURIComponent(id)}/scorers?fresh=${Date.now()}`, { cache: 'no-store' });
-                    if (!response.ok) throw new Error('Scorer request failed');
-                    scorerDetails.set(id, await response.json());
+                    await loadScorerDetail(game);
                 } catch (error) {
                     scorerDetails.set(id, { error: true });
                 }
