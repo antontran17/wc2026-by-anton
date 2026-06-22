@@ -4987,7 +4987,7 @@
         const LIVE_REFRESH_INTERVAL_MS = 15 * 1000;
         const SCORER_FINAL_CACHE_MS = 30 * 24 * 60 * 60 * 1000;
         const SCORER_LIVE_CACHE_MS = 20 * 1000;
-        const SCORER_PREFETCH_LIMIT = 6;
+        const SCORER_PREFETCH_LIMIT = 10;
         const MATCH_NOTIFICATION_LEAD_MINUTES = 15;
         const PROVISIONAL_LIVE_WINDOW_MS = 3 * 60 * 60 * 1000;
         let notificationRegistration = null;
@@ -4999,7 +4999,7 @@
             // Vietnamese-only clean version
             const savedLang = 'vi';
             setLanguage(savedLang);
-            
+            resetLegacyScorerCache();
             loadAllData();
             startLiveRefresh();
             initializeMatchNotifications();
@@ -5484,7 +5484,20 @@
         }
 
         function scorerStorageKey(id) {
-            return `wc2026_scorers_v1_${id}`;
+            return `wc2026_scorers_v2_${id}`;
+        }
+
+        function resetLegacyScorerCache() {
+            try {
+                const versionKey = 'wc2026_scorers_cache_version';
+                if (localStorage.getItem(versionKey) === 'v2') return;
+                Object.keys(localStorage)
+                    .filter(key => key.startsWith('wc2026_scorers_'))
+                    .forEach(key => localStorage.removeItem(key));
+                localStorage.setItem(versionKey, 'v2');
+            } catch (_) {
+                // The in-memory cache remains available when browser storage is unavailable.
+            }
         }
 
         function scorerCacheLifetime(game) {
@@ -5534,7 +5547,9 @@
             if (scorerLoadRequests.has(id)) return scorerLoadRequests.get(id);
 
             const request = (async () => {
-                const finalParam = isCompletedGame(game) ? '&final=1' : '';
+                const finalParam = isCompletedGame(game)
+                    ? `&final=1&home=${encodeURIComponent(Number(game.home_score) || 0)}&away=${encodeURIComponent(Number(game.away_score) || 0)}`
+                    : '';
                 const response = await fetch(`${API_BASE}/get/games/${encodeURIComponent(id)}/scorers?fresh=${Date.now()}${finalParam}`, { cache: 'no-store' });
                 if (!response.ok) throw new Error('Scorer request failed');
                 return saveCachedScorerDetail(game, await response.json());
