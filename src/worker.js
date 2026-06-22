@@ -10,6 +10,10 @@ const REMOTE_BASE = 'https://worldcup26.ir';
 const ESPN_SCOREBOARD_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
 const LIVE_SOURCE_TIMEOUT_MS = 6500;
 const SCORER_SOURCE_TIMEOUT_MS = 5000;
+const CACHE_ORIGIN = 'https://attak.online';
+const CRON_INTERVAL_MS = 15 * 60 * 1000;
+const GROUP_STAGE_SETTLE_MS = 135 * 60 * 1000;
+const KNOCKOUT_SETTLE_MS = 195 * 60 * 1000;
 let gamesFetchInFlight = null;
 const SERVICE_WORKER = `
 self.addEventListener('install', () => self.skipWaiting());
@@ -391,6 +395,84 @@ async function scorers(id, request, ctx) {
   return json(payload);
 }
 
+function scheduledMatchDate(match) {
+  const parts = String(match?.local_date || '').match(/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})/);
+  if (!parts) return null;
+  const [, month, day, year, hour, minute] = parts;
+  // Fixture times are Vietnam time (UTC+7); use an absolute UTC instant for cron comparisons.
+  return new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour) - 7, Number(minute)));
+}
+
+function scheduledMatchClusters() {
+  const dated = matches
+    .map((match) => ({ match, start: scheduledMatchDate(match) }))
+    .filter((item) => item.start)
+    .sort((a, b) => a.start - b.start);
+  const clusters = [];
+  for (const item of dated) {
+    const current = clusters.at(-1);
+    if (!current || item.start.getTime() - current.lastStart.getTime() > 6 * 60 * 60 * 1000) {
+      clusters.push({ games: [item.match], firstStart: item.start, lastStart: item.start });
+    } else {
+      current.games.push(item.match);
+      current.lastStart = item.start;
+    }
+  }
+  return clusters;
+}
+
+function isKnockoutCluster(cluster) {
+  return cluster.games.some((game) => !/^[A-L]$/i.test(String(game.group || '').trim()));
+}
+
+function dueScheduledRefreshes(now = new Date()) {
+  const tasks = [];
+  const clusters = scheduledMatchClusters();
+  clusters.forEach((cluster, index) => {
+    const settleDelay = isKnockoutCluster(cluster) ? KNOCKOUT_SETTLE_MS : GROUP_STAGE_SETTLE_MS;
+    const previous = clusters[index - 1];
+    tasks.push({
+      kind: 'pre',
+      target: new Date(cluster.firstStart.getTime() - CRON_INTERVAL_MS),
+      games: previous?.games || []
+    });
+    [0, 1, 2, 3].forEach((retry) => tasks.push({
+      kind: retry ? 'retry' : 'final',
+      target: new Date(cluster.lastStart.getTime() + settleDelay + retry * CRON_INTERVAL_MS),
+      games: cluster.games
+    }));
+  });
+  return tasks.filter((task) => {
+    const elapsed = now.getTime() - task.target.getTime();
+    return elapsed >= 0 && elapsed < CRON_INTERVAL_MS;
+  });
+}
+
+async function warmFinalScorers(games, task, ctx) {
+  const queue = games.filter(isFinishedMatch);
+  const requestFor = (game) => new Request(new URL(
+    `/get/games/${encodeURIComponent(game.id)}/scorers?final=1&home=${encodeURIComponent(Number(game.home_score) || 0)}&away=${encodeURIComponent(Number(game.away_score) || 0)}`,
+    CACHE_ORIGIN
+  ));
+  const worker = async () => {
+    while (queue.length) {
+      const game = queue.shift();
+      await scorers(String(game.id), requestFor(game), ctx);
+    }
+  };
+  await Promise.all([worker(), worker()]);
+}
+
+async function refreshScheduledCache(task, env, ctx) {
+  const request = new Request(`${CACHE_ORIGIN}/__wc2026/cron/${task.kind}`);
+  // This always asks the upstream source for fresh scores. Only confirmed final games are persisted.
+  const response = await liveGames(request, env, ctx);
+  const payload = await response.json();
+  const byId = new Map((payload.games || []).map((game) => [String(game.id), game]));
+  const taskGames = task.games.map((game) => byId.get(String(game.id)) || game);
+  await warmFinalScorers(taskGames, task, ctx);
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -412,5 +494,10 @@ export default {
     const scorerMatch = url.pathname.match(/^\/get\/games\/([^/]+)\/scorers$/);
     if (scorerMatch) return scorers(decodeURIComponent(scorerMatch[1]), request, ctx);
     return env.ASSETS.fetch(request);
+  },
+
+  async scheduled(controller, env, ctx) {
+    const tasks = dueScheduledRefreshes(new Date(controller.scheduledTime || Date.now()));
+    for (const task of tasks) ctx.waitUntil(refreshScheduledCache(task, env, ctx));
   }
 };
