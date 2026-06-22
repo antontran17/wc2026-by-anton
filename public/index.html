@@ -4435,6 +4435,17 @@
 
         .scorer-dialog-team.home { align-items: flex-start !important; text-align: left !important; }
         .scorer-dialog-team.away { align-items: flex-end !important; text-align: right !important; }
+        .scorer-goal {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 2px !important;
+        }
+        .scorer-assist {
+            color: rgba(238,243,255,.58) !important;
+            font-size: 10px !important;
+            font-weight: 500 !important;
+            line-height: 1.15 !important;
+        }
         .scorer-empty { color: rgba(238,243,255,.38) !important; }
 
         .scorer-dialog-state {
@@ -5483,18 +5494,37 @@
                 .filter(Boolean);
         }
 
+        function goalEntries(details, legacyScorers) {
+            if (Array.isArray(details) && details.length) {
+                return details.map(item => ({
+                    label: `${item.scorer || 'Goal'}${item.minute ? ` ${item.minute}` : ''}`,
+                    assist: String(item.assist || '').trim()
+                }));
+            }
+            return scorerEntries(legacyScorers).map(label => ({ label, assist: '' }));
+        }
+
+        function renderGoalEntries(goals) {
+            return goals.map(goal => `
+                <span class="scorer-goal">
+                    <span>${escapeHtml(goal.label)}</span>
+                    ${goal.assist ? `<small class="scorer-assist">(${escapeHtml(goal.assist)})</small>` : ''}
+                </span>
+            `).join('');
+        }
+
         function scorerStorageKey(id) {
-            return `wc2026_scorers_v2_${id}`;
+            return `wc2026_scorers_v3_${id}`;
         }
 
         function resetLegacyScorerCache() {
             try {
                 const versionKey = 'wc2026_scorers_cache_version';
-                if (localStorage.getItem(versionKey) === 'v2') return;
+                if (localStorage.getItem(versionKey) === 'v3') return;
                 Object.keys(localStorage)
                     .filter(key => key.startsWith('wc2026_scorers_'))
                     .forEach(key => localStorage.removeItem(key));
-                localStorage.setItem(versionKey, 'v2');
+                localStorage.setItem(versionKey, 'v3');
             } catch (_) {
                 // The in-memory cache remains available when browser storage is unavailable.
             }
@@ -5608,8 +5638,8 @@
 
             const detail = scorerDetails.get(String(game.id));
             const scorerData = detail && !detail.loading && !detail.error ? detail : game;
-            const homeGoals = scorerEntries(scorerData.home_scorers);
-            const awayGoals = scorerEntries(scorerData.away_scorers);
+            const homeGoals = goalEntries(scorerData.home_goal_details, scorerData.home_scorers);
+            const awayGoals = goalEntries(scorerData.away_goal_details, scorerData.away_scorers);
 
             dialog.innerHTML = `
                 <div class="scorer-dialog-panel" role="dialog" aria-modal="true" aria-label="Chi tiết trận đấu">
@@ -5619,10 +5649,10 @@
                     ${!detail?.loading && !detail?.error && (homeGoals.length || awayGoals.length) ? `
                         <div class="scorer-dialog-goals">
                             <div class="scorer-dialog-team home">
-                                ${homeGoals.length ? homeGoals.map(goal => `<span>${escapeHtml(goal)}</span>`).join('') : '<span class="scorer-empty">-</span>'}
+                                ${homeGoals.length ? renderGoalEntries(homeGoals) : '<span class="scorer-empty">-</span>'}
                             </div>
                             <div class="scorer-dialog-team away">
-                                ${awayGoals.length ? awayGoals.map(goal => `<span>${escapeHtml(goal)}</span>`).join('') : '<span class="scorer-empty">-</span>'}
+                                ${awayGoals.length ? renderGoalEntries(awayGoals) : '<span class="scorer-empty">-</span>'}
                             </div>
                         </div>
                     ` : ''}
