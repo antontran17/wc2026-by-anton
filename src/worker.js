@@ -267,7 +267,7 @@ function espnDateCandidates(localDate) {
 }
 
 function espnTeamAlias(value) {
-  const normalized = alias(value);
+  const key = normalized(value).replace(/[^a-z0-9]/g, '');
   const aliases = {
     usa: 'unitedstates',
     unitedstates: 'unitedstates',
@@ -280,7 +280,7 @@ function espnTeamAlias(value) {
     congodr: 'drcongo',
     drcongo: 'drcongo'
   };
-  return aliases[normalized] || normalized;
+  return aliases[key] || key;
 }
 
 async function espnScorers(id) {
