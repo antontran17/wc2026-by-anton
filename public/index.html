@@ -4494,28 +4494,22 @@
                 background-clip: text !important;
             }
             }
-        }
-
-        @keyframes glowGreenRow {
+        @keyframes glowGreenTD {
             0% { background-color: rgba(0, 255, 135, 0.05); }
             100% { background-color: rgba(0, 255, 135, 0.45); }
         }
-        @keyframes glowBlueRow {
+        @keyframes glowBlueTD {
             0% { background-color: rgba(0, 150, 255, 0.05); }
             100% { background-color: rgba(0, 150, 255, 0.45); }
         }
-        @keyframes glowRedRow {
+        @keyframes glowRedTD {
             0% { background-color: rgba(227, 28, 61, 0.05); }
             100% { background-color: rgba(227, 28, 61, 0.45); }
         }
         
-        .qualified-1st { animation: glowGreenRow 2s infinite alternate ease-in-out; }
-        .qualified-2nd { animation: glowBlueRow 2s infinite alternate ease-in-out; }
-        .qualified-3rd { animation: glowRedRow 2s infinite alternate ease-in-out; }
-        
-        .qualified-1st td, .qualified-2nd td, .qualified-3rd td {
-            background: transparent !important;
-        }
+        .qualified-1st td { animation: glowGreenTD 2s infinite alternate ease-in-out; }
+        .qualified-2nd td { animation: glowBlueTD 2s infinite alternate ease-in-out; }
+        .qualified-3rd td { animation: glowRedTD 2s infinite alternate ease-in-out; }
 
         .qualified-1st td:first-child { border-left: 3px solid rgba(0, 255, 135, 1) !important; }
         .qualified-2nd td:first-child { border-left: 3px solid rgba(0, 150, 255, 1) !important; }
