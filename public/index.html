@@ -6486,8 +6486,21 @@
                 tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px;">CHƯA CÓ DỮ LIỆU</td></tr>';
                 return;
             }
+            const computedGroups = buildGroupStandings(groupsData);
+            let allComputedTeams = [];
+            computedGroups.forEach(g => {
+                if (g.teams) allComputedTeams = allComputedTeams.concat(g.teams);
+            });
             
-            const sorted = [...teamsData].sort((a, b) => {
+            const combinedTeams = teamsData.map(t => {
+                const cTeam = allComputedTeams.find(c => String(c.team_id) === String(t.id));
+                if (cTeam) {
+                    return { ...t, mp: cTeam.mp, w: cTeam.w, d: cTeam.d, l: cTeam.l, gf: cTeam.gf, ga: cTeam.ga, gd: cTeam.gd, pts: cTeam.pts };
+                }
+                return t;
+            });
+            
+            const sorted = combinedTeams.sort((a, b) => {
                 const ptsA = statNumber(a.pts);
                 const ptsB = statNumber(b.pts);
                 if (ptsA !== ptsB) return ptsB - ptsA;
