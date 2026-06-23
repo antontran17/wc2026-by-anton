@@ -440,6 +440,7 @@ async function tournamentStatistics() {
       const espnTeam = athlete.team || {};
       const local = localTeam({ name: espnTeam.displayName, shortName: espnTeam.name, tla: espnTeam.abbreviation });
       const id = String(athlete.id || '');
+      const appStat = athlete.statistics?.find(s => s.name === 'appearances');
       return {
         id,
         name: athlete.displayName || 'Unknown',
@@ -447,7 +448,8 @@ async function tournamentStatistics() {
         team: local?.fifa_code || espnTeam.abbreviation || espnTeam.displayName || '',
         flag: local?.flag || espnTeam.logos?.[0]?.href || '',
         value: Number(leader.value) || 0,
-        secondary: secondaryValues.get(id) || 0
+        secondary: secondaryValues.get(id) || 0,
+        matches_played: appStat ? Number(appStat.value) : undefined
       };
       }).sort((a, b) => b.value - a.value || b.secondary - a.secondary || a.name.localeCompare(b.name));
       let previous = null;
