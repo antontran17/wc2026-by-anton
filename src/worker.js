@@ -456,7 +456,7 @@ async function tournamentStatistics() {
         if (!previous || player.value !== previous.value || player.secondary !== previous.secondary) rank = index + 1;
         previous = player;
         return { ...player, rank };
-      }).slice(0, 7);
+      }).slice(0, 12);
     };
     return { goals: rows(goalLeaders, assistValues), assists: rows(assistLeaders, goalValues), source: 'espn', updated_at: data.timestamp || new Date().toISOString() };
   } finally {
