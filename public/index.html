@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi" dir="ltr">
 <head>
     <meta charset="UTF-8">
@@ -5272,8 +5272,8 @@
                 const response = await fetch(`${API_BASE}/get/statistics?fresh=${Date.now()}`, { cache: 'no-store' });
                 if (!response.ok) throw new Error('Statistics request failed');
                 const data = await response.json();
-                const goals = (data.goals || []).slice(0, 7);
-                const assists = (data.assists || []).slice(0, 7);
+                const goals = (data.goals || []).slice(0, 12);
+                const assists = (data.assists || []).slice(0, 12);
                 renderStatisticsTable('goals-statistics', goals, 'BÀN');
                 renderStatisticsTable('assists-statistics', assists, 'KT');
             } catch (_) {
