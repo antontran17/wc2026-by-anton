@@ -5431,7 +5431,7 @@
                         <span class="statistics-rank">${Number(player.rank) || '–'}</span>
                         <span class="statistics-player" title="${escapeHtml(player.name)}">${escapeHtml(player.name)}</span>
                         ${player.flag ? `<img class="statistics-flag" src="${escapeHtml(player.flag)}" alt="${escapeHtml(player.team)}">` : `<span>${escapeHtml(player.team || '-')}</span>`}
-                        <span class="statistics-value">${Number(player.matches_played) || 0}</span>
+                        <span class="statistics-value">${player.matches_played !== undefined ? Number(player.matches_played) : (teamsData.find(t => t.id === player.team_id)?.mp || 0)}</span>
                         <span class="statistics-value">${Number(player.value) || 0}</span>
                     </div>
                 `).join('')}
