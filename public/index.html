@@ -5025,11 +5025,8 @@
         }
     </style>
     <style id="anton-hide-overall-ranking-mobile">
-        @media (max-width: 768px) {
-            a[href="#overall-ranking"],
-            #overall-ranking {
-                display: none !important;
-            }
+        @media (max-width: 800px) {
+            .desktop-only { display: none !important; }
         }
     </style>
 </head>
@@ -5052,7 +5049,7 @@
                     <a href="#groups" data-i18n="nav_groups">BẢNG ĐẤU</a>
                     <a href="#statistics">THÀNH TÍCH</a>
                     <a href="#teams" data-i18n="nav_teams">ĐỘI TUYỂN</a>
-                    <a href="#overall-ranking">BXH TỔNG</a>
+                    <a href="#overall-ranking" class="desktop-only">BXH TỔNG</a>
                 </nav>
             </div>
         </div>
@@ -5159,7 +5156,7 @@
     </section>
 
     <!-- Overall Ranking Section -->
-    <section id="overall-ranking">
+    <section id="overall-ranking" class="desktop-only">
         <div class="container">
             <div class="section-header">
                 <h2>XẾP HẠNG TỔNG</h2>
