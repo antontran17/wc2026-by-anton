@@ -4824,9 +4824,9 @@
         .statistics-panel { border: 1px solid rgba(145, 161, 255, .30); border-radius: 8px; background: rgba(32, 26, 83, .72); overflow: hidden; }
         .statistics-panel h3 { margin: 0; padding: 15px 18px 12px; font-size: 18px; font-weight: 700; color: #fff; }
         .statistics-table { min-height: 86px; }
-        .statistics-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) 42px 42px; align-items: center; column-gap: 10px; min-height: 48px; padding: 7px 16px; border-top: 1px solid rgba(255,255,255,.08); }
+        .statistics-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) 42px 55px 42px; align-items: center; column-gap: 10px; min-height: 48px; padding: 7px 16px; border-top: 1px solid rgba(255,255,255,.08); }
         .statistics-row.head { min-height: 34px; color: rgba(239,243,255,.60); font-size: 10px; font-weight: 700; }
-        .statistics-row > :first-child, .statistics-row > :nth-child(3), .statistics-row > :nth-child(4) { text-align: center; }
+        .statistics-row > :first-child, .statistics-row > :nth-child(3), .statistics-row > :nth-child(4), .statistics-row > :nth-child(5) { text-align: center; }
         .statistics-row > :nth-child(2) { min-width: 0; }
         .statistics-player { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; font-size: 14px; font-weight: 700; }
         .statistics-flag { width: 28px; height: 19px; object-fit: cover; border-radius: 3px; }
@@ -4838,7 +4838,7 @@
             #statistics { padding: 24px 0 10px; }
             .statistics-grid { grid-template-columns: 1fr; gap: 12px; }
             .statistics-panel h3 { padding: 13px 14px 10px; font-size: 16px; }
-            .statistics-row { grid-template-columns: 32px minmax(0, 1fr) 38px 34px; min-height: 44px; padding: 6px 12px; column-gap: 6px; }
+            .statistics-row { grid-template-columns: 32px minmax(0, 1fr) 38px 45px 34px; min-height: 44px; padding: 6px 12px; column-gap: 6px; }
             .statistics-player { font-size: 13px; }
             .statistics-value, .statistics-rank { font-size: 14px; }
         }
@@ -5255,12 +5255,13 @@
                 return;
             }
             target.innerHTML = `
-                <div class="statistics-row head"><span>HẠNG</span><span>CẦU THỦ</span><span>ĐỘI</span><span>${label}</span></div>
+                <div class="statistics-row head"><span>HẠNG</span><span>CẦU THỦ</span><span>ĐỘI</span><span>SỐ TRẬN</span><span>${label}</span></div>
                 ${players.map(player => `
                     <div class="statistics-row">
                         <span class="statistics-rank">${Number(player.rank) || '–'}</span>
                         <span class="statistics-player" title="${escapeHtml(player.name)}">${escapeHtml(player.name)}</span>
                         ${player.flag ? `<img class="statistics-flag" src="${escapeHtml(player.flag)}" alt="${escapeHtml(player.team)}">` : `<span>${escapeHtml(player.team || '-')}</span>`}
+                        <span class="statistics-value">${Number(player.matches_played) || 0}</span>
                         <span class="statistics-value">${Number(player.value) || 0}</span>
                     </div>
                 `).join('')}
