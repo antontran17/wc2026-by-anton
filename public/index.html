@@ -4505,24 +4505,30 @@
             }
         }
 
-        @keyframes glowGreen {
-            0% { box-shadow: inset 0 0 0 rgba(0, 255, 135, 0); background-color: rgba(0, 255, 135, 0.0); }
-            100% { box-shadow: inset 4px 0 10px rgba(0, 255, 135, 0.4); background-color: rgba(0, 255, 135, 0.05); }
+        @keyframes glowGreenRow {
+            0% { background-color: rgba(0, 255, 135, 0.02); }
+            100% { background-color: rgba(0, 255, 135, 0.25); }
         }
-        @keyframes glowBlue {
-            0% { box-shadow: inset 0 0 0 rgba(0, 150, 255, 0); background-color: rgba(0, 150, 255, 0.0); }
-            100% { box-shadow: inset 4px 0 10px rgba(0, 150, 255, 0.4); background-color: rgba(0, 150, 255, 0.05); }
+        @keyframes glowBlueRow {
+            0% { background-color: rgba(0, 150, 255, 0.02); }
+            100% { background-color: rgba(0, 150, 255, 0.25); }
         }
-        @keyframes glowRed {
-            0% { box-shadow: inset 0 0 0 rgba(227, 28, 61, 0); background-color: rgba(227, 28, 61, 0.0); }
-            100% { box-shadow: inset 4px 0 10px rgba(227, 28, 61, 0.4); background-color: rgba(227, 28, 61, 0.05); }
+        @keyframes glowRedRow {
+            0% { background-color: rgba(227, 28, 61, 0.02); }
+            100% { background-color: rgba(227, 28, 61, 0.25); }
         }
-        .qualified-1st td { animation: glowGreen 2s infinite alternate ease-in-out; }
-        .qualified-2nd td { animation: glowBlue 2s infinite alternate ease-in-out; }
-        .qualified-3rd td { animation: glowRed 2s infinite alternate ease-in-out; }
-        .qualified-1st td:first-child { border-left: 3px solid rgba(0, 255, 135, 0.8); }
-        .qualified-2nd td:first-child { border-left: 3px solid rgba(0, 150, 255, 0.8); }
-        .qualified-3rd td:first-child { border-left: 3px solid rgba(227, 28, 61, 0.8); }
+        
+        .qualified-1st { animation: glowGreenRow 2s infinite alternate ease-in-out; }
+        .qualified-2nd { animation: glowBlueRow 2s infinite alternate ease-in-out; }
+        .qualified-3rd { animation: glowRedRow 2s infinite alternate ease-in-out; }
+        
+        .qualified-1st td, .qualified-2nd td, .qualified-3rd td {
+            background: transparent !important;
+        }
+
+        .qualified-1st td:first-child { border-left: 3px solid rgba(0, 255, 135, 1) !important; }
+        .qualified-2nd td:first-child { border-left: 3px solid rgba(0, 150, 255, 1) !important; }
+        .qualified-3rd td:first-child { border-left: 3px solid rgba(227, 28, 61, 1) !important; }
     </style>
     <style id="anton-match-dialog-and-mobile-density">
         .scorer-dialog-panel {
