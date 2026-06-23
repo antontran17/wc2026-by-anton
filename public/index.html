@@ -5701,7 +5701,7 @@
 
         function scheduleStageTitle(key) {
             if (key === 'GROUP') return 'VÒNG BẢNG';
-            return `LỊCH ${stageLabel(key)}`;
+            return stageLabel(key);
         }
 
         function hasResolvedCandidate(game) {
