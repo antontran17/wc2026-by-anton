@@ -4866,6 +4866,116 @@
             .statistics-value, .statistics-rank { font-size: 14px; }
         }
     </style>
+    <style id="anton-menu-refresh-patch">
+        /* Khắc phục menu lệch dọc và lỗi tràn viền hover */
+        .header-content nav {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 32px !important;
+        }
+        .header-content nav a {
+            position: relative !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 100% !important;
+            padding: 0 4px !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: rgba(242, 246, 255, 0.86) !important;
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            transition: color 0.3s ease !important;
+            line-height: normal !important;
+        }
+        .header-content nav a::after {
+            content: "" !important;
+            position: absolute !important;
+            bottom: -2px !important;
+            left: 50% !important;
+            width: 0 !important;
+            height: 3px !important;
+            background: #ffe2a7 !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            transform: translateX(-50%) !important;
+            border-radius: 3px !important;
+            box-shadow: 0 0 8px rgba(255, 226, 167, 0.6) !important;
+        }
+        .header-content nav a:hover::after,
+        .header-content nav a.active::after {
+            width: 100% !important;
+        }
+        .header-content nav a:hover,
+        .header-content nav a.active {
+            color: #ffe2a7 !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            text-shadow: 0 0 10px rgba(255, 226, 167, 0.4) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        /* Nút refresh trôi góc trái dưới */
+        .floating-refresh-btn {
+            position: fixed !important;
+            bottom: 24px !important;
+            left: 24px !important;
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 50% !important;
+            background: linear-gradient(135deg, rgba(8, 10, 42, 0.8), rgba(28, 33, 86, 0.8)) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            border: 1px solid rgba(142, 162, 255, 0.3) !important;
+            color: rgba(242, 246, 255, 0.9) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 20px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(142, 162, 255, 0.2) !important;
+            cursor: pointer !important;
+            z-index: 9999 !important;
+            transition: all 0.3s ease !important;
+            padding: 0 !important;
+            outline: none !important;
+        }
+        .floating-refresh-btn:hover {
+            transform: scale(1.1) rotate(180deg) !important;
+            background: linear-gradient(135deg, rgba(28, 33, 86, 0.9), rgba(50, 58, 128, 0.9)) !important;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6), 0 0 25px rgba(142, 162, 255, 0.4) !important;
+            border-color: rgba(142, 162, 255, 0.6) !important;
+            color: #fff !important;
+        }
+        .floating-refresh-btn:active {
+            transform: scale(0.9) rotate(180deg) !important;
+        }
+
+        @media (max-width: 640px) {
+            .header-content nav {
+                width: 100% !important;
+                display: flex !important;
+                justify-content: space-around !important;
+                gap: 0 !important;
+                padding: 0 4px !important;
+            }
+            .header-content nav a {
+                font-size: 11px !important;
+                padding: 0 !important;
+                flex: 1 !important;
+                white-space: nowrap !important;
+            }
+            .floating-refresh-btn {
+                bottom: 16px !important;
+                left: 16px !important;
+                width: 44px !important;
+                height: 44px !important;
+                font-size: 18px !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- SEO fallback content for crawlers that don't execute JavaScript -->
@@ -4886,10 +4996,15 @@
                     <a href="#groups" data-i18n="nav_groups">BẢNG ĐẤU</a>
                     <a href="#teams" data-i18n="nav_teams">ĐỘI TUYỂN</a>
                     <a href="#statistics">THỐNG KÊ</a>
-                    <button id="header-refresh-btn" class="header-refresh-btn" onclick="refreshData()" aria-label="Tải lại">TẢI LẠI</button></nav>
+                </nav>
             </div>
         </div>
     </header>
+
+    <!-- Nút tải lại cố định góc trái dưới -->
+    <button id="floating-refresh-btn" class="floating-refresh-btn" onclick="refreshData()" aria-label="Tải lại">
+        <i class="fa-solid fa-arrows-rotate"></i>
+    </button>
 
     <!-- Hero Section -->
     <section class="hero clean-hero">
