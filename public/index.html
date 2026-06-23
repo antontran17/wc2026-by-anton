@@ -5026,8 +5026,9 @@
                 <nav>
                     <a href="#matches" data-i18n="nav_matches">LỊCH ĐẤU</a>
                     <a href="#groups" data-i18n="nav_groups">BẢNG ĐẤU</a>
-                    <a href="#teams" data-i18n="nav_teams">ĐỘI TUYỂN</a>
                     <a href="#statistics">THỐNG KÊ</a>
+                    <a href="#teams" data-i18n="nav_teams">ĐỘI TUYỂN</a>
+                    <a href="#overall-ranking">BXH TỔNG</a>
                 </nav>
             </div>
         </div>
@@ -5109,6 +5110,35 @@
                     <h3>VUA KIẾN TẠO</h3>
                     <div class="statistics-table" id="assists-statistics"><span class="statistics-loading">ĐANG TẢI...</span></div>
                 </div>
+            </div>
+        </div>
+    </section>
+    <!-- Overall Ranking Section -->
+    <section id="overall-ranking">
+        <div class="container">
+            <div class="section-header">
+                <h2>XẾP HẠNG TỔNG</h2>
+            </div>
+            <div class="group-card">
+                <table class="group-table" style="margin-top:0;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th style="text-align:left; padding-left:15px;">ĐỘI</th>
+                            <th>TRẬN</th>
+                            <th>W</th>
+                            <th>D</th>
+                            <th>L</th>
+                            <th>BT</th>
+                            <th>BB</th>
+                            <th>HS</th>
+                            <th>PTS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="overall-ranking-tbody">
+                        <tr><td colspan="10" style="text-align:center; padding: 20px;">ĐANG TẢI...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </section>
@@ -5277,6 +5307,7 @@
             
             // Re-render with new language
             if (teamsData.length > 0) renderTeams(teamsData);
+            if (teamsData.length > 0) renderOverallRanking();
             if (gamesData.length > 0) renderMatches(gamesData);
             if (groupsData.length > 0) renderGroups(groupsData);
         }
@@ -5406,6 +5437,7 @@
                 });
                 
                 renderTeams(teamsData);
+                renderOverallRanking();
                 renderMatches(gamesData);
                 renderGroups(groupsData);
                 loadStatistics();
@@ -6436,14 +6468,69 @@
             });
 
             grid.innerHTML = sortedTeams.map(team => `
-                <div class="team-card ${favoriteTeams.has(String(team.id)) ? 'favorite-team-card' : ''}" id="team-card-${team.id}" data-team-id="${team.id}">
-                    <button class="fav-btn team-fav ${favoriteTeams.has(String(team.id)) ? 'active' : ''}" onclick="toggleFavoriteTeam('${team.id}')" aria-label="Yêu thích đội">${favoriteTeams.has(String(team.id)) ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-light fa-star"></i>'}</button>
+                <div class="team-card ${favoriteTeams.has(String(team.id)) ? 'favorite-team-card' : ''}" id="team-card-${team.id}" data-team-id="${team.id}" onclick="if(!event.target.closest('.fav-btn')) window.open('https://en.wikipedia.org/wiki/' + encodeURIComponent('${team.name_en}') + '_national_football_team', '_blank')" style="cursor: pointer;">
+                    <button class="fav-btn team-fav ${favoriteTeams.has(String(team.id)) ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavoriteTeam('${team.id}')" aria-label="Yêu thích đội">${favoriteTeams.has(String(team.id)) ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-light fa-star"></i>'}</button>
                     <img class="team-flag ${favoriteTeams.has(String(team.id)) ? 'favorite-flag' : ''}" src="${team.flag || ''}" alt="${team.name_en}" onerror="this.src='https://via.placeholder.com/80x55?text=Flag'">
                     <span class="team-name">${team.name_en}</span>
                     <span class="team-group">${translations[currentLang].group} ${team.groups || '-'}</span>
                     <span class="fifa-code">${team.fifa_code || ''}</span>
                 </div>
             `).join('');
+        }
+
+        // Render Overall Ranking
+        function renderOverallRanking() {
+            const tbody = document.getElementById('overall-ranking-tbody');
+            if (!tbody) return;
+            if (!teamsData || teamsData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px;">CHƯA CÓ DỮ LIỆU</td></tr>';
+                return;
+            }
+            
+            const sorted = [...teamsData].sort((a, b) => {
+                const ptsA = statNumber(a.pts);
+                const ptsB = statNumber(b.pts);
+                if (ptsA !== ptsB) return ptsB - ptsA;
+                
+                const gdA = statNumber(a.gd);
+                const gdB = statNumber(b.gd);
+                if (gdA !== gdB) return gdB - gdA;
+                
+                const gfA = statNumber(a.gf);
+                const gfB = statNumber(b.gf);
+                if (gfA !== gfB) return gfB - gfA;
+                
+                const nameA = String(a.name_en || '').toUpperCase();
+                const nameB = String(b.name_en || '').toUpperCase();
+                return nameA.localeCompare(nameB, 'en', { sensitivity: 'base' });
+            });
+
+            tbody.innerHTML = sorted.map((team, index) => {
+                let rowClass = '';
+                if (statNumber(team.mp) > 0) {
+                    if (index < 32) rowClass = 'qualified-1st';
+                }
+
+                return `
+                    <tr class="${rowClass}">
+                        <td><span class="rank" style="font-weight:700;">${index + 1}</span></td>
+                        <td>
+                            <div class="team-cell" onclick="scrollToTeam('${team.id}')" style="cursor:pointer;" title="Xem đội tuyển">
+                                <img src="${team.flag || ''}" alt="${team.name_en || ''}" onerror="this.style.display='none'">
+                                <span class="team-name-text">${teamCode(team, team.name_en || 'TBD')}</span>
+                            </div>
+                        </td>
+                        <td>${statNumber(team.mp)}</td>
+                        <td>${statNumber(team.w)}</td>
+                        <td>${statNumber(team.d)}</td>
+                        <td>${statNumber(team.l)}</td>
+                        <td>${statNumber(team.gf)}</td>
+                        <td>${statNumber(team.ga)}</td>
+                        <td>${statNumber(team.gd)}</td>
+                        <td><strong>${statNumber(team.pts)}</strong></td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // Render Groups
