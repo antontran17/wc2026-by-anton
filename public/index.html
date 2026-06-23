@@ -3831,9 +3831,13 @@
         }
 
         .match-card:hover,
-        .team-card:hover,
-        .group-card:hover {
+        .team-card:hover {
             transform: translateY(-8px) scale(1.055) !important;
+            z-index: 20 !important;
+        }
+        
+        .group-card:hover {
+            transform: translateY(-2px) !important;
             z-index: 20 !important;
             box-shadow:
                 0 28px 68px rgba(0,0,0,.38),
@@ -4079,9 +4083,11 @@
 
         @media(max-width:640px){
             .match-card:hover,
-            .team-card:hover,
-            .group-card:hover {
+            .team-card:hover {
                 transform: translateY(-5px) scale(1.025) !important;
+            }
+            .group-card:hover {
+                transform: translateY(-2px) !important;
             }
 
             .match-card.has-favorite-team .match-fav {
