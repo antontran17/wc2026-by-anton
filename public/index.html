@@ -5274,6 +5274,14 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            // Force hide overall ranking on mobile instantly
+            if (window.innerWidth <= 800) {
+                const rankingLink = document.querySelector('a[href="#overall-ranking"]');
+                if (rankingLink) rankingLink.style.setProperty('display', 'none', 'important');
+                const rankingSection = document.getElementById('overall-ranking');
+                if (rankingSection) rankingSection.style.setProperty('display', 'none', 'important');
+            }
+            
             // Vietnamese-only clean version
             const savedLang = 'vi';
             setLanguage(savedLang);
