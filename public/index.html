@@ -4502,7 +4502,27 @@
                 -webkit-background-clip: text !important;
                 background-clip: text !important;
             }
+            }
         }
+
+        @keyframes glowGreen {
+            0% { box-shadow: inset 0 0 0 rgba(0, 255, 135, 0); background-color: rgba(0, 255, 135, 0.0); }
+            100% { box-shadow: inset 4px 0 10px rgba(0, 255, 135, 0.4); background-color: rgba(0, 255, 135, 0.05); }
+        }
+        @keyframes glowBlue {
+            0% { box-shadow: inset 0 0 0 rgba(0, 150, 255, 0); background-color: rgba(0, 150, 255, 0.0); }
+            100% { box-shadow: inset 4px 0 10px rgba(0, 150, 255, 0.4); background-color: rgba(0, 150, 255, 0.05); }
+        }
+        @keyframes glowRed {
+            0% { box-shadow: inset 0 0 0 rgba(227, 28, 61, 0); background-color: rgba(227, 28, 61, 0.0); }
+            100% { box-shadow: inset 4px 0 10px rgba(227, 28, 61, 0.4); background-color: rgba(227, 28, 61, 0.05); }
+        }
+        .qualified-1st td { animation: glowGreen 2s infinite alternate ease-in-out; }
+        .qualified-2nd td { animation: glowBlue 2s infinite alternate ease-in-out; }
+        .qualified-3rd td { animation: glowRed 2s infinite alternate ease-in-out; }
+        .qualified-1st td:first-child { border-left: 3px solid rgba(0, 255, 135, 0.8); }
+        .qualified-2nd td:first-child { border-left: 3px solid rgba(0, 150, 255, 0.8); }
+        .qualified-3rd td:first-child { border-left: 3px solid rgba(227, 28, 61, 0.8); }
     </style>
     <style id="anton-match-dialog-and-mobile-density">
         .scorer-dialog-panel {
@@ -6254,6 +6274,46 @@
             }));
         }
 
+        function getBestThirdPlacedTeams(groups) {
+            const thirdPlaced = [];
+            groups.forEach(group => {
+                const groupTeams = group.teams || [];
+                const sortedTeams = [...groupTeams].sort((a, b) => {
+                    const teamA = teamsData.find(t => t.id === a.team_id) || {};
+                    const teamB = teamsData.find(t => t.id === b.team_id) || {};
+                    const ptsDiff = statNumber(b.pts) - statNumber(a.pts);
+                    if (ptsDiff !== 0) return ptsDiff;
+                    const gdDiff = statNumber(b.gd) - statNumber(a.gd);
+                    if (gdDiff !== 0) return gdDiff;
+                    const gfDiff = statNumber(b.gf) - statNumber(a.gf);
+                    if (gfDiff !== 0) return gfDiff;
+                    const h2h = headToHeadScore(a.team_id, b.team_id, group.group || group.name);
+                    const h2hPtsDiff = h2h.bPts - h2h.aPts;
+                    if (h2hPtsDiff !== 0) return h2hPtsDiff;
+                    const h2hGdDiff = h2h.bGd - h2h.aGd;
+                    if (h2hGdDiff !== 0) return h2hGdDiff;
+                    const h2hGfDiff = h2h.bGf - h2h.aGf;
+                    if (h2hGfDiff !== 0) return h2hGfDiff;
+                    const nameA = teamCode(teamA, teamA.name_en || 'TBD');
+                    const nameB = teamCode(teamB, teamB.name_en || 'TBD');
+                    return nameA.localeCompare(nameB, 'en', { sensitivity: 'base' });
+                });
+                if (sortedTeams.length > 2) {
+                    thirdPlaced.push(sortedTeams[2]);
+                }
+            });
+            thirdPlaced.sort((a, b) => {
+                const ptsDiff = statNumber(b.pts) - statNumber(a.pts);
+                if (ptsDiff !== 0) return ptsDiff;
+                const gdDiff = statNumber(b.gd) - statNumber(a.gd);
+                if (gdDiff !== 0) return gdDiff;
+                const gfDiff = statNumber(b.gf) - statNumber(a.gf);
+                if (gfDiff !== 0) return gfDiff;
+                return 0;
+            });
+            return thirdPlaced.filter(t => statNumber(t.mp) > 0).slice(0, 8).map(t => t.team_id);
+        }
+
         function renderMatchGroup(title, items, className = '', compact = false) {
             if (!items.length) return '';
             return `
@@ -6399,6 +6459,9 @@
         function renderGroups(groups) {
             const grid = document.getElementById('groups-grid');
             const computedGroups = buildGroupStandings(groups);
+            
+            const groupStageGroups = computedGroups.filter(g => isGroupStageValue(g.group || g.name));
+            const bestThirdTeams = getBestThirdPlacedTeams(groupStageGroups);
 
             const filteredGroups = computedGroups
                 .filter(group => {
@@ -6469,8 +6532,15 @@
                                     const gdClass = gd > 0 ? 'stat-positive' : (gd < 0 ? 'stat-negative' : 'stat-zero');
                                     const rankClass = `rank-${index + 1}`;
                                     
+                                    let rowClass = '';
+                                    if (statNumber(teamInfo.mp) > 0) {
+                                        if (index === 0) rowClass = 'qualified-1st';
+                                        else if (index === 1) rowClass = 'qualified-2nd';
+                                        else if (index === 2 && bestThirdTeams.includes(teamInfo.team_id)) rowClass = 'qualified-3rd';
+                                    }
+                                    
                                     return `
-                                        <tr>
+                                        <tr class="${rowClass}">
                                             <td><span class="rank ${rankClass}">${index + 1}</span></td>
                                             <td>
                                                 <div class="team-cell">
