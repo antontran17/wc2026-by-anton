@@ -49,7 +49,9 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .fa-solid, .fa-regular { font-family: "Font Awesome 6 Free" !important; }
+        .fa-solid, .fa-solid::before, .fa-regular, .fa-regular::before { 
+            font-family: "Font Awesome 6 Free" !important; 
+        }
         .fa-solid, .fa-solid::before { font-weight: 900 !important; }
         .fa-regular, .fa-regular::before { font-weight: 400 !important; }
     </style>
