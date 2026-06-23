@@ -2,7 +2,7 @@
 <html lang="vi" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
     <!-- SEO Meta Tags -->
@@ -5027,6 +5027,10 @@
     <style id="anton-hide-overall-ranking-mobile">
         @media (max-width: 800px) {
             .desktop-only { display: none !important; }
+        }
+        html, body {
+            touch-action: pan-x pan-y !important;
+            -ms-touch-action: pan-x pan-y !important;
         }
     </style>
 </head>
