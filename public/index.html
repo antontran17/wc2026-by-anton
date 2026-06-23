@@ -771,6 +771,12 @@
             background: inherit !important;
             transform: none !important;
         }
+        .group-card.no-scale:hover {
+            transform: none !important;
+            box-shadow: 0 18px 44px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.10) !important;
+            border-color: inherit !important;
+            cursor: default !important;
+        }
 
         /* Qualify positions styling (Removed to support new WC26 glows) */
 
@@ -5117,13 +5123,34 @@
             </div>
         </div>
     </section>
+
+    <!-- Teams Section -->
+    <section id="teams">
+        <div class="container">
+            <div class="section-header">
+                <h2 data-i18n="teams_title">ĐỘI TUYỂN</h2>
+            </div>
+
+            <div class="tabs" id="team-tabs">
+                <!-- Group tabs will be generated -->
+            </div>
+            
+            <div class="cards-grid" id="teams-grid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span data-i18n="loading">ĐANG TẢI...</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Overall Ranking Section -->
     <section id="overall-ranking">
         <div class="container">
             <div class="section-header">
                 <h2>XẾP HẠNG TỔNG</h2>
             </div>
-            <div class="group-card">
+            <div class="group-card no-scale">
                 <table class="group-table no-hover" style="margin-top:0;">
                     <thead>
                         <tr>
@@ -5143,26 +5170,6 @@
                         <tr><td colspan="10" style="text-align:center; padding: 20px;">ĐANG TẢI...</td></tr>
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- Teams Section -->
-    <section id="teams">
-        <div class="container">
-            <div class="section-header">
-                <h2 data-i18n="teams_title">ĐỘI TUYỂN</h2>
-            </div>
-
-            <div class="tabs" id="team-tabs">
-                <!-- Group tabs will be generated -->
-            </div>
-            
-            <div class="cards-grid" id="teams-grid">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <span data-i18n="loading">ĐANG TẢI...</span>
-                </div>
             </div>
         </div>
     </section>
