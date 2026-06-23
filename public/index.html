@@ -771,26 +771,19 @@
         /* Qualify positions styling (Removed to support new WC26 glows) */
 
         .group-table .rank {
-            width: 30px;
-            height: 30px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
-            
-            font-size: 0.85rem;
+            font-size: 1rem;
+            color: #ffffff;
+            font-weight: 700;
         }
 
         .group-table .rank-1,
-        .group-table .rank-2 {
-            background: rgba(212, 175, 55, 0.2);
-            color: var(--secondary);
-        }
-
+        .group-table .rank-2,
         .group-table .rank-3,
         .group-table .rank-4 {
-            background: rgba(255,255,255,0.05);
-            color: var(--text-muted);
+            background: transparent;
         }
 
         .group-table .team-cell {
@@ -6512,7 +6505,7 @@
                         <table class="group-table">
                             <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th></th>
                                     <th style="text-align:left; padding-left:15px;">ĐỘI</th>
                                     <th>${translations[currentLang].mp}</th>
                                     <th>${translations[currentLang].w}</th>
