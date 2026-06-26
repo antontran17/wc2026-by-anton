@@ -5029,6 +5029,11 @@
         @media (max-width: 800px) {
             .desktop-only { display: none !important; }
         }
+        .overall-ranking-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
         html, body {
             touch-action: pan-x pan-y !important;
             -ms-touch-action: pan-x pan-y !important;
@@ -5166,26 +5171,48 @@
             <div class="section-header">
                 <h2>XẾP HẠNG TỔNG</h2>
             </div>
-            <div class="group-card no-scale">
-                <table class="group-table no-hover" style="margin-top:0;">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th style="text-align:left; padding-left:15px;">ĐỘI</th>
-                            <th>TRẬN</th>
-                            <th>W</th>
-                            <th>D</th>
-                            <th>L</th>
-                            <th>BT</th>
-                            <th>BB</th>
-                            <th>HS</th>
-                            <th>PTS</th>
-                        </tr>
-                    </thead>
-                    <tbody id="overall-ranking-tbody">
-                        <tr><td colspan="10" style="text-align:center; padding: 20px;">ĐANG TẢI...</td></tr>
-                    </tbody>
-                </table>
+            <div class="overall-ranking-split">
+                <div class="group-card no-scale">
+                    <table class="group-table no-hover" style="margin-top:0;">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th style="text-align:left; padding-left:15px;">ĐỘI</th>
+                                <th>TRẬN</th>
+                                <th>W</th>
+                                <th>D</th>
+                                <th>L</th>
+                                <th>BT</th>
+                                <th>BB</th>
+                                <th>HS</th>
+                                <th>PTS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overall-ranking-tbody-1">
+                            <tr><td colspan="10" style="text-align:center; padding: 20px;">ĐANG TẢI...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="group-card no-scale">
+                    <table class="group-table no-hover" style="margin-top:0;">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th style="text-align:left; padding-left:15px;">ĐỘI</th>
+                                <th>TRẬN</th>
+                                <th>W</th>
+                                <th>D</th>
+                                <th>L</th>
+                                <th>BT</th>
+                                <th>BB</th>
+                                <th>HS</th>
+                                <th>PTS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overall-ranking-tbody-2">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </section>
@@ -6515,10 +6542,12 @@
 
         // Render Overall Ranking
         function renderOverallRanking() {
-            const tbody = document.getElementById('overall-ranking-tbody');
-            if (!tbody) return;
+            const tbody1 = document.getElementById('overall-ranking-tbody-1');
+            const tbody2 = document.getElementById('overall-ranking-tbody-2');
+            if (!tbody1 || !tbody2) return;
             if (!teamsData || teamsData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px;">CHƯA CÓ DỮ LIỆU</td></tr>';
+                tbody1.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px;">CHƯA CÓ DỮ LIỆU</td></tr>';
+                tbody2.innerHTML = '';
                 return;
             }
             const computedGroups = buildGroupStandings(groupsData);
@@ -6580,7 +6609,10 @@
                 return nameA.localeCompare(nameB, 'en', { sensitivity: 'base' });
             });
 
-            tbody.innerHTML = sorted.map((team, index) => {
+            let html1 = '';
+            let html2 = '';
+            
+            sorted.forEach((team, index) => {
                 let rowClass = '';
                 if (statNumber(team.mp) > 0 && typeof team.group_rank !== 'undefined') {
                     if (team.group_rank === 0) rowClass = 'qualified-1st';
@@ -6588,7 +6620,7 @@
                     else if (team.group_rank === 2 && bestThirdTeams.includes(String(team.id))) rowClass = 'qualified-3rd';
                 }
 
-                return `
+                const rowHtml = `
                     <tr class="${rowClass}">
                         <td><span class="rank" style="font-weight:700;">${index + 1}</span></td>
                         <td>
@@ -6607,7 +6639,16 @@
                         <td><strong>${statNumber(team.pts)}</strong></td>
                     </tr>
                 `;
-            }).join('');
+                
+                if (index % 2 === 0) {
+                    html1 += rowHtml;
+                } else {
+                    html2 += rowHtml;
+                }
+            });
+            
+            tbody1.innerHTML = html1;
+            tbody2.innerHTML = html2;
         }
 
         // Render Groups
