@@ -6378,7 +6378,9 @@
                 return '<span class="match-status-pill">FT</span>';
             }
             if (status.includes('is-live')) {
-                return `<span class="match-status-pill live">${matchPhaseLabel(game)}${liveMinute(game) ? ` ${liveMinute(game)}` : ''}</span>`;
+                const minuteStr = liveMinute(game);
+                const label = minuteStr ? minuteStr : matchPhaseLabel(game);
+                return `<span class="match-status-pill live">${label}</span>`;
             }
             if (status.includes('is-upcoming')) return '<span class="match-status-pill upcoming">SẮP ĐÁ</span>';
             return '';
