@@ -151,8 +151,54 @@ async function fetchLatestGames(env) {
     });
     if (!source.ok) throw new Error(`football-data.org ${source.status}`);
     const data = await source.json();
-    if (!Array.isArray(data.matches) || !data.matches.length) throw new Error('Empty fixtures response');
-    return data.matches.map(mapMatch);
+    const apiMatches = data.matches || [];
+    
+    // Map directly from local matches to ensure all 104 games (especially R32 onwards with ID 73+) are returned properly.
+    return matches.map((local, index) => {
+        // Try to find the corresponding apiMatch
+        let apiMatch = null;
+        if (local.home_team_id && local.home_team_id !== '0' && local.away_team_id && local.away_team_id !== '0') {
+            apiMatch = apiMatches.find(m => {
+                const mHome = localTeam(m.homeTeam);
+                const mAway = localTeam(m.awayTeam);
+                return String(mHome?.id) === String(local.home_team_id) && String(mAway?.id) === String(local.away_team_id);
+            });
+        }
+        
+        // If not found by team, try chronological order for knockout matches
+        if (!apiMatch && local.type !== 'group') {
+            const localKnockouts = matches.filter(m => m.type !== 'group');
+            const apiKnockouts = apiMatches.filter(m => String(m.stage || '').toLowerCase().indexOf('group') === -1);
+            const knockoutIndex = localKnockouts.findIndex(m => String(m.id) === String(local.id));
+            if (knockoutIndex >= 0 && knockoutIndex < apiKnockouts.length) {
+                apiMatch = apiKnockouts[knockoutIndex];
+            }
+        }
+        
+        const status = String(apiMatch?.status || '').toUpperCase();
+        const finished = ['FINISHED', 'AWARDED'].includes(status);
+        const score = apiMatch?.score?.fullTime || {};
+        const penalties = apiMatch?.score?.penalties || {};
+        
+        return {
+            ...local,
+            id: String(local.id),
+            football_data_id: apiMatch?.id || '',
+            api_utc_date: apiMatch?.utcDate || '',
+            home_team_name_en: apiMatch?.homeTeam?.shortName || apiMatch?.homeTeam?.name || local.home_team_name_en,
+            away_team_name_en: apiMatch?.awayTeam?.shortName || apiMatch?.awayTeam?.name || local.away_team_name_en,
+            home_team_label: local.home_team_label || '',
+            away_team_label: local.away_team_label || '',
+            home_score: String(score.home ?? local.home_score ?? 0),
+            away_score: String(score.away ?? local.away_score ?? 0),
+            score_duration: apiMatch?.score?.duration || '',
+            home_penalties: penalties.home == null ? '' : String(penalties.home),
+            away_penalties: penalties.away == null ? '' : String(penalties.away),
+            finished: finished ? 'TRUE' : 'FALSE',
+            status: status || local.status || '',
+            time_elapsed: apiMatch ? (finished ? 'finished' : (['IN_PLAY', 'PAUSED'].includes(status) ? 'in_play' : 'notstarted')) : 'notstarted'
+        };
+    });
   } finally {
     clearTimeout(timeout);
   }
