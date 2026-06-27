@@ -5818,6 +5818,9 @@
                     const homeAbbrev = home.team?.abbreviation || '';
                     const awayAbbrev = away.team?.abbreviation || '';
                     
+                    const homePenScore = home.shootoutScore !== undefined ? String(home.shootoutScore) : '';
+                    const awayPenScore = away.shootoutScore !== undefined ? String(away.shootoutScore) : '';
+                    
                     const game = gamesData.find(g => {
                         const gHome = teamsData.find(t => String(t.id) === String(g.home_team_id));
                         const gAway = teamsData.find(t => String(t.id) === String(g.away_team_id));
@@ -5859,12 +5862,14 @@
                         espnOverrides.set(game.id, {
                             home_score: newHomeScore,
                             away_score: newAwayScore,
+                            home_penalties: homePenScore || game.home_penalties || '',
+                            away_penalties: awayPenScore || game.away_penalties || '',
                             finished: newFinished,
                             status: newStatus,
                             time_elapsed: newTime
                         });
                         
-                        if (game.home_score !== newHomeScore || game.away_score !== newAwayScore || game.status !== newStatus || game.time_elapsed !== newTime) {
+                        if (game.home_score !== newHomeScore || game.away_score !== newAwayScore || game.status !== newStatus || game.time_elapsed !== newTime || game.home_penalties !== homePenScore) {
                             Object.assign(game, espnOverrides.get(game.id));
                             hasChanges = true;
                         }
@@ -6114,6 +6119,18 @@
         function scoreCenter(game) {
             const hs = Number(game.home_score || 0);
             const as = Number(game.away_score || 0);
+            const hasPenalties = game.home_penalties !== undefined && game.home_penalties !== '' && game.status === 'PENALTY';
+            
+            if (hasPenalties) {
+                return `
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <span class="score-center"><span>${hs}</span><span>${as}</span></span>
+                    <span class="penalty-score" style="font-size:0.8em; color:#ffb703; font-weight:bold; margin-top:4px;">
+                        Pen: ${game.home_penalties} - ${game.away_penalties}
+                    </span>
+                </div>`;
+            }
+            
             return `<span class="score-center"><span>${hs}</span><span>${as}</span></span>`;
         }
 
