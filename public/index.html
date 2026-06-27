@@ -6630,10 +6630,13 @@
             }
 
             const displayGames = games.filter(hasRenderableParticipants);
+            const isOldMatchday = (g) => isGroupStageValue(g.group) && (String(g.matchday) === '1' || String(g.matchday) === '2');
+
             const live = sortByStartTime(displayGames.filter(g => matchStatusClass(g).includes('is-live'))).slice(0, 4);
-            const upcoming = sortByStartTime(displayGames.filter(g => matchStatusClass(g).includes('is-upcoming') && !live.some(x => String(x.id) === String(g.id)))).slice(0, 4);
+            const upcoming = sortByStartTime(displayGames.filter(g => !isOldMatchday(g) && matchStatusClass(g).includes('is-upcoming') && !live.some(x => String(x.id) === String(g.id)))).slice(0, 4);
             const results = sortByStartTime(displayGames.filter(g => {
                 const id = String(g.id);
+                if (isOldMatchday(g)) return false;
                 return isRecentResult(g) && !live.some(x => String(x.id) === id) && !upcoming.some(x => String(x.id) === id);
             })).slice(-6).reverse();
             const favorites = sortByStartTime(displayGames.filter(g => {
