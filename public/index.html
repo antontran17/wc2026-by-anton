@@ -5958,9 +5958,20 @@
             return /^[A-L]$/i.test(String(value || '').trim());
         }
 
+        function getMatchdayStr(game) {
+            let md = String(game.matchday || '');
+            if (!md && game.id) {
+                const idNum = parseInt(game.id, 10);
+                if (idNum >= 1 && idNum <= 24) return '1';
+                if (idNum >= 25 && idNum <= 48) return '2';
+                if (idNum >= 49 && idNum <= 72) return '3';
+            }
+            return md;
+        }
+
         function scheduleStageKey(game) {
             if (isGroupStageValue(game.group)) {
-                const md = String(game.matchday || '');
+                const md = getMatchdayStr(game);
                 if (md === '1' || md === '2') return 'GROUP_MD_OLD';
                 return md ? `GROUP_MD_${md}` : 'GROUP';
             }
@@ -5968,7 +5979,7 @@
         }
 
         function scheduleStageTitle(key) {
-            if (key === 'GROUP_MD_OLD') return 'TẤT CẢ TRẬN VÒNG BẢNG (LƯỢT 1 & 2)';
+            if (key === 'GROUP_MD_OLD') return 'TẤT CẢ TRẬN VÒNG BẢNG';
             if (key.startsWith('GROUP_MD_')) {
                 const md = key.replace('GROUP_MD_', '');
                 return `VÒNG BẢNG - LƯỢT ${md}`;
@@ -6633,7 +6644,11 @@
             }
 
             const displayGames = games.filter(hasRenderableParticipants);
-            const isOldMatchday = (g) => isGroupStageValue(g.group) && (String(g.matchday) === '1' || String(g.matchday) === '2');
+            const isOldMatchday = (g) => {
+                if (!isGroupStageValue(g.group)) return false;
+                const md = getMatchdayStr(g);
+                return md === '1' || md === '2';
+            };
 
             const live = sortByStartTime(displayGames.filter(g => matchStatusClass(g).includes('is-live'))).slice(0, 4);
             const upcoming = sortByStartTime(displayGames.filter(g => !isOldMatchday(g) && matchStatusClass(g).includes('is-upcoming') && !live.some(x => String(x.id) === String(g.id)))).slice(0, 4);
