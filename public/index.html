@@ -5069,16 +5069,44 @@
             margin-bottom: 10px;
             color: rgba(255,255,255,0.6);
         }
-        .bracket-match .team-row {
+        .bracket-match.horizontal-layout {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 4px 0;
+            gap: 12px;
+            padding: 12px 10px;
         }
-        .bracket-match .team-row.winner { font-weight: bold; color: #fff; }
-        .bracket-match .team-name-flag { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-        .bracket-match .team-score { font-size: 13px; font-weight: 700; }
-        .bracket-match .team-name-flag img { width: 16px; height: 12px; border-radius: 2px; }
+        .bracket-team {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            width: 70px;
+        }
+        .bracket-team img {
+            width: 30px;
+            height: 20px;
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        .bracket-team span {
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+            color: rgba(255,255,255,0.7);
+        }
+        .bracket-team.winner span {
+            font-weight: 800;
+            color: #fff;
+        }
+        .bracket-score {
+            font-weight: 800;
+            font-size: 16px;
+            background: rgba(0,0,0,0.4);
+            padding: 6px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -6839,29 +6867,30 @@
                     let matchesHtml = roundGames.map(game => {
                         const homeTeam = teamsData.find(t => t.id === game.home_team_id) || {};
                         const awayTeam = teamsData.find(t => t.id === game.away_team_id) || {};
-                        const homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || 'TBD';
-                        const awayLabel = game.away_team_name_en || awayTeam.name_en || game.away_team_label || 'TBD';
+                        let homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || 'TBD';
+                        let awayLabel = game.away_team_name_en || awayTeam.name_en || game.away_team_label || 'TBD';
+                        if (String(homeLabel).includes('undefined')) homeLabel = 'TBD';
+                        if (String(awayLabel).includes('undefined')) awayLabel = 'TBD';
+
                         const homeName = homeTeam.id ? teamCode(homeTeam, homeLabel) : pendingTeamLabel(homeLabel);
                         const awayName = awayTeam.id ? teamCode(awayTeam, awayLabel) : pendingTeamLabel(awayLabel);
                         const homeScore = game.home_score !== null ? game.home_score : '-';
                         const awayScore = game.away_score !== null ? game.away_score : '-';
                         const isHomeWin = (game.home_score !== null && game.home_score > game.away_score) || (game.home_pen !== null && game.home_pen > game.away_pen);
                         const isAwayWin = (game.home_score !== null && game.home_score < game.away_score) || (game.home_pen !== null && game.home_pen < game.away_pen);
+                        
                         return `
-                            <div class="bracket-match" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer;">
-                                <div class="team-row ${isHomeWin ? 'winner' : ''}">
-                                    <div class="team-name-flag">
-                                        <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
-                                        <span>${homeName}</span>
-                                    </div>
-                                    <span class="team-score">${homeScore}${game.home_pen !== null ? ` (${game.home_pen})` : ''}</span>
+                            <div class="bracket-match horizontal-layout" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer;">
+                                <div class="bracket-team ${isHomeWin ? 'winner' : ''}">
+                                    <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
+                                    <span>${homeName}</span>
                                 </div>
-                                <div class="team-row ${isAwayWin ? 'winner' : ''}">
-                                    <div class="team-name-flag">
-                                        <img src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
-                                        <span>${awayName}</span>
-                                    </div>
-                                    <span class="team-score">${awayScore}${game.away_pen !== null ? ` (${game.away_pen})` : ''}</span>
+                                <div class="bracket-score">
+                                    ${homeScore}${game.home_pen !== null ? `(${game.home_pen})` : ''} : ${awayScore}${game.away_pen !== null ? `(${game.away_pen})` : ''}
+                                </div>
+                                <div class="bracket-team ${isAwayWin ? 'winner' : ''}">
+                                    <img src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
+                                    <span>${awayName}</span>
                                 </div>
                             </div>
                         `;
