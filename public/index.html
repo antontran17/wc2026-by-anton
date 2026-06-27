@@ -6600,9 +6600,9 @@
             if (isCollapsibleGroup) {
                 return `
                     <div class="match-priority-group schedule-stage-group">
-                        <div class="match-priority-title toggle-header" onclick="const c = this.nextElementSibling; const i = this.querySelector('.toggle-icon'); if(c.style.display === 'none') { c.style.display = 'grid'; i.style.transform = 'rotate(0deg)'; } else { c.style.display = 'none'; i.style.transform = 'rotate(-90deg)'; }" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
-                            <span>${title}</span>
-                            <i class="fa-solid fa-chevron-down toggle-icon" style="transition: transform 0.2s; transform: rotate(-90deg);"></i>
+                        <div class="collapsed-stage-card toggle-card" onclick="const c = this.nextElementSibling; const i = this.querySelector('.toggle-icon'); if(c.style.display === 'none') { c.style.display = 'grid'; i.style.transform = 'rotate(180deg)'; this.style.marginBottom = '15px'; } else { c.style.display = 'none'; i.style.transform = 'rotate(0deg)'; this.style.marginBottom = '0'; }" style="cursor: pointer; margin-bottom: 0;">
+                            <strong>${title}</strong>
+                            <span>${sortedItems.length} trận <i class="fa-solid fa-chevron-down toggle-icon" style="margin-left: 8px; transition: transform 0.2s; transform: rotate(0deg);"></i></span>
                         </div>
                         <div class="cards-grid match-priority-grid stage-cards-container" style="display: none;">
                             ${sortedItems.map(game => renderSingleMatchCard(game)).join('')}
