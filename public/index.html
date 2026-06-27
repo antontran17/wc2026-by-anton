@@ -5223,43 +5223,30 @@
         </div>
     </section>
 
-    <!-- Matches Section -->
-    <section id="matches">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="visually-hidden-title" data-i18n="matches_title">LỊCH THI ĐẤU</h2>
-            </div>
+    <!-- 1. Đang diễn ra -->
+    <section id="section-live" class="matches-section"></section>
+    
+    <!-- 2. Kết quả -->
+    <section id="section-results" class="matches-section"></section>
+    
+    <!-- 3. Sắp diễn ra -->
+    <section id="section-upcoming" class="matches-section"></section>
+    
+    <!-- 4. Knockout Thẻ Trận -->
+    <section id="section-knockout" class="matches-section container" style="margin-top:20px;"></section>
 
-            <div class="mobile-filter-row">
-                <select class="mobile-filter-select" id="match-filter-select" onchange="filterMatches(this.value)" aria-label="Chọn bảng hoặc vòng">
-                    <option value="all">TẤT CẢ TRẬN</option>
-                </select>
-            </div>
-            
-            <div class="tabs" id="match-tabs">
-                <!-- Tabs will be generated dynamically -->
-            </div>
-            
-            <div class="cards-grid" id="matches-grid">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <span data-i18n="loading">ĐANG TẢI...</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
+    <!-- Knockout Cây đồ thị -->
     <section id="tournament-bracket" class="bracket-section" style="display:none;">
         <div class="container">
             <div class="section-header">
-                <h2>KNOCK OUT</h2>
+                <h2>KNOCK OUT BRACKET</h2>
             </div>
             <div class="bracket-wrapper" id="bracket-wrapper">
             </div>
         </div>
     </section>
 
-    <!-- Groups Section -->
+    <!-- 5. Groups Section -->
     <section id="groups">
         <div class="container">
             <div class="section-header">
@@ -5275,7 +5262,31 @@
         </div>
     </section>
 
-    <!-- Statistics Section -->
+    <!-- 6. Mớ thẻ trận vòng bảng -->
+    <section id="section-group-matches" class="matches-section container" style="margin-top:40px;">
+        <div class="section-header">
+            <h2 class="visually-hidden-title" data-i18n="matches_title">LỊCH THI ĐẤU VÒNG BẢNG</h2>
+        </div>
+
+        <div class="mobile-filter-row">
+            <select class="mobile-filter-select" id="match-filter-select" onchange="filterMatches(this.value)" aria-label="Chọn bảng">
+                <option value="all">TẤT CẢ TRẬN</option>
+            </select>
+        </div>
+        
+        <div class="tabs" id="match-tabs">
+            <!-- Tabs will be generated dynamically -->
+        </div>
+        
+        <div class="cards-grid" id="group-matches-content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <span data-i18n="loading">ĐANG TẢI...</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. Statistics Section -->
     <section id="statistics">
         <div class="container">
             <div class="section-header">
@@ -5294,27 +5305,7 @@
         </div>
     </section>
 
-    <!-- Teams Section -->
-    <section id="teams">
-        <div class="container">
-            <div class="section-header">
-                <h2 data-i18n="teams_title">ĐỘI TUYỂN</h2>
-            </div>
-
-            <div class="tabs" id="team-tabs">
-                <!-- Group tabs will be generated -->
-            </div>
-            
-            <div class="cards-grid" id="teams-grid">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <span data-i18n="loading">ĐANG TẢI...</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Overall Ranking Section -->
+    <!-- 8. Overall Ranking Section -->
     <section id="overall-ranking" class="desktop-only">
         <div class="container">
             <div class="section-header">
@@ -5361,6 +5352,26 @@
                         <tbody id="overall-ranking-tbody-2">
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. Teams Section -->
+    <section id="teams">
+        <div class="container">
+            <div class="section-header">
+                <h2 data-i18n="teams_title">ĐỘI TUYỂN</h2>
+            </div>
+
+            <div class="tabs" id="team-tabs">
+                <!-- Group tabs will be generated -->
+            </div>
+            
+            <div class="cards-grid" id="teams-grid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span data-i18n="loading">ĐANG TẢI...</span>
                 </div>
             </div>
         </div>
@@ -5958,32 +5969,11 @@
             return /^[A-L]$/i.test(String(value || '').trim());
         }
 
-        function getMatchdayStr(game) {
-            let md = String(game.matchday || '');
-            if (!md && game.id) {
-                const idNum = parseInt(game.id, 10);
-                if (idNum >= 1 && idNum <= 24) return '1';
-                if (idNum >= 25 && idNum <= 48) return '2';
-                if (idNum >= 49 && idNum <= 72) return '3';
-            }
-            return md;
-        }
-
         function scheduleStageKey(game) {
-            if (isGroupStageValue(game.group)) {
-                const md = getMatchdayStr(game);
-                if (md === '1' || md === '2') return 'GROUP_MD_OLD';
-                return md ? `GROUP_MD_${md}` : 'GROUP';
-            }
-            return String(game.group || 'OTHER').trim().toUpperCase();
+            return isGroupStageValue(game.group) ? 'GROUP' : String(game.group || 'OTHER').trim().toUpperCase();
         }
 
         function scheduleStageTitle(key) {
-            if (key === 'GROUP_MD_OLD') return 'TẤT CẢ TRẬN VÒNG BẢNG';
-            if (key.startsWith('GROUP_MD_')) {
-                const md = key.replace('GROUP_MD_', '');
-                return `VÒNG BẢNG - LƯỢT ${md}`;
-            }
             if (key === 'GROUP') return 'VÒNG BẢNG';
             return stageLabel(key);
         }
@@ -6594,32 +6584,17 @@
         function renderStageScheduleGroup(stageKey, items) {
             if (!items.length) return '';
             const sortedItems = sortByStartTime(items);
-            const isKnockout = !stageKey.startsWith('GROUP');
-            const isCollapsibleGroup = stageKey === 'GROUP_MD_OLD';
-            const collapsedKnockout = isKnockout && !sortedItems.some(hasResolvedCandidate);
+            const isKnockout = stageKey !== 'GROUP';
+            const collapsed = isKnockout && !sortedItems.some(hasResolvedCandidate);
             const title = scheduleStageTitle(stageKey);
 
-            if (collapsedKnockout) {
+            if (collapsed) {
                 return `
                     <div class="match-priority-group schedule-stage-group collapsed-stage-group">
                         <div class="match-priority-title">${title}</div>
                         <div class="collapsed-stage-card">
                             <strong>${title}</strong>
                             <span>${sortedItems.length} trận · chờ xác định đội</span>
-                        </div>
-                    </div>
-                `;
-            }
-
-            if (isCollapsibleGroup) {
-                return `
-                    <div class="match-priority-group schedule-stage-group">
-                        <div class="collapsed-stage-card toggle-card" onclick="const c = this.nextElementSibling; const i = this.querySelector('.toggle-icon'); if(c.style.display === 'none') { c.style.display = 'grid'; i.style.transform = 'rotate(180deg)'; this.style.marginBottom = '15px'; } else { c.style.display = 'none'; i.style.transform = 'rotate(0deg)'; this.style.marginBottom = '0'; }" style="cursor: pointer; margin-bottom: 0;">
-                            <strong>${title}</strong>
-                            <span>${sortedItems.length} trận <i class="fa-solid fa-chevron-down toggle-icon" style="margin-left: 8px; transition: transform 0.2s; transform: rotate(0deg);"></i></span>
-                        </div>
-                        <div class="cards-grid match-priority-grid stage-cards-container" style="display: none;">
-                            ${sortedItems.map(game => renderSingleMatchCard(game)).join('')}
                         </div>
                     </div>
                 `;
@@ -6636,25 +6611,20 @@
         }
 
         function renderMatchCards(games) {
-            const grid = document.getElementById('matches-grid');
-
             if (games.length === 0) {
-                grid.innerHTML = `<div class="no-data"><p>KHÔNG CÓ TRẬN ĐẤU NÀO</p></div>`;
+                document.getElementById('section-live').innerHTML = '';
+                document.getElementById('section-results').innerHTML = '';
+                document.getElementById('section-upcoming').innerHTML = '';
+                document.getElementById('section-knockout').innerHTML = '';
+                document.getElementById('group-matches-content').innerHTML = `<div class="no-data"><p>KHÔNG CÓ TRẬN ĐẤU NÀO</p></div>`;
                 return;
             }
 
             const displayGames = games.filter(hasRenderableParticipants);
-            const isOldMatchday = (g) => {
-                if (!isGroupStageValue(g.group)) return false;
-                const md = getMatchdayStr(g);
-                return md === '1' || md === '2';
-            };
-
             const live = sortByStartTime(displayGames.filter(g => matchStatusClass(g).includes('is-live'))).slice(0, 4);
-            const upcoming = sortByStartTime(displayGames.filter(g => !isOldMatchday(g) && matchStatusClass(g).includes('is-upcoming') && !live.some(x => String(x.id) === String(g.id)))).slice(0, 4);
+            const upcoming = sortByStartTime(displayGames.filter(g => matchStatusClass(g).includes('is-upcoming') && !live.some(x => String(x.id) === String(g.id)))).slice(0, 4);
             const results = sortByStartTime(displayGames.filter(g => {
                 const id = String(g.id);
-                if (isOldMatchday(g)) return false;
                 return isRecentResult(g) && !live.some(x => String(x.id) === id) && !upcoming.some(x => String(x.id) === id);
             })).slice(-6).reverse();
             const favorites = sortByStartTime(displayGames.filter(g => {
@@ -6666,12 +6636,14 @@
             const highlightedIds = new Set([...live, ...upcoming, ...results, ...favorites].map(g => String(g.id)));
             const rest = games.filter(g => !highlightedIds.has(String(g.id)));
 
-            const groupedHtml = [
-                renderMatchGroup('ĐANG DIỄN RA', live, 'live-group', true),
-                renderMatchGroup('KẾT QUẢ', results, 'results-group', true),
-                renderMatchGroup('SẮP DIỄN RA', upcoming, 'upcoming-group', true)
-            ].join('');
+            const liveHtml = live.length > 0 ? renderMatchGroup('ĐANG DIỄN RA', live, 'live-group', true) : '';
+            const resultsHtml = results.length > 0 ? renderMatchGroup('KẾT QUẢ', results, 'results-group', true) : '';
+            const upcomingHtml = upcoming.length > 0 ? renderMatchGroup('SẮP DIỄN RA', upcoming, 'upcoming-group', true) : '';
             const favoritesHtml = renderMatchGroup('YÊU THÍCH', favorites, 'favorite-group');
+
+            document.getElementById('section-live').innerHTML = liveHtml ? '<div class="container">' + liveHtml + '</div>' : '';
+            document.getElementById('section-results').innerHTML = resultsHtml ? '<div class="container">' + resultsHtml + '</div>' : '';
+            document.getElementById('section-upcoming').innerHTML = upcomingHtml ? '<div class="container">' + upcomingHtml + '</div>' : '';
 
             const stageBuckets = new Map();
             rest.forEach(game => {
@@ -6681,18 +6653,19 @@
             });
 
             const stageKeys = [...stageBuckets.keys()].sort((a, b) => {
-                const getOrder = (k) => {
-                    if (k === 'GROUP') return -7;
-                    if (k === 'GROUP_MD_OLD') return -10;
-                    if (k.startsWith('GROUP_MD_')) return -9 + parseInt(k.replace('GROUP_MD_', ''), 10);
-                    return stageSortValue(k);
-                };
-                return getOrder(a) - getOrder(b);
+                const orderA = a === 'GROUP' ? -1 : stageSortValue(a);
+                const orderB = b === 'GROUP' ? -1 : stageSortValue(b);
+                return orderA - orderB;
             });
 
-            const restHtml = stageKeys.map(key => renderStageScheduleGroup(key, stageBuckets.get(key))).join('');
+            const knockoutKeys = stageKeys.filter(k => k !== 'GROUP');
+            const groupKeys = stageKeys.filter(k => k === 'GROUP');
 
-            grid.innerHTML = groupedHtml + favoritesHtml + restHtml;
+            const knockoutHtml = knockoutKeys.map(key => renderStageScheduleGroup(key, stageBuckets.get(key))).join('');
+            document.getElementById('section-knockout').innerHTML = knockoutHtml ? knockoutHtml : '';
+
+            const groupHtml = groupKeys.map(key => renderStageScheduleGroup(key, stageBuckets.get(key))).join('');
+            document.getElementById('group-matches-content').innerHTML = favoritesHtml + groupHtml || '<div class="no-data"><p>KHÔNG CÓ TRẬN ĐẤU NÀO</p></div>';
         }
 
         // Render Teams
