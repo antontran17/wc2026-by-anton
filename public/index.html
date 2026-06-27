@@ -5081,24 +5081,30 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            padding: 12px 10px;
+            gap: 8px;
+            padding: 8px 10px;
         }
         .bracket-team {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            gap: 6px;
-            width: 70px;
+            gap: 8px;
+            flex: 1;
+        }
+        .bracket-team.right-align {
+            justify-content: flex-end;
+        }
+        .bracket-team.left-align {
+            justify-content: flex-start;
         }
         .bracket-team img {
-            width: 30px;
-            height: 20px;
-            border-radius: 3px;
+            width: 24px;
+            height: 16px;
+            border-radius: 2px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
         .bracket-team span {
-            font-size: 11px;
+            font-size: 12px;
             text-align: center;
             line-height: 1.2;
             color: rgba(255,255,255,0.7);
@@ -5106,6 +5112,35 @@
         .bracket-team.winner span {
             font-weight: 800;
             color: #fff;
+        }
+        .bracket-round:not(:first-child) .bracket-match-slot {
+            position: relative;
+        }
+        .bracket-round:not(:first-child) .bracket-match-slot::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 25%;
+            bottom: 25%;
+            width: 10px;
+            border-left: 2px solid #e53935;
+            border-top: 2px solid #e53935;
+            border-bottom: 2px solid #e53935;
+            border-radius: 4px 0 0 4px;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .bracket-round:not(:first-child) .bracket-match-slot::after {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            width: 10px;
+            height: 2px;
+            background-color: #e53935;
+            transform: translateY(-50%);
+            z-index: 0;
+            pointer-events: none;
         }
         .bracket-score {
             font-weight: 800;
@@ -6897,15 +6932,15 @@
                         
                         return `
                             <div class="bracket-match-slot" style="height: ${slotHeight}px">
-                                <div class="bracket-match horizontal-layout" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer;">
-                                    <div class="bracket-team ${isHomeWin ? 'winner' : ''}">
-                                        <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
+                                <div class="bracket-match horizontal-layout" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer; position:relative; z-index:1;">
+                                    <div class="bracket-team ${isHomeWin ? 'winner' : ''} right-align">
                                         <span>${homeName}</span>
+                                        <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
                                     </div>
                                     <div class="bracket-score">
                                         ${homeScore}${homePen} : ${awayScore}${awayPen}
                                     </div>
-                                    <div class="bracket-team ${isAwayWin ? 'winner' : ''}">
+                                    <div class="bracket-team ${isAwayWin ? 'winner' : ''} left-align">
                                         <img src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
                                         <span>${awayName}</span>
                                     </div>
