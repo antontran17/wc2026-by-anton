@@ -6981,7 +6981,7 @@
             
             sorted.forEach((team, index) => {
                 let rowClass = '';
-                if (statNumber(team.mp) === 3 && typeof team.group_rank !== 'undefined') {
+                if (statNumber(team.mp) > 0 && typeof team.group_rank !== 'undefined') {
                     if (team.group_rank === 0) rowClass = 'qualified-1st';
                     else if (team.group_rank === 1) rowClass = 'qualified-2nd';
                     else if (team.group_rank === 2 && bestThirdTeams.includes(String(team.id))) rowClass = 'qualified-3rd';
@@ -7096,7 +7096,7 @@
                                     const rankClass = `rank-${index + 1}`;
                                     
                                     let rowClass = '';
-                                    if (statNumber(teamInfo.mp) === 3) {
+                                    if (statNumber(teamInfo.mp) > 0) {
                                         if (index === 0) rowClass = 'qualified-1st';
                                         else if (index === 1) rowClass = 'qualified-2nd';
                                         else if (index === 2 && bestThirdTeams.includes(teamInfo.team_id)) rowClass = 'qualified-3rd';
