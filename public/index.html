@@ -6337,7 +6337,7 @@
 
         function liveMinute(game) {
             const raw = String(game.minute || game.elapsed || game.time_elapsed || '').trim();
-            const minute = raw.match(/^\d{1,3}$/);
+            const minute = raw.match(/^\d{1,3}(?:\+\d{1,2})?$/);
             return minute ? `${minute[0]}'` : '';
         }
 
