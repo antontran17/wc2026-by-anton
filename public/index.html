@@ -218,6 +218,7 @@
 
         html {
             scroll-behavior: smooth;
+            scroll-padding-top: 80px;
         }
 
         body {
@@ -6798,62 +6799,87 @@
 
         function resolveKnockoutTeams(games, computedGroups) {
             const positions = {};
+            const availableThirdTeams = [];
+
             computedGroups.forEach(g => {
                 const groupName = String(g.group || g.name || '').replace('GROUP_', '').replace('Group ', '').trim().toUpperCase();
                 if (g.teams && g.teams.length > 0) {
-                    const allFinished = g.teams.every(t => statNumber(t.mp) === 3);
-                    if (allFinished) {
-                        const sortedGroupTeams = [...g.teams].sort((a, b) => {
-                            const ptsDiff = statNumber(b.pts) - statNumber(a.pts);
-                            if (ptsDiff !== 0) return ptsDiff;
-                            const gdDiff = statNumber(b.gd) - statNumber(a.gd);
-                            if (gdDiff !== 0) return gdDiff;
-                            const gfDiff = statNumber(b.gf) - statNumber(a.gf);
-                            if (gfDiff !== 0) return gfDiff;
-                            const h2h = headToHeadScore(a.team_id, b.team_id, g.group || g.name);
-                            const h2hPtsDiff = h2h.bPts - h2h.aPts;
-                            if (h2hPtsDiff !== 0) return h2hPtsDiff;
-                            const h2hGdDiff = h2h.bGd - h2h.aGd;
-                            if (h2hGdDiff !== 0) return h2hGdDiff;
-                            const h2hGfDiff = h2h.bGf - h2h.aGf;
-                            if (h2hGfDiff !== 0) return h2hGfDiff;
-                            const teamA = teamsData.find(t => String(t.id) === String(a.team_id)) || {};
-                            const teamB = teamsData.find(t => String(t.id) === String(b.team_id)) || {};
-                            const nameA = teamCode(teamA, teamA.name_en || 'TBD');
-                            const nameB = teamCode(teamB, teamB.name_en || 'TBD');
-                            return nameA.localeCompare(nameB, 'en', { sensitivity: 'base' });
-                        });
-                        positions[groupName] = {
-                            1: sortedGroupTeams[0]?.team_id,
-                            2: sortedGroupTeams[1]?.team_id
-                        };
+                    const sortedGroupTeams = [...g.teams].sort((a, b) => {
+                        const ptsDiff = statNumber(b.pts) - statNumber(a.pts);
+                        if (ptsDiff !== 0) return ptsDiff;
+                        const gdDiff = statNumber(b.gd) - statNumber(a.gd);
+                        if (gdDiff !== 0) return gdDiff;
+                        const gfDiff = statNumber(b.gf) - statNumber(a.gf);
+                        if (gfDiff !== 0) return gfDiff;
+                        const h2h = headToHeadScore(a.team_id, b.team_id, g.group || g.name);
+                        const h2hPtsDiff = h2h.bPts - h2h.aPts;
+                        if (h2hPtsDiff !== 0) return h2hPtsDiff;
+                        const h2hGdDiff = h2h.bGd - h2h.aGd;
+                        if (h2hGdDiff !== 0) return h2hGdDiff;
+                        const h2hGfDiff = h2h.bGf - h2h.aGf;
+                        if (h2hGfDiff !== 0) return h2hGfDiff;
+                        const teamA = teamsData.find(t => String(t.id) === String(a.team_id)) || {};
+                        const teamB = teamsData.find(t => String(t.id) === String(b.team_id)) || {};
+                        const nameA = teamCode(teamA, teamA.name_en || 'TBD');
+                        const nameB = teamCode(teamB, teamB.name_en || 'TBD');
+                        return nameA.localeCompare(nameB, 'en', { sensitivity: 'base' });
+                    });
+                    
+                    positions[groupName] = {};
+                    if (statNumber(sortedGroupTeams[0]?.mp) === 3) positions[groupName][1] = sortedGroupTeams[0].team_id;
+                    if (statNumber(sortedGroupTeams[1]?.mp) === 3) positions[groupName][2] = sortedGroupTeams[1].team_id;
+                    if (statNumber(sortedGroupTeams[2]?.mp) === 3) {
+                        positions[groupName][3] = sortedGroupTeams[2].team_id;
+                        availableThirdTeams.push({ team_id: sortedGroupTeams[2].team_id, groupName });
                     }
                 }
             });
+
+            const groupStageGroups = computedGroups.filter(g => isGroupStageValue(g.group || g.name));
+            const bestThirdTeamsIds = getBestThirdPlacedTeams(groupStageGroups);
+            let validThirdTeams = availableThirdTeams.filter(t => bestThirdTeamsIds.includes(String(t.team_id)));
 
             games.forEach(game => {
                 if (!isGroupStageValue(game.group)) {
                     const homeLabel = String(game.home_team_label || '');
                     if (!game.home_team_id || String(game.home_team_id) === '0') {
                         const wMatch = homeLabel.match(/Winner Group ([A-L])/i);
-                        if (wMatch && positions[wMatch[1].toUpperCase()]) {
+                        if (wMatch && positions[wMatch[1].toUpperCase()]?.[1]) {
                             game.home_team_id = positions[wMatch[1].toUpperCase()][1];
                         }
                         const rMatch = homeLabel.match(/Runner-up Group ([A-L])/i);
-                        if (rMatch && positions[rMatch[1].toUpperCase()]) {
+                        if (rMatch && positions[rMatch[1].toUpperCase()]?.[2]) {
                             game.home_team_id = positions[rMatch[1].toUpperCase()][2];
+                        }
+                        const thirdMatch = homeLabel.match(/3rd Group ([A-L\/]+)/i);
+                        if (thirdMatch) {
+                            const allowedGroups = thirdMatch[1].toUpperCase().split('/');
+                            const index = validThirdTeams.findIndex(t => allowedGroups.includes(t.groupName));
+                            if (index !== -1) {
+                                game.home_team_id = validThirdTeams[index].team_id;
+                                validThirdTeams.splice(index, 1);
+                            }
                         }
                     }
 
                     const awayLabel = String(game.away_team_label || '');
                     if (!game.away_team_id || String(game.away_team_id) === '0') {
                         const wMatch = awayLabel.match(/Winner Group ([A-L])/i);
-                        if (wMatch && positions[wMatch[1].toUpperCase()]) {
+                        if (wMatch && positions[wMatch[1].toUpperCase()]?.[1]) {
                             game.away_team_id = positions[wMatch[1].toUpperCase()][1];
                         }
                         const rMatch = awayLabel.match(/Runner-up Group ([A-L])/i);
-                        if (rMatch && positions[rMatch[1].toUpperCase()]) {
+                        if (rMatch && positions[rMatch[1].toUpperCase()]?.[2]) {
                             game.away_team_id = positions[rMatch[1].toUpperCase()][2];
+                        }
+                        const thirdMatch = awayLabel.match(/3rd Group ([A-L\/]+)/i);
+                        if (thirdMatch) {
+                            const allowedGroups = thirdMatch[1].toUpperCase().split('/');
+                            const index = validThirdTeams.findIndex(t => allowedGroups.includes(t.groupName));
+                            if (index !== -1) {
+                                game.away_team_id = validThirdTeams[index].team_id;
+                                validThirdTeams.splice(index, 1);
+                            }
                         }
                     }
                 }
