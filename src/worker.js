@@ -97,6 +97,8 @@ function mapMatch(match) {
     away_team_id: String(away?.id || match.awayTeam?.id || ''),
     home_team_name_en: match.homeTeam?.shortName || match.homeTeam?.name || local?.home_team_name_en,
     away_team_name_en: match.awayTeam?.shortName || match.awayTeam?.name || local?.away_team_name_en,
+    home_team_label: local?.home_team_label || '',
+    away_team_label: local?.away_team_label || '',
     home_score: String(score.home ?? 0),
     away_score: String(score.away ?? 0),
     score_duration: match.score?.duration || '',

@@ -5206,7 +5206,7 @@
             <div class="header-content">
                 <nav>
                     <a href="#groups" data-i18n="nav_groups">VÒNG BẢNG</a>
-                    <a href="#section-knockout" data-i18n="nav_bracket">KNOCK OUT</a>
+                    <a href="#tournament-bracket" data-i18n="nav_bracket">KNOCK OUT</a>
                     <a href="#statistics">THÀNH TÍCH</a>
                     <a href="#teams" data-i18n="nav_teams">ĐỘI TUYỂN</a>
                     <a href="#overall-ranking" class="desktop-only">BXH TỔNG</a>
@@ -6841,7 +6841,7 @@
 
             games.forEach(game => {
                 if (!isGroupStageValue(game.group)) {
-                    const homeLabel = String(game.home_team_label || '');
+                    const homeLabel = String(game.home_team_label || game.home_team_name_en || '');
                     if (!game.home_team_id || String(game.home_team_id) === '0') {
                         const wMatch = homeLabel.match(/Winner Group ([A-L])/i);
                         if (wMatch && positions[wMatch[1].toUpperCase()]?.[1]) {
@@ -6862,7 +6862,7 @@
                         }
                     }
 
-                    const awayLabel = String(game.away_team_label || '');
+                    const awayLabel = String(game.away_team_label || game.away_team_name_en || '');
                     if (!game.away_team_id || String(game.away_team_id) === '0') {
                         const wMatch = awayLabel.match(/Winner Group ([A-L])/i);
                         if (wMatch && positions[wMatch[1].toUpperCase()]?.[1]) {
