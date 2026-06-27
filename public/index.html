@@ -5119,14 +5119,14 @@
         .bracket-round:not(:first-child) .bracket-match-slot::before {
             content: '';
             position: absolute;
-            left: -10px;
+            left: -20px;
             top: 25%;
             bottom: 25%;
             width: 10px;
-            border-left: 2px solid #e53935;
+            border-right: 2px solid #e53935;
             border-top: 2px solid #e53935;
             border-bottom: 2px solid #e53935;
-            border-radius: 4px 0 0 4px;
+            border-radius: 0 4px 4px 0;
             z-index: 0;
             pointer-events: none;
         }
@@ -6906,7 +6906,7 @@
 
             let html = '';
             let roundIndex = 0;
-            const baseHeight = 100;
+            const baseHeight = 60;
             rounds.forEach(r => {
                 const roundGames = sortByStartTime(koGames.filter(g => String(g.group).trim().toUpperCase() === r.id));
                 if (roundGames.length > 0) {
