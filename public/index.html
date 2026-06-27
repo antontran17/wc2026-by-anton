@@ -5232,6 +5232,19 @@
         </div>
     </section>
 
+    <!-- 0. Filter Trận Đấu -->
+    <section id="section-filters" class="matches-section container" style="padding-top: 12px !important; padding-bottom: 0 !important; margin-bottom: 0 !important;">
+        <div class="mobile-filter-row" style="margin-bottom: 0 !important;">
+            <select class="mobile-filter-select" id="match-filter-select" onchange="filterMatches(this.value)" aria-label="Chọn bảng">
+                <option value="all">TẤT CẢ TRẬN</option>
+            </select>
+        </div>
+        
+        <div class="tabs" id="match-tabs" style="margin-bottom: 0 !important;">
+            <!-- Tabs will be generated dynamically -->
+        </div>
+    </section>
+
     <!-- 1. Đang diễn ra -->
     <section id="section-live" class="matches-section"></section>
 
@@ -5278,16 +5291,6 @@
     <section id="section-group-matches" class="matches-section container">
         <div class="section-header">
             <h2 class="visually-hidden-title" data-i18n="matches_title">LỊCH THI ĐẤU VÒNG BẢNG</h2>
-        </div>
-
-        <div class="mobile-filter-row">
-            <select class="mobile-filter-select" id="match-filter-select" onchange="filterMatches(this.value)" aria-label="Chọn bảng">
-                <option value="all">TẤT CẢ TRẬN</option>
-            </select>
-        </div>
-        
-        <div class="tabs" id="match-tabs">
-            <!-- Tabs will be generated dynamically -->
         </div>
         
         <div id="group-matches-content">
