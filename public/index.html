@@ -5051,16 +5051,24 @@
         .bracket-round {
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
             min-width: 280px;
             scroll-snap-align: start;
         }
+        .bracket-matches-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .bracket-match-slot {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+        }
         .bracket-match {
-            margin: 10px 0;
             background: rgba(30,30,40,0.6);
             border-radius: 8px;
-            padding: 8px;
             border: 1px solid rgba(255,255,255,0.1);
+            width: 100%;
         }
         .bracket-title {
             text-align: center;
@@ -6861,42 +6869,56 @@
             ];
 
             let html = '';
+            let roundIndex = 0;
+            const baseHeight = 100;
             rounds.forEach(r => {
                 const roundGames = sortByStartTime(koGames.filter(g => String(g.group).trim().toUpperCase() === r.id));
                 if (roundGames.length > 0) {
+                    const slotHeight = baseHeight * Math.pow(2, roundIndex);
                     let matchesHtml = roundGames.map(game => {
                         const homeTeam = teamsData.find(t => t.id === game.home_team_id) || {};
                         const awayTeam = teamsData.find(t => t.id === game.away_team_id) || {};
-                        let homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || 'TBD';
-                        let awayLabel = game.away_team_name_en || awayTeam.name_en || game.away_team_label || 'TBD';
-                        if (String(homeLabel).includes('undefined')) homeLabel = 'TBD';
-                        if (String(awayLabel).includes('undefined')) awayLabel = 'TBD';
+                        
+                        let homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || '-';
+                        let awayLabel = game.away_team_name_en || awayTeam.name_en || game.away_team_label || '-';
+                        if (String(homeLabel).includes('undefined') || homeLabel === 'TBD') homeLabel = '-';
+                        if (String(awayLabel).includes('undefined') || awayLabel === 'TBD') awayLabel = '-';
 
-                        const homeName = homeTeam.id ? teamCode(homeTeam, homeLabel) : pendingTeamLabel(homeLabel);
-                        const awayName = awayTeam.id ? teamCode(awayTeam, awayLabel) : pendingTeamLabel(awayLabel);
+                        const homeName = homeTeam.id ? teamCode(homeTeam, homeLabel) : (homeLabel === '-' ? '-' : pendingTeamLabel(homeLabel));
+                        const awayName = awayTeam.id ? teamCode(awayTeam, awayLabel) : (awayLabel === '-' ? '-' : pendingTeamLabel(awayLabel));
+                        
                         const homeScore = game.home_score !== null ? game.home_score : '-';
                         const awayScore = game.away_score !== null ? game.away_score : '-';
                         const isHomeWin = (game.home_score !== null && game.home_score > game.away_score) || (game.home_pen !== null && game.home_pen > game.away_pen);
                         const isAwayWin = (game.home_score !== null && game.home_score < game.away_score) || (game.home_pen !== null && game.home_pen < game.away_pen);
                         
                         return `
-                            <div class="bracket-match horizontal-layout" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer;">
-                                <div class="bracket-team ${isHomeWin ? 'winner' : ''}">
-                                    <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
-                                    <span>${homeName}</span>
-                                </div>
-                                <div class="bracket-score">
-                                    ${homeScore}${game.home_pen !== null ? `(${game.home_pen})` : ''} : ${awayScore}${game.away_pen !== null ? `(${game.away_pen})` : ''}
-                                </div>
-                                <div class="bracket-team ${isAwayWin ? 'winner' : ''}">
-                                    <img src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
-                                    <span>${awayName}</span>
+                            <div class="bracket-match-slot" style="height: ${slotHeight}px">
+                                <div class="bracket-match horizontal-layout" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer;">
+                                    <div class="bracket-team ${isHomeWin ? 'winner' : ''}">
+                                        <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
+                                        <span>${homeName}</span>
+                                    </div>
+                                    <div class="bracket-score">
+                                        ${homeScore}${game.home_pen !== null ? `(${game.home_pen})` : ''} : ${awayScore}${game.away_pen !== null ? `(${game.away_pen})` : ''}
+                                    </div>
+                                    <div class="bracket-team ${isAwayWin ? 'winner' : ''}">
+                                        <img src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
+                                        <span>${awayName}</span>
+                                    </div>
                                 </div>
                             </div>
                         `;
                     }).join('');
-                    html += `<div class="bracket-round"><div class="bracket-title">${r.title}</div>${matchesHtml}</div>`;
+                    html += `
+                        <div class="bracket-round">
+                            <div class="bracket-title" style="height: 30px; margin-bottom: 0px; display: flex; align-items: center; justify-content: center;">${r.title}</div>
+                            <div class="bracket-matches-container">
+                                ${matchesHtml}
+                            </div>
+                        </div>`;
                 }
+                roundIndex++;
             });
             wrapper.innerHTML = html;
         }
