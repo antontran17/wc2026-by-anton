@@ -5782,6 +5782,7 @@
                 renderMatches(gamesData);
                 renderGroups(groupsData);
                 if (activeScorerMatchId) renderScorerDialog();
+                updateCountdowns();
                 scheduleNextLiveCheck();
             } catch (err) {
                 console.warn('Live score refresh skipped:', err.message);
@@ -5880,6 +5881,7 @@
                     renderMatches(gamesData);
                     renderGroups(groupsData);
                     if (activeScorerMatchId) renderScorerDialog();
+                    updateCountdowns();
                 }
             } catch (err) {
                 console.warn('ESPN fast fetch failed:', err.message);
@@ -5890,6 +5892,7 @@
             setInterval(refreshLiveScores, LIVE_REFRESH_INTERVAL_MS);
             setInterval(fetchEspnFastLiveScores, ESPN_FAST_INTERVAL_MS);
             setInterval(scheduleMatchNotifications, 60 * 1000);
+            setInterval(updateCountdowns, 1000);
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) {
                     refreshLiveScores(true);
@@ -6411,8 +6414,43 @@
                 const label = minuteStr ? minuteStr : matchPhaseLabel(game);
                 return `<span class="match-status-pill live">${label}</span>`;
             }
-            if (status.includes('is-upcoming')) return '<span class="match-status-pill upcoming">SẮP ĐÁ</span>';
+            if (status.includes('is-upcoming')) {
+                const start = parseSourceDate(game);
+                if (start) {
+                    const diff = start.getTime() - Date.now();
+                    if (diff > 0 && diff <= 2 * 60 * 60 * 1000) {
+                        return `<span class="match-status-pill upcoming countdown-timer" data-start="${start.getTime()}">SẮP ĐÁ</span>`;
+                    }
+                }
+                return '<span class="match-status-pill upcoming">SẮP ĐÁ</span>';
+            }
             return '';
+        }
+
+        function updateCountdowns() {
+            const timers = document.querySelectorAll('.countdown-timer');
+            const now = Date.now();
+            timers.forEach(timer => {
+                const start = parseInt(timer.getAttribute('data-start'), 10);
+                if (!start) return;
+                const diff = start - now;
+                if (diff <= 0) {
+                    timer.innerHTML = 'ĐANG ĐỢI...';
+                    timer.classList.remove('countdown-timer');
+                } else {
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                    
+                    let text = '';
+                    if (hours > 0) {
+                        text = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    } else {
+                        text = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    }
+                    timer.innerHTML = text;
+                }
+            });
         }
 
 
