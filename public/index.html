@@ -5204,7 +5204,7 @@
             <div class="header-content">
                 <nav>
                     <a href="#groups" data-i18n="nav_groups">VÒNG BẢNG</a>
-                    <a href="#tournament-bracket" data-i18n="nav_bracket">KNOCK OUT</a>
+                    <a href="#section-knockout" data-i18n="nav_bracket">KNOCK OUT</a>
                     <a href="#statistics">THÀNH TÍCH</a>
                     <a href="#teams" data-i18n="nav_teams">ĐỘI TUYỂN</a>
                     <a href="#overall-ranking" class="desktop-only">BXH TỔNG</a>
@@ -6331,6 +6331,15 @@
             const filtered = currentMatchFilter === 'all' ? gamesData : gamesData.filter(g => g.group === currentMatchFilter);
             renderMatchCards(filtered);
             renderGroups(groupsData);
+
+            if (currentMatchFilter !== 'all') {
+                const target = document.getElementById('groups') || document.getElementById('section-group-matches');
+                if (target) {
+                    const headerOffset = document.querySelector('header') ? document.querySelector('header').offsetHeight : 60;
+                    const y = target.getBoundingClientRect().top + window.scrollY - headerOffset - 10;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                }
+            }
         }
 
         function renderSingleMatchCard(game, compact = false) {
