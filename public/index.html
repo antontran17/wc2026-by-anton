@@ -5051,7 +5051,7 @@
         .bracket-round {
             display: flex;
             flex-direction: column;
-            min-width: 280px;
+            min-width: 230px;
             scroll-snap-align: start;
         }
         .bracket-matches-container {
@@ -5073,7 +5073,7 @@
         .bracket-title {
             text-align: center;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             margin-bottom: 10px;
             color: rgba(255,255,255,0.6);
         }
@@ -5081,14 +5081,14 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 8px;
-            padding: 8px 10px;
+            gap: 6px;
+            padding: 4px 6px;
         }
         .bracket-team {
             display: flex;
             flex-direction: row;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             flex: 1;
         }
         .bracket-team.right-align {
@@ -5098,13 +5098,13 @@
             justify-content: flex-start;
         }
         .bracket-team img {
-            width: 24px;
-            height: 16px;
+            width: 20px;
+            height: 14px;
             border-radius: 2px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
         .bracket-team span {
-            font-size: 12px;
+            font-size: 11px;
             text-align: center;
             line-height: 1.2;
             color: rgba(255,255,255,0.7);
@@ -5144,9 +5144,9 @@
         }
         .bracket-score {
             font-weight: 800;
-            font-size: 16px;
+            font-size: 13px;
             background: rgba(0,0,0,0.4);
-            padding: 6px 12px;
+            padding: 4px 8px;
             border-radius: 6px;
             white-space: nowrap;
         }
@@ -6906,7 +6906,7 @@
 
             let html = '';
             let roundIndex = 0;
-            const baseHeight = 60;
+            const baseHeight = 46;
             rounds.forEach(r => {
                 const roundGames = sortByStartTime(koGames.filter(g => String(g.group).trim().toUpperCase() === r.id));
                 if (roundGames.length > 0) {
