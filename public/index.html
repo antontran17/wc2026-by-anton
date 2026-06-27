@@ -6419,7 +6419,7 @@
                 if (start) {
                     const diff = start.getTime() - Date.now();
                     if (diff > 0 && diff <= 2 * 60 * 60 * 1000) {
-                        return `<span class="match-status-pill upcoming countdown-timer" data-start="${start.getTime()}">SẮP ĐÁ</span>`;
+                        return `<span class="match-status-pill live countdown-timer" data-start="${start.getTime()}">SẮP ĐÁ</span>`;
                     }
                 }
                 return '<span class="match-status-pill upcoming">SẮP ĐÁ</span>';
