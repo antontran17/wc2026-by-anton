@@ -6125,14 +6125,14 @@
         function scoreCenter(game) {
             const hs = Number(game.home_score || 0);
             const as = Number(game.away_score || 0);
-            const hasPenalties = game.home_penalties !== undefined && game.home_penalties !== '' && game.status === 'PENALTY';
+            const hasPenalties = game.home_penalties !== undefined && game.home_penalties !== '';
             
             if (hasPenalties) {
                 return `
                 <div style="display:flex; flex-direction:column; align-items:center;">
                     <span class="score-center"><span>${hs}</span><span>${as}</span></span>
-                    <span class="penalty-score" style="font-size:12px; color:#ffb703; font-weight:400; margin-top:2px;">
-                        Pen: ${game.home_penalties} - ${game.away_penalties}
+                    <span class="penalty-score" style="font-size:11px; color:#ff9800; font-weight:300; margin-top:3px; letter-spacing: 0.05em;">
+                        (Pen: ${game.home_penalties} - ${game.away_penalties})
                     </span>
                 </div>`;
             }
@@ -6406,10 +6406,11 @@
             const elapsed = String(game.time_elapsed || '').trim().toLowerCase();
             if (isCompletedGame(game)) {
                 const duration = String(game.score_duration || '').toUpperCase();
-                if (duration.includes('PENALTY')) return '<span class="match-status-pill">PEN</span>';
-                if (duration.includes('EXTRA')) return '<span class="match-status-pill">AET</span>';
-                if (apiStatus === 'PEN') return '<span class="match-status-pill">PEN</span>';
-                if (apiStatus === 'AET') return '<span class="match-status-pill">AET</span>';
+                const style = 'color:#ff9800; font-weight:300; font-size:11px;';
+                if (duration.includes('PENALTY')) return `<span class="match-status-pill" style="${style}">PEN</span>`;
+                if (duration.includes('EXTRA')) return `<span class="match-status-pill" style="${style}">AET</span>`;
+                if (apiStatus === 'PEN') return `<span class="match-status-pill" style="${style}">PEN</span>`;
+                if (apiStatus === 'AET') return `<span class="match-status-pill" style="${style}">AET</span>`;
                 return '<span class="match-status-pill">FT</span>';
             }
             if (status.includes('is-live')) {
