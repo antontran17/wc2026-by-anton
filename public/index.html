@@ -5831,7 +5831,18 @@
                         const newAwayScore = String(away.score ?? 0);
                         const newFinished = completed ? 'TRUE' : 'FALSE';
                         const newStatus = completed ? 'FINISHED' : 'IN_PLAY';
-                        const newTime = completed ? 'finished' : (statusType.detail || 'live');
+                        
+                        let newTime = 'live';
+                        if (completed) {
+                            newTime = 'finished';
+                        } else {
+                            const clock = event.status && event.status.displayClock ? String(event.status.displayClock).replace(/'/g, "") : '';
+                            if (clock && clock !== "0" && clock.trim() !== "") {
+                                newTime = clock;
+                            } else {
+                                newTime = statusType.detail || 'live';
+                            }
+                        }
                         
                         espnOverrides.set(game.id, {
                             home_score: newHomeScore,
