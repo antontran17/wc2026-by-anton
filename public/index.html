@@ -5039,6 +5039,47 @@
             -ms-touch-action: pan-x pan-y !important;
         }
     </style>
+    <style id="anton-bracket-css">
+        .bracket-section { overflow: hidden; padding-bottom: 20px; }
+        .bracket-wrapper {
+            display: flex;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scroll-snap-type: x mandatory;
+            gap: 20px;
+        }
+        .bracket-round {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            min-width: 280px;
+            scroll-snap-align: start;
+        }
+        .bracket-match {
+            margin: 10px 0;
+            background: rgba(30,30,40,0.6);
+            border-radius: 8px;
+            padding: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .bracket-title {
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: rgba(255,255,255,0.6);
+        }
+        .bracket-match .team-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 0;
+        }
+        .bracket-match .team-row.winner { font-weight: bold; color: #fff; }
+        .bracket-match .team-name-flag { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .bracket-match .team-score { font-size: 13px; font-weight: 700; }
+        .bracket-match .team-name-flag img { width: 16px; height: 12px; border-radius: 2px; }
+    </style>
 </head>
 <body>
     <!-- SEO fallback content for crawlers that don't execute JavaScript -->
@@ -5106,6 +5147,16 @@
                     <div class="spinner"></div>
                     <span data-i18n="loading">ĐANG TẢI...</span>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tournament-bracket" class="bracket-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <h2>SƠ ĐỒ NHÁNH THI ĐẤU</h2>
+            </div>
+            <div class="bracket-wrapper" id="bracket-wrapper">
             </div>
         </div>
     </section>
@@ -6132,6 +6183,7 @@
             }
 
             renderMatchCards(filteredMatchesForCurrentTab());
+            renderTournamentBracket(games);
         }
 
         function filterMatches(group) {
@@ -6170,9 +6222,9 @@
                     <button class="fav-btn match-fav ${favoriteMatches.has(String(game.id)) ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavoriteMatch('${game.id}')" aria-label="Yêu thích trận">${favoriteMatches.has(String(game.id)) ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-light fa-star"></i>'}</button>
                     <div class="match-time-top">${dateStr}</div>
                     <div class="match-header">
-                        <span class="match-group">${translations[currentLang].group} ${game.group || '-'}</span>
+                        <span class="match-group">${isGroupStageValue(game.group) ? translations[currentLang].group + ' ' + (game.group || '-') : stageLabel(game.group)}</span>
                         <span class="match-status-slot">${matchStatusLabel(game)}</span>
-                        <span class="matchday-label">${translations[currentLang].matchday} ${game.matchday || '-'}</span>
+                        ${isGroupStageValue(game.group) ? `<span class="matchday-label">${translations[currentLang].matchday} ${game.matchday || '-'}</span>` : ''}
                     </div>
                     <div class="match-teams">
                         <div class="match-team">
@@ -6761,7 +6813,64 @@
                 `;
             }).join('');
         }
+        function renderTournamentBracket(games) {
+            const wrapper = document.getElementById('bracket-wrapper');
+            if (!wrapper) return;
 
+            const koGames = games.filter(g => !isGroupStageValue(g.group));
+            if (koGames.length === 0) {
+                document.getElementById('tournament-bracket').style.display = 'none';
+                return;
+            }
+            document.getElementById('tournament-bracket').style.display = 'block';
+
+            const rounds = [
+                { id: 'R32', title: 'VÒNG 32' },
+                { id: 'R16', title: 'VÒNG 16' },
+                { id: 'QF', title: 'TỨ KẾT' },
+                { id: 'SF', title: 'BÁN KẾT' },
+                { id: 'FINAL', title: 'CHUNG KẾT' }
+            ];
+
+            let html = '';
+            rounds.forEach(r => {
+                const roundGames = sortByStartTime(koGames.filter(g => String(g.group).trim().toUpperCase() === r.id));
+                if (roundGames.length > 0) {
+                    let matchesHtml = roundGames.map(game => {
+                        const homeTeam = teamsData.find(t => t.id === game.home_team_id) || {};
+                        const awayTeam = teamsData.find(t => t.id === game.away_team_id) || {};
+                        const homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || 'TBD';
+                        const awayLabel = game.away_team_name_en || awayTeam.name_en || game.away_team_label || 'TBD';
+                        const homeName = homeTeam.id ? teamCode(homeTeam, homeLabel) : pendingTeamLabel(homeLabel);
+                        const awayName = awayTeam.id ? teamCode(awayTeam, awayLabel) : pendingTeamLabel(awayLabel);
+                        const homeScore = game.home_score !== null ? game.home_score : '-';
+                        const awayScore = game.away_score !== null ? game.away_score : '-';
+                        const isHomeWin = (game.home_score !== null && game.home_score > game.away_score) || (game.home_pen !== null && game.home_pen > game.away_pen);
+                        const isAwayWin = (game.home_score !== null && game.home_score < game.away_score) || (game.home_pen !== null && game.home_pen < game.away_pen);
+                        return `
+                            <div class="bracket-match" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer;">
+                                <div class="team-row ${isHomeWin ? 'winner' : ''}">
+                                    <div class="team-name-flag">
+                                        <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
+                                        <span>${homeName}</span>
+                                    </div>
+                                    <span class="team-score">${homeScore}${game.home_pen !== null ? ` (${game.home_pen})` : ''}</span>
+                                </div>
+                                <div class="team-row ${isAwayWin ? 'winner' : ''}">
+                                    <div class="team-name-flag">
+                                        <img src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
+                                        <span>${awayName}</span>
+                                    </div>
+                                    <span class="team-score">${awayScore}${game.away_pen !== null ? ` (${game.away_pen})` : ''}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    html += `<div class="bracket-round"><div class="bracket-title">${r.title}</div>${matchesHtml}</div>`;
+                }
+            });
+            wrapper.innerHTML = html;
+        }
         // ==================== DONATION FUNCTIONS ====================
         
         let selectedAmount = 5;
