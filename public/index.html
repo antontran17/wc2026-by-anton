@@ -5079,6 +5079,11 @@
             border: 1px solid rgba(255,255,255,0.1);
             width: 100%;
         }
+        .bracket-match.is-favorite {
+            border-color: #8faaff !important;
+            box-shadow: 0 0 16px rgba(143,170,255,.5) !important;
+            background: linear-gradient(180deg, rgba(143,170,255,.15), rgba(143,170,255,.05)) !important;
+        }
         .bracket-title {
             text-align: center;
             font-weight: 700;
@@ -6642,7 +6647,7 @@
             })).slice(0, 6);
 
             const highlightedIds = new Set([...live, ...upcoming, ...results, ...favorites].map(g => String(g.id)));
-            const rest = games.filter(g => !highlightedIds.has(String(g.id)));
+            const rest = games;
 
             const liveHtml = live.length > 0 ? renderMatchGroup('ĐANG DIỄN RA', live, 'live-group', true) : '';
             const resultsHtml = results.length > 0 ? renderMatchGroup('KẾT QUẢ', results, 'results-group', true) : '';
@@ -6993,10 +6998,11 @@
                         const isAwayWin = (homeScore !== '-' && homeScore < awayScore) || (game.home_pen !== null && game.home_pen !== undefined && game.home_pen < game.away_pen);
                         const homePen = (game.home_pen !== null && game.home_pen !== undefined) ? `(${game.home_pen})` : '';
                         const awayPen = (game.away_pen !== null && game.away_pen !== undefined) ? `(${game.away_pen})` : '';
+                        const isFav = favoriteMatches.has(String(game.id)) || favoriteTeams.has(String(game.home_team_id)) || favoriteTeams.has(String(game.away_team_id));
                         
                         return `
                             <div class="bracket-match-slot" style="height: ${slotHeight}px">
-                                <div class="bracket-match horizontal-layout" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer; position:relative; z-index:1;">
+                                <div class="bracket-match horizontal-layout ${isFav ? 'is-favorite' : ''}" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer; position:relative; z-index:1;">
                                     <div class="bracket-team ${isHomeWin ? 'winner' : ''} right-align">
                                         <span>${homeName}</span>
                                         <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
