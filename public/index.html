@@ -5232,9 +5232,6 @@
     <!-- 3. Sắp diễn ra -->
     <section id="section-upcoming" class="matches-section"></section>
     
-    <!-- 4. Knockout Thẻ Trận -->
-    <section id="section-knockout" class="matches-section container" style="margin-top:20px;"></section>
-
     <!-- Knockout Cây đồ thị -->
     <section id="tournament-bracket" class="bracket-section" style="display:none;">
         <div class="container">
@@ -5245,6 +5242,9 @@
             </div>
         </div>
     </section>
+
+    <!-- 4. Knockout Thẻ Trận -->
+    <section id="section-knockout" class="matches-section container"></section>
 
     <!-- 5. Groups Section -->
     <section id="groups">
@@ -5263,7 +5263,7 @@
     </section>
 
     <!-- 6. Mớ thẻ trận vòng bảng -->
-    <section id="section-group-matches" class="matches-section container" style="margin-top:40px;">
+    <section id="section-group-matches" class="matches-section container">
         <div class="section-header">
             <h2 class="visually-hidden-title" data-i18n="matches_title">LỊCH THI ĐẤU VÒNG BẢNG</h2>
         </div>
@@ -5278,7 +5278,7 @@
             <!-- Tabs will be generated dynamically -->
         </div>
         
-        <div class="cards-grid" id="group-matches-content">
+        <div id="group-matches-content">
             <div class="loading">
                 <div class="spinner"></div>
                 <span data-i18n="loading">ĐANG TẢI...</span>
