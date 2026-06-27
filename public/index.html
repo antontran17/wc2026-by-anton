@@ -5470,7 +5470,9 @@
         let expandedMobileMatchId = null;
         let liveRefreshInFlight = false;
         let nextKickoffTimer = null;
-        const LIVE_REFRESH_INTERVAL_MS = 15 * 1000;
+        const LIVE_REFRESH_INTERVAL_MS = 20 * 1000;
+        const ESPN_FAST_INTERVAL_MS = 5 * 1000;
+        const espnOverrides = new Map();
         const SCORER_FINAL_CACHE_MS = 30 * 24 * 60 * 60 * 1000;
         const SCORER_LIVE_CACHE_MS = 20 * 1000;
         const SCORER_PREFETCH_LIMIT = 10;
@@ -5770,6 +5772,13 @@
                 if (!response.ok) throw new Error('Live score refresh failed');
                 const games = await response.json();
                 gamesData = games.games || (Array.isArray(games) ? games : []);
+                
+                gamesData.forEach(game => {
+                    if (espnOverrides.has(game.id)) {
+                        Object.assign(game, espnOverrides.get(game.id));
+                    }
+                });
+
                 renderMatches(gamesData);
                 renderGroups(groupsData);
                 if (activeScorerMatchId) renderScorerDialog();
@@ -5781,11 +5790,83 @@
             }
         }
 
+        async function fetchEspnFastLiveScores() {
+            if (document.hidden) return;
+            try {
+                const url = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard";
+                const response = await fetch(url, { cache: 'no-store' });
+                const data = await response.json();
+                let hasChanges = false;
+                const events = data.events || [];
+                
+                events.forEach(event => {
+                    const statusType = event.status && event.status.type;
+                    if (!statusType) return;
+                    
+                    const completed = Boolean(statusType.completed) || /FINAL|POST/.test(String(statusType.name).toUpperCase());
+                    const live = String(statusType.state || '').toLowerCase() === 'in' || /HALF|OVERTIME|PENALT/.test(String(statusType.name).toUpperCase());
+                    
+                    if (!live && !completed) return;
+                    
+                    const competitors = event.competitions && event.competitions[0] && event.competitions[0].competitors;
+                    if (!competitors) return;
+                    
+                    const home = competitors.find(c => c.homeAway === 'home');
+                    const away = competitors.find(c => c.homeAway === 'away');
+                    if (!home || !away) return;
+                    
+                    const homeAbbrev = home.team?.abbreviation || '';
+                    const awayAbbrev = away.team?.abbreviation || '';
+                    
+                    const game = gamesData.find(g => {
+                        const gHome = teamsData.find(t => String(t.id) === String(g.home_team_id));
+                        const gAway = teamsData.find(t => String(t.id) === String(g.away_team_id));
+                        const matchHome = (gHome && gHome.fifa_code === homeAbbrev) || g.home_team_name_en === home.team?.displayName || g.home_team_name_en === home.team?.name;
+                        const matchAway = (gAway && gAway.fifa_code === awayAbbrev) || g.away_team_name_en === away.team?.displayName || g.away_team_name_en === away.team?.name;
+                        return matchHome && matchAway;
+                    });
+                    
+                    if (game) {
+                        const newHomeScore = String(home.score ?? 0);
+                        const newAwayScore = String(away.score ?? 0);
+                        const newFinished = completed ? 'TRUE' : 'FALSE';
+                        const newStatus = completed ? 'FINISHED' : 'IN_PLAY';
+                        const newTime = completed ? 'finished' : (statusType.detail || 'live');
+                        
+                        espnOverrides.set(game.id, {
+                            home_score: newHomeScore,
+                            away_score: newAwayScore,
+                            finished: newFinished,
+                            status: newStatus,
+                            time_elapsed: newTime
+                        });
+                        
+                        if (game.home_score !== newHomeScore || game.away_score !== newAwayScore || game.status !== newStatus || game.time_elapsed !== newTime) {
+                            Object.assign(game, espnOverrides.get(game.id));
+                            hasChanges = true;
+                        }
+                    }
+                });
+                
+                if (hasChanges) {
+                    renderMatches(gamesData);
+                    renderGroups(groupsData);
+                    if (activeScorerMatchId) renderScorerDialog();
+                }
+            } catch (err) {
+                console.warn('ESPN fast fetch failed:', err.message);
+            }
+        }
+
         function startLiveRefresh() {
             setInterval(refreshLiveScores, LIVE_REFRESH_INTERVAL_MS);
+            setInterval(fetchEspnFastLiveScores, ESPN_FAST_INTERVAL_MS);
             setInterval(scheduleMatchNotifications, 60 * 1000);
             document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) refreshLiveScores(true);
+                if (!document.hidden) {
+                    refreshLiveScores(true);
+                    fetchEspnFastLiveScores();
+                }
             });
         }
 
