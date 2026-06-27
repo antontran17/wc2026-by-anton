@@ -5830,7 +5830,19 @@
                         const newHomeScore = String(home.score ?? 0);
                         const newAwayScore = String(away.score ?? 0);
                         const newFinished = completed ? 'TRUE' : 'FALSE';
-                        const newStatus = completed ? 'FINISHED' : 'IN_PLAY';
+                        let newStatus = 'IN_PLAY';
+                        if (completed) {
+                            newStatus = 'FINISHED';
+                        } else if (statusType.name) {
+                            const upperName = String(statusType.name).toUpperCase();
+                            if (upperName.includes('SHOOTOUT') || upperName.includes('PENALT')) {
+                                newStatus = 'PENALTY';
+                            } else if (upperName.includes('OVERTIME') || upperName.includes('EXTRA')) {
+                                newStatus = 'ET';
+                            } else if (upperName.includes('HALFTIME')) {
+                                newStatus = 'HT';
+                            }
+                        }
                         
                         let newTime = 'live';
                         if (completed) {
