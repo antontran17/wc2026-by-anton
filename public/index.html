@@ -5959,10 +5959,17 @@
         }
 
         function scheduleStageKey(game) {
-            return isGroupStageValue(game.group) ? 'GROUP' : String(game.group || 'OTHER').trim().toUpperCase();
+            if (isGroupStageValue(game.group)) {
+                return game.matchday ? `GROUP_MD_${game.matchday}` : 'GROUP';
+            }
+            return String(game.group || 'OTHER').trim().toUpperCase();
         }
 
         function scheduleStageTitle(key) {
+            if (key.startsWith('GROUP_MD_')) {
+                const md = key.replace('GROUP_MD_', '');
+                return `VÒNG BẢNG - LƯỢT ${md}`;
+            }
             if (key === 'GROUP') return 'VÒNG BẢNG';
             return stageLabel(key);
         }
@@ -6573,17 +6580,32 @@
         function renderStageScheduleGroup(stageKey, items) {
             if (!items.length) return '';
             const sortedItems = sortByStartTime(items);
-            const isKnockout = stageKey !== 'GROUP';
-            const collapsed = isKnockout && !sortedItems.some(hasResolvedCandidate);
+            const isKnockout = !stageKey.startsWith('GROUP');
+            const isCollapsibleGroup = stageKey === 'GROUP_MD_1' || stageKey === 'GROUP_MD_2';
+            const collapsedKnockout = isKnockout && !sortedItems.some(hasResolvedCandidate);
             const title = scheduleStageTitle(stageKey);
 
-            if (collapsed) {
+            if (collapsedKnockout) {
                 return `
                     <div class="match-priority-group schedule-stage-group collapsed-stage-group">
                         <div class="match-priority-title">${title}</div>
                         <div class="collapsed-stage-card">
                             <strong>${title}</strong>
                             <span>${sortedItems.length} trận · chờ xác định đội</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (isCollapsibleGroup) {
+                return `
+                    <div class="match-priority-group schedule-stage-group">
+                        <div class="match-priority-title toggle-header" onclick="const c = this.nextElementSibling; const i = this.querySelector('.toggle-icon'); if(c.style.display === 'none') { c.style.display = 'grid'; i.style.transform = 'rotate(0deg)'; } else { c.style.display = 'none'; i.style.transform = 'rotate(-90deg)'; }" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                            <span>${title}</span>
+                            <i class="fa-solid fa-chevron-down toggle-icon" style="transition: transform 0.2s; transform: rotate(-90deg);"></i>
+                        </div>
+                        <div class="cards-grid match-priority-grid stage-cards-container" style="display: none;">
+                            ${sortedItems.map(game => renderSingleMatchCard(game)).join('')}
                         </div>
                     </div>
                 `;
@@ -6638,9 +6660,12 @@
             });
 
             const stageKeys = [...stageBuckets.keys()].sort((a, b) => {
-                const orderA = a === 'GROUP' ? -1 : stageSortValue(a);
-                const orderB = b === 'GROUP' ? -1 : stageSortValue(b);
-                return orderA - orderB;
+                const getOrder = (k) => {
+                    if (k === 'GROUP') return -7;
+                    if (k.startsWith('GROUP_MD_')) return -10 + parseInt(k.replace('GROUP_MD_', ''), 10);
+                    return stageSortValue(k);
+                };
+                return getOrder(a) - getOrder(b);
             });
 
             const restHtml = stageKeys.map(key => renderStageScheduleGroup(key, stageBuckets.get(key))).join('');
