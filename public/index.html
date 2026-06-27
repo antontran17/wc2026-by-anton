@@ -5656,6 +5656,14 @@
                 scheduleNextLiveCheck();
                 scheduleMatchNotifications();
                 prefetchScorerDetails();
+                
+                const savedScrollPosition = sessionStorage.getItem('scrollPosition');
+                if (savedScrollPosition) {
+                    setTimeout(() => {
+                        window.scrollTo(0, parseInt(savedScrollPosition, 10));
+                        sessionStorage.removeItem('scrollPosition');
+                    }, 100);
+                }
             } catch (err) {
                 console.error('Error loading data:', err);
             }
@@ -7206,6 +7214,11 @@
             };
             
             updatePlaceholders();
+        });
+
+        // Save scroll position on page reload or close
+        window.addEventListener('beforeunload', () => {
+            sessionStorage.setItem('scrollPosition', window.scrollY);
         });
     </script>
 </body>
