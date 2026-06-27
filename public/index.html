@@ -5133,7 +5133,8 @@
             <div class="header-content">
                 <nav>
                     <a href="#matches" data-i18n="nav_matches">LỊCH ĐẤU</a>
-                    <a href="#groups" data-i18n="nav_groups">BẢNG ĐẤU</a>
+                    <a href="#groups" data-i18n="nav_groups">VÒNG BẢNG</a>
+                    <a href="#tournament-bracket" data-i18n="nav_bracket">KNOCKOUT</a>
                     <a href="#statistics">THÀNH TÍCH</a>
                     <a href="#teams" data-i18n="nav_teams">ĐỘI TUYỂN</a>
                     <a href="#overall-ranking" class="desktop-only">BXH TỔNG</a>
@@ -5190,7 +5191,7 @@
     <section id="tournament-bracket" class="bracket-section" style="display:none;">
         <div class="container">
             <div class="section-header">
-                <h2>SƠ ĐỒ NHÁNH THI ĐẤU</h2>
+                <h2>NHÁNH THI ĐẤU</h2>
             </div>
             <div class="bracket-wrapper" id="bracket-wrapper">
             </div>
@@ -5201,7 +5202,7 @@
     <section id="groups">
         <div class="container">
             <div class="section-header">
-                <h2 data-i18n="groups_title">BẢNG ĐẤU</h2>
+                <h2 data-i18n="groups_title">VÒNG BẢNG</h2>
             </div>
             
             <div class="cards-grid" id="groups-grid">
@@ -5325,7 +5326,8 @@
                 logo: 'WC2026 | CALENDAR',
                 nav_matches: 'LỊCH ĐẤU',
                 nav_teams: 'ĐỘI TUYỂN',
-                nav_groups: 'BẢNG ĐẤU',
+                nav_groups: 'VÒNG BẢNG',
+                nav_bracket: 'KNOCKOUT',
                 hero_badge: 'GIỜ VIỆT NAM · UTC+7',
                 hero_title: 'WC2026 | CALENDAR',
                 hero_subtitle: '',
@@ -5340,7 +5342,7 @@
                 matches_subtitle: '',
                 teams_title: 'ĐỘI TUYỂN',
                 teams_subtitle: '',
-                groups_title: 'BẢNG ĐẤU',
+                groups_title: 'VÒNG BẢNG',
                 groups_subtitle: '',
                 loading: 'ĐANG TẢI...',
                 footer_text: '',
@@ -6887,10 +6889,12 @@
                         const homeName = homeTeam.id ? teamCode(homeTeam, homeLabel) : (homeLabel === '-' ? '-' : pendingTeamLabel(homeLabel));
                         const awayName = awayTeam.id ? teamCode(awayTeam, awayLabel) : (awayLabel === '-' ? '-' : pendingTeamLabel(awayLabel));
                         
-                        const homeScore = game.home_score !== null ? game.home_score : '-';
-                        const awayScore = game.away_score !== null ? game.away_score : '-';
-                        const isHomeWin = (game.home_score !== null && game.home_score > game.away_score) || (game.home_pen !== null && game.home_pen > game.away_pen);
-                        const isAwayWin = (game.home_score !== null && game.home_score < game.away_score) || (game.home_pen !== null && game.home_pen < game.away_pen);
+                        const homeScore = (game.home_score !== null && game.home_score !== undefined) ? game.home_score : '-';
+                        const awayScore = (game.away_score !== null && game.away_score !== undefined) ? game.away_score : '-';
+                        const isHomeWin = (homeScore !== '-' && homeScore > awayScore) || (game.home_pen !== null && game.home_pen !== undefined && game.home_pen > game.away_pen);
+                        const isAwayWin = (homeScore !== '-' && homeScore < awayScore) || (game.home_pen !== null && game.home_pen !== undefined && game.home_pen < game.away_pen);
+                        const homePen = (game.home_pen !== null && game.home_pen !== undefined) ? `(${game.home_pen})` : '';
+                        const awayPen = (game.away_pen !== null && game.away_pen !== undefined) ? `(${game.away_pen})` : '';
                         
                         return `
                             <div class="bracket-match-slot" style="height: ${slotHeight}px">
@@ -6900,7 +6904,7 @@
                                         <span>${homeName}</span>
                                     </div>
                                     <div class="bracket-score">
-                                        ${homeScore}${game.home_pen !== null ? `(${game.home_pen})` : ''} : ${awayScore}${game.away_pen !== null ? `(${game.away_pen})` : ''}
+                                        ${homeScore}${homePen} : ${awayScore}${awayPen}
                                     </div>
                                     <div class="bracket-team ${isAwayWin ? 'winner' : ''}">
                                         <img src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
