@@ -5960,12 +5960,15 @@
 
         function scheduleStageKey(game) {
             if (isGroupStageValue(game.group)) {
-                return game.matchday ? `GROUP_MD_${game.matchday}` : 'GROUP';
+                const md = String(game.matchday || '');
+                if (md === '1' || md === '2') return 'GROUP_MD_OLD';
+                return md ? `GROUP_MD_${md}` : 'GROUP';
             }
             return String(game.group || 'OTHER').trim().toUpperCase();
         }
 
         function scheduleStageTitle(key) {
+            if (key === 'GROUP_MD_OLD') return 'TẤT CẢ TRẬN VÒNG BẢNG (LƯỢT 1 & 2)';
             if (key.startsWith('GROUP_MD_')) {
                 const md = key.replace('GROUP_MD_', '');
                 return `VÒNG BẢNG - LƯỢT ${md}`;
@@ -6581,7 +6584,7 @@
             if (!items.length) return '';
             const sortedItems = sortByStartTime(items);
             const isKnockout = !stageKey.startsWith('GROUP');
-            const isCollapsibleGroup = stageKey === 'GROUP_MD_1' || stageKey === 'GROUP_MD_2';
+            const isCollapsibleGroup = stageKey === 'GROUP_MD_OLD';
             const collapsedKnockout = isKnockout && !sortedItems.some(hasResolvedCandidate);
             const title = scheduleStageTitle(stageKey);
 
@@ -6665,7 +6668,8 @@
             const stageKeys = [...stageBuckets.keys()].sort((a, b) => {
                 const getOrder = (k) => {
                     if (k === 'GROUP') return -7;
-                    if (k.startsWith('GROUP_MD_')) return -10 + parseInt(k.replace('GROUP_MD_', ''), 10);
+                    if (k === 'GROUP_MD_OLD') return -10;
+                    if (k.startsWith('GROUP_MD_')) return -9 + parseInt(k.replace('GROUP_MD_', ''), 10);
                     return stageSortValue(k);
                 };
                 return getOrder(a) - getOrder(b);
