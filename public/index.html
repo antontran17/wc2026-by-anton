@@ -5232,6 +5232,9 @@
     <!-- 3. Sắp diễn ra -->
     <section id="section-upcoming" class="matches-section"></section>
     
+    <!-- Yêu thích -->
+    <section id="section-favorites" class="matches-section"></section>
+    
     <!-- Knockout Cây đồ thị -->
     <section id="tournament-bracket" class="bracket-section" style="display:none;">
         <div class="container">
@@ -6615,6 +6618,7 @@
                 document.getElementById('section-live').innerHTML = '';
                 document.getElementById('section-results').innerHTML = '';
                 document.getElementById('section-upcoming').innerHTML = '';
+                document.getElementById('section-favorites').innerHTML = '';
                 document.getElementById('section-knockout').innerHTML = '';
                 document.getElementById('group-matches-content').innerHTML = `<div class="no-data"><p>KHÔNG CÓ TRẬN ĐẤU NÀO</p></div>`;
                 return;
@@ -6644,6 +6648,7 @@
             document.getElementById('section-live').innerHTML = liveHtml ? '<div class="container">' + liveHtml + '</div>' : '';
             document.getElementById('section-results').innerHTML = resultsHtml ? '<div class="container">' + resultsHtml + '</div>' : '';
             document.getElementById('section-upcoming').innerHTML = upcomingHtml ? '<div class="container">' + upcomingHtml + '</div>' : '';
+            document.getElementById('section-favorites').innerHTML = favoritesHtml ? '<div class="container">' + favoritesHtml + '</div>' : '';
 
             const stageBuckets = new Map();
             rest.forEach(game => {
@@ -6665,7 +6670,7 @@
             document.getElementById('section-knockout').innerHTML = knockoutHtml ? knockoutHtml : '';
 
             const groupHtml = groupKeys.map(key => renderStageScheduleGroup(key, stageBuckets.get(key))).join('');
-            document.getElementById('group-matches-content').innerHTML = favoritesHtml + groupHtml || '<div class="no-data"><p>KHÔNG CÓ TRẬN ĐẤU NÀO</p></div>';
+            document.getElementById('group-matches-content').innerHTML = groupHtml || '<div class="no-data"><p>KHÔNG CÓ TRẬN ĐẤU NÀO</p></div>';
         }
 
         // Render Teams
