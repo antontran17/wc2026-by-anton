@@ -6519,8 +6519,17 @@
 
         function renderSingleMatchCard(game, compact = false) {
             if (!hasRenderableParticipants(game)) return '';
-            const homeTeam = teamsData.find(t => t.id === game.home_team_id) || {};
-            const awayTeam = teamsData.find(t => t.id === game.away_team_id) || {};
+            let homeTeam = teamsData.find(t => String(t.id) === String(game.home_team_id));
+            if (!homeTeam && game.home_team_name_en && !game.home_team_name_en.includes('Winner') && !game.home_team_name_en.includes('3rd') && !game.home_team_name_en.includes('Runner')) {
+                homeTeam = teamsData.find(t => t.name_en === game.home_team_name_en) || {};
+            }
+            homeTeam = homeTeam || {};
+
+            let awayTeam = teamsData.find(t => String(t.id) === String(game.away_team_id));
+            if (!awayTeam && game.away_team_name_en && !game.away_team_name_en.includes('Winner') && !game.away_team_name_en.includes('3rd') && !game.away_team_name_en.includes('Runner')) {
+                awayTeam = teamsData.find(t => t.name_en === game.away_team_name_en) || {};
+            }
+            awayTeam = awayTeam || {};
             const stadium = stadiumsData.find(s => s.id === game.stadium_id) || {};
 
             const homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || 'Team not decided';
@@ -6854,7 +6863,8 @@
             games.forEach(game => {
                 if (!isGroupStageValue(game.group)) {
                     const homeLabel = String(game.home_team_label || game.home_team_name_en || '');
-                    if (!game.home_team_id || String(game.home_team_id) === '0') {
+                    const hasRealHomeName = game.home_team_name_en && !game.home_team_name_en.includes('Winner') && !game.home_team_name_en.includes('3rd') && !game.home_team_name_en.includes('Runner');
+                    if ((!game.home_team_id || String(game.home_team_id) === '0') && !hasRealHomeName) {
                         const wMatch = homeLabel.match(/Winner Group ([A-L])/i);
                         if (wMatch && positions[wMatch[1].toUpperCase()]?.[1]) {
                             game.home_team_id = positions[wMatch[1].toUpperCase()][1];
@@ -6875,7 +6885,8 @@
                     }
 
                     const awayLabel = String(game.away_team_label || game.away_team_name_en || '');
-                    if (!game.away_team_id || String(game.away_team_id) === '0') {
+                    const hasRealAwayName = game.away_team_name_en && !game.away_team_name_en.includes('Winner') && !game.away_team_name_en.includes('3rd') && !game.away_team_name_en.includes('Runner');
+                    if ((!game.away_team_id || String(game.away_team_id) === '0') && !hasRealAwayName) {
                         const wMatch = awayLabel.match(/Winner Group ([A-L])/i);
                         if (wMatch && positions[wMatch[1].toUpperCase()]?.[1]) {
                             game.away_team_id = positions[wMatch[1].toUpperCase()][1];
@@ -7262,8 +7273,17 @@
                 if (roundGames.length > 0) {
                     const slotHeight = baseHeight * Math.pow(2, roundIndex);
                     let matchesHtml = roundGames.map(game => {
-                        const homeTeam = teamsData.find(t => t.id === game.home_team_id) || {};
-                        const awayTeam = teamsData.find(t => t.id === game.away_team_id) || {};
+                        let homeTeam = teamsData.find(t => String(t.id) === String(game.home_team_id));
+                        if (!homeTeam && game.home_team_name_en && !game.home_team_name_en.includes('Winner') && !game.home_team_name_en.includes('3rd') && !game.home_team_name_en.includes('Runner')) {
+                            homeTeam = teamsData.find(t => t.name_en === game.home_team_name_en) || {};
+                        }
+                        homeTeam = homeTeam || {};
+
+                        let awayTeam = teamsData.find(t => String(t.id) === String(game.away_team_id));
+                        if (!awayTeam && game.away_team_name_en && !game.away_team_name_en.includes('Winner') && !game.away_team_name_en.includes('3rd') && !game.away_team_name_en.includes('Runner')) {
+                            awayTeam = teamsData.find(t => t.name_en === game.away_team_name_en) || {};
+                        }
+                        awayTeam = awayTeam || {};
                         
                         let homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || '-';
                         let awayLabel = game.away_team_name_en || awayTeam.name_en || game.away_team_label || '-';
