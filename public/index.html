@@ -7231,30 +7231,32 @@
                 `;
             }).join('');
         }
-        function renderTournamentBracket(games) {
-            const wrapper = document.getElementById('bracket-wrapper');
-            if (!wrapper) return;
-
-            const koGames = games.filter(g => !isGroupStageValue(g.group));
+        function renderTournamentBracket(gamesData) {
+            const bracketWrapper = document.getElementById('bracket-wrapper');
+            if (!bracketWrapper) return;
+            
+            const koGames = gamesData.filter(g => !isGroupStageValue(g.group));
             if (koGames.length === 0) {
                 document.getElementById('tournament-bracket').style.display = 'none';
                 return;
             }
             document.getElementById('tournament-bracket').style.display = 'block';
 
-            const rounds = [
-                { id: 'R32', title: 'VÒNG 32' },
-                { id: 'R16', title: 'VÒNG 16' },
-                { id: 'QF', title: 'TỨ KẾT' },
-                { id: 'SF', title: 'BÁN KẾT' },
-                { id: 'FINAL', title: 'CHUNG KẾT' }
+            const bracketStructure = [
+                { id: 'R32', title: 'VÒNG 32', visualOrder: ['74', '77', '73', '75', '83', '84', '81', '82', '76', '78', '79', '80', '86', '88', '85', '87'] },
+                { id: 'R16', title: 'VÒNG 16', visualOrder: ['89', '90', '93', '94', '91', '92', '95', '96'] },
+                { id: 'QF', title: 'TỨ KẾT', visualOrder: ['97', '98', '99', '100'] },
+                { id: 'SF', title: 'BÁN KẾT', visualOrder: ['101', '102'] },
+                { id: 'FINAL', title: 'CHUNG KẾT', visualOrder: ['104'] }
             ];
 
             let html = '';
             let roundIndex = 0;
             const baseHeight = 46;
-            rounds.forEach(r => {
-                const roundGames = sortByStartTime(koGames.filter(g => String(g.group).trim().toUpperCase() === r.id));
+            bracketStructure.forEach(r => {
+                const roundGamesUnsorted = koGames.filter(g => String(g.group).trim().toUpperCase() === r.id);
+                // Sắp xếp các trận đấu theo đúng thứ tự logic cây nhị phân để kết nối nhánh chính xác
+                const roundGames = r.visualOrder.map(matchId => roundGamesUnsorted.find(g => String(g.id) === matchId)).filter(Boolean);
                 if (roundGames.length > 0) {
                     const slotHeight = baseHeight * Math.pow(2, roundIndex);
                     let matchesHtml = roundGames.map(game => {
