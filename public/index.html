@@ -5594,6 +5594,17 @@
             if (isAdding) ensureFavoriteNotifications();
         }
 
+        function centerBracket(e) {
+            e.preventDefault();
+            const bracket = document.getElementById('bracket-wrapper');
+            if (bracket) {
+                const header = document.querySelector('header');
+                const headerOffset = header ? header.offsetHeight : 80;
+                const y = bracket.getBoundingClientRect().top + window.scrollY - headerOffset;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        }
+
         function toggleFavoriteTeam(id) {
             id = String(id);
             const isAdding = !favoriteTeams.has(id);
