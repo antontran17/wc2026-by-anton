@@ -7232,8 +7232,8 @@
             }).join('');
         }
         function renderTournamentBracket() {
-            const bracketWrapper = document.getElementById('bracket-wrapper');
-            if (!bracketWrapper) return;
+            const wrapper = document.getElementById('bracket-wrapper');
+            if (!wrapper) return;
             
             const koGames = gamesData.filter(g => !isGroupStageValue(g.group));
             if (koGames.length === 0) {
