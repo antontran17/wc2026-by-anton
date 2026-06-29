@@ -6946,8 +6946,12 @@
             const favorites = sortByStartTime(displayGames.filter(g => {
                 const matchFav = favoriteMatches.has(String(g.id));
                 const teamFav = favoriteTeams.has(String(g.home_team_id)) || favoriteTeams.has(String(g.away_team_id));
-                return (matchFav || teamFav) && !live.some(x => String(x.id) === String(g.id)) && !upcoming.some(x => String(x.id) === String(g.id)) && !results.some(x => String(x.id) === String(g.id));
-            })).slice(0, 6);
+                if (!(matchFav || teamFav)) return false;
+                if (matchStatusClass(g).includes('is-live') || matchStatusClass(g).includes('is-upcoming')) return true;
+                const start = parseSourceDate(g);
+                if (!start) return true;
+                return (new Date().getTime() - start.getTime()) < 72 * 60 * 60 * 1000;
+            })).slice(0, 10);
 
             const highlightedIds = new Set([...live, ...upcoming, ...results, ...favorites].map(g => String(g.id)));
             const rest = games;
