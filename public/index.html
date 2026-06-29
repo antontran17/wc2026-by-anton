@@ -6869,44 +6869,54 @@
                 if (!isGroupStageValue(game.group)) {
                     const homeLabel = String(game.home_team_label || game.home_team_name_en || '');
                     const hasRealHomeName = game.home_team_name_en && !game.home_team_name_en.includes('Winner') && !game.home_team_name_en.includes('3rd') && !game.home_team_name_en.includes('Runner');
-                    if ((!game.home_team_id || String(game.home_team_id) === '0') && !hasRealHomeName) {
-                        const wMatch = homeLabel.match(/Winner Group ([A-L])/i);
-                        if (wMatch && positions[wMatch[1].toUpperCase()]?.[1]) {
-                            game.home_team_id = positions[wMatch[1].toUpperCase()][1];
-                        }
-                        const rMatch = homeLabel.match(/Runner-up Group ([A-L])/i);
-                        if (rMatch && positions[rMatch[1].toUpperCase()]?.[2]) {
-                            game.home_team_id = positions[rMatch[1].toUpperCase()][2];
-                        }
-                        const thirdMatch = homeLabel.match(/3rd Group ([A-L\/]+)/i);
-                        if (thirdMatch) {
-                            const allowedGroups = thirdMatch[1].toUpperCase().split('/');
-                            const index = validThirdTeams.findIndex(t => allowedGroups.includes(t.groupName));
-                            if (index !== -1) {
-                                game.home_team_id = validThirdTeams[index].team_id;
-                                validThirdTeams.splice(index, 1);
+                    if (!game.home_team_id || String(game.home_team_id) === '0') {
+                        if (hasRealHomeName) {
+                            const found = teamsData.find(t => t.name_en === game.home_team_name_en);
+                            if (found) game.home_team_id = found.id;
+                        } else {
+                            const wMatch = homeLabel.match(/Winner Group ([A-L])/i);
+                            if (wMatch && positions[wMatch[1].toUpperCase()]?.[1]) {
+                                game.home_team_id = positions[wMatch[1].toUpperCase()][1];
+                            }
+                            const rMatch = homeLabel.match(/Runner-up Group ([A-L])/i);
+                            if (rMatch && positions[rMatch[1].toUpperCase()]?.[2]) {
+                                game.home_team_id = positions[rMatch[1].toUpperCase()][2];
+                            }
+                            const thirdMatch = homeLabel.match(/3rd Group ([A-L\/]+)/i);
+                            if (thirdMatch) {
+                                const allowedGroups = thirdMatch[1].toUpperCase().split('/');
+                                const index = validThirdTeams.findIndex(t => allowedGroups.includes(t.groupName));
+                                if (index !== -1) {
+                                    game.home_team_id = validThirdTeams[index].team_id;
+                                    validThirdTeams.splice(index, 1);
+                                }
                             }
                         }
                     }
 
                     const awayLabel = String(game.away_team_label || game.away_team_name_en || '');
                     const hasRealAwayName = game.away_team_name_en && !game.away_team_name_en.includes('Winner') && !game.away_team_name_en.includes('3rd') && !game.away_team_name_en.includes('Runner');
-                    if ((!game.away_team_id || String(game.away_team_id) === '0') && !hasRealAwayName) {
-                        const wMatch = awayLabel.match(/Winner Group ([A-L])/i);
-                        if (wMatch && positions[wMatch[1].toUpperCase()]?.[1]) {
-                            game.away_team_id = positions[wMatch[1].toUpperCase()][1];
-                        }
-                        const rMatch = awayLabel.match(/Runner-up Group ([A-L])/i);
-                        if (rMatch && positions[rMatch[1].toUpperCase()]?.[2]) {
-                            game.away_team_id = positions[rMatch[1].toUpperCase()][2];
-                        }
-                        const thirdMatch = awayLabel.match(/3rd Group ([A-L\/]+)/i);
-                        if (thirdMatch) {
-                            const allowedGroups = thirdMatch[1].toUpperCase().split('/');
-                            const index = validThirdTeams.findIndex(t => allowedGroups.includes(t.groupName));
-                            if (index !== -1) {
-                                game.away_team_id = validThirdTeams[index].team_id;
-                                validThirdTeams.splice(index, 1);
+                    if (!game.away_team_id || String(game.away_team_id) === '0') {
+                        if (hasRealAwayName) {
+                            const found = teamsData.find(t => t.name_en === game.away_team_name_en);
+                            if (found) game.away_team_id = found.id;
+                        } else {
+                            const wMatch = awayLabel.match(/Winner Group ([A-L])/i);
+                            if (wMatch && positions[wMatch[1].toUpperCase()]?.[1]) {
+                                game.away_team_id = positions[wMatch[1].toUpperCase()][1];
+                            }
+                            const rMatch = awayLabel.match(/Runner-up Group ([A-L])/i);
+                            if (rMatch && positions[rMatch[1].toUpperCase()]?.[2]) {
+                                game.away_team_id = positions[rMatch[1].toUpperCase()][2];
+                            }
+                            const thirdMatch = awayLabel.match(/3rd Group ([A-L\/]+)/i);
+                            if (thirdMatch) {
+                                const allowedGroups = thirdMatch[1].toUpperCase().split('/');
+                                const index = validThirdTeams.findIndex(t => allowedGroups.includes(t.groupName));
+                                if (index !== -1) {
+                                    game.away_team_id = validThirdTeams[index].team_id;
+                                    validThirdTeams.splice(index, 1);
+                                }
                             }
                         }
                     }
