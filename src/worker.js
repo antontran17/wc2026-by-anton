@@ -44,7 +44,7 @@ function normalized(value) {
 }
 
 function alias(value) {
-  const aliases = { usa: 'united states', 'u s a': 'united states', korea: 'south korea', czech: 'czech republic', 's africa': 'south africa', bosnia: 'bosnia and herzegovina', drc: 'congo dr', cod: 'congo dr', 'cote divoire': 'ivory coast' };
+  const aliases = { usa: 'united states', 'u s a': 'united states', korea: 'south korea', czech: 'czech republic', 's africa': 'south africa', bosnia: 'bosnia and herzegovina', 'bosnia h': 'bosnia and herzegovina', drc: 'congo dr', cod: 'congo dr', 'cote divoire': 'ivory coast' };
   const key = normalized(value);
   return aliases[key] || key;
 }
@@ -58,6 +58,23 @@ for (const team of teams) {
 
 function localTeam(apiTeam) {
   return teamLookup.get(alias(apiTeam?.name)) || teamLookup.get(alias(apiTeam?.shortName)) || teamLookup.get(alias(apiTeam?.tla)) || null;
+}
+
+function apiTeamName(apiTeam) {
+  const values = [apiTeam?.shortName, apiTeam?.name, apiTeam?.tla]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+  const value = values.find((item) => !/^(undefined|null|tbd)$/i.test(item));
+  return value || '';
+}
+
+function mergeApiTeam(localId, localName, apiTeam) {
+  const team = localTeam(apiTeam);
+  const name = apiTeamName(apiTeam);
+  return {
+    id: String(team?.id || localId || ''),
+    name: name || localName || ''
+  };
 }
 
 function localMatch(home, away, utcDate) {
@@ -175,6 +192,8 @@ async function fetchLatestGames(env) {
             }
         }
         
+        const apiHome = mergeApiTeam(local.home_team_id, local.home_team_name_en, apiMatch?.homeTeam);
+        const apiAway = mergeApiTeam(local.away_team_id, local.away_team_name_en, apiMatch?.awayTeam);
         const status = String(apiMatch?.status || '').toUpperCase();
         const finished = ['FINISHED', 'AWARDED'].includes(status);
         const score = apiMatch?.score?.fullTime || {};
@@ -185,8 +204,10 @@ async function fetchLatestGames(env) {
             id: String(local.id),
             football_data_id: apiMatch?.id || '',
             api_utc_date: apiMatch?.utcDate || '',
-            home_team_name_en: apiMatch?.homeTeam?.shortName || apiMatch?.homeTeam?.name || local.home_team_name_en,
-            away_team_name_en: apiMatch?.awayTeam?.shortName || apiMatch?.awayTeam?.name || local.away_team_name_en,
+            home_team_id: apiHome.id,
+            away_team_id: apiAway.id,
+            home_team_name_en: apiHome.name,
+            away_team_name_en: apiAway.name,
             home_team_label: local.home_team_label || '',
             away_team_label: local.away_team_label || '',
             home_score: String(score.home ?? local.home_score ?? 0),

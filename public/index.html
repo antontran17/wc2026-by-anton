@@ -6061,13 +6061,60 @@
                 .replace(/'/g, '&#39;');
         }
 
+        function normalizeTeamLookup(value) {
+            return String(value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/&/g, ' and ')
+                .replace(/[^a-z0-9]+/gi, ' ')
+                .trim()
+                .toLowerCase();
+        }
+
+        function findTeamByLabel(value) {
+            const key = normalizeTeamLookup(value);
+            if (!key || /^(undefined|null|tbd)$/.test(key)) return null;
+            const aliases = {
+                usa: 'united states',
+                'u s a': 'united states',
+                korea: 'south korea',
+                czech: 'czech republic',
+                bosnia: 'bosnia and herzegovina',
+                'bosnia h': 'bosnia and herzegovina',
+                drc: 'congo dr',
+                cod: 'congo dr',
+                'cote divoire': 'ivory coast'
+            };
+            const wanted = aliases[key] || key;
+            return teamsData.find(team => {
+                const candidates = [team.name_en, team.fifa_code, team.iso2].map(normalizeTeamLookup);
+                return candidates.some(item => (aliases[item] || item) === wanted);
+            }) || null;
+        }
+
+        function resolveMatchTeam(game, side) {
+            const idKey = `${side}_team_id`;
+            const nameKey = `${side}_team_name_en`;
+            const labelKey = `${side}_team_label`;
+            return teamsData.find(t => String(t.id) === String(game[idKey])) ||
+                findTeamByLabel(game[nameKey]) ||
+                findTeamByLabel(game[labelKey]) ||
+                {};
+        }
+
         function pendingTeamLabel(label) {
             const raw = String(label || '').trim();
             if (!raw) return 'TBD';
-            if (/winner match/i.test(raw)) return 'WIN';
-            if (/runner-up/i.test(raw)) return 'RUP';
-            if (/winner group/i.test(raw)) return 'WIN';
-            if (/3rd group/i.test(raw)) return '3RD';
+            const winnerMatch = raw.match(/winner match\s*(\d+)/i);
+            if (winnerMatch) return `W${winnerMatch[1]}`;
+            const loserMatch = raw.match(/loser match\s*(\d+)/i);
+            if (loserMatch) return `L${loserMatch[1]}`;
+            const winnerGroup = raw.match(/winner group\s*([A-L])/i);
+            if (winnerGroup) return `W${winnerGroup[1].toUpperCase()}`;
+            const runnerGroup = raw.match(/runner-up group\s*([A-L])/i);
+            if (runnerGroup) return `R${runnerGroup[1].toUpperCase()}`;
+            const thirdGroup = raw.match(/3rd group\s*([A-L/]+)/i);
+            if (thirdGroup) return `3${thirdGroup[1].replace(/\//g, '')}`;
             return 'TBD';
         }
 
@@ -6524,17 +6571,8 @@
 
         function renderSingleMatchCard(game, compact = false) {
             if (!hasRenderableParticipants(game)) return '';
-            let homeTeam = teamsData.find(t => String(t.id) === String(game.home_team_id));
-            if (!homeTeam && game.home_team_name_en && !game.home_team_name_en.includes('Winner') && !game.home_team_name_en.includes('3rd') && !game.home_team_name_en.includes('Runner')) {
-                homeTeam = teamsData.find(t => t.name_en === game.home_team_name_en) || {};
-            }
-            homeTeam = homeTeam || {};
-
-            let awayTeam = teamsData.find(t => String(t.id) === String(game.away_team_id));
-            if (!awayTeam && game.away_team_name_en && !game.away_team_name_en.includes('Winner') && !game.away_team_name_en.includes('3rd') && !game.away_team_name_en.includes('Runner')) {
-                awayTeam = teamsData.find(t => t.name_en === game.away_team_name_en) || {};
-            }
-            awayTeam = awayTeam || {};
+            const homeTeam = resolveMatchTeam(game, 'home');
+            const awayTeam = resolveMatchTeam(game, 'away');
             const stadium = stadiumsData.find(s => s.id === game.stadium_id) || {};
 
             const homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || 'Team not decided';
@@ -7277,6 +7315,7 @@
                 { id: 'R16', title: 'VÒNG 16', visualOrder: ['89', '90', '94', '93', '91', '92', '96', '95'] },
                 { id: 'QF', title: 'TỨ KẾT', visualOrder: ['97', '98', '99', '100'] },
                 { id: 'SF', title: 'BÁN KẾT', visualOrder: ['101', '102'] },
+                { id: '3RD', title: 'TRANH HẠNG 3', visualOrder: ['103'] },
                 { id: 'FINAL', title: 'CHUNG KẾT', visualOrder: ['104'] }
             ];
 
@@ -7292,17 +7331,8 @@
                 if (roundGames.length > 0) {
                     const slotHeight = baseHeight * Math.pow(2, roundIndex);
                     let matchesHtml = roundGames.map(game => {
-                        let homeTeam = teamsData.find(t => String(t.id) === String(game.home_team_id));
-                        if (!homeTeam && game.home_team_name_en && !game.home_team_name_en.includes('Winner') && !game.home_team_name_en.includes('3rd') && !game.home_team_name_en.includes('Runner')) {
-                            homeTeam = teamsData.find(t => t.name_en === game.home_team_name_en) || {};
-                        }
-                        homeTeam = homeTeam || {};
-
-                        let awayTeam = teamsData.find(t => String(t.id) === String(game.away_team_id));
-                        if (!awayTeam && game.away_team_name_en && !game.away_team_name_en.includes('Winner') && !game.away_team_name_en.includes('3rd') && !game.away_team_name_en.includes('Runner')) {
-                            awayTeam = teamsData.find(t => t.name_en === game.away_team_name_en) || {};
-                        }
-                        awayTeam = awayTeam || {};
+                        const homeTeam = resolveMatchTeam(game, 'home');
+                        const awayTeam = resolveMatchTeam(game, 'away');
                         
                         let homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || '-';
                         let awayLabel = game.away_team_name_en || awayTeam.name_en || game.away_team_label || '-';
@@ -7312,12 +7342,16 @@
                         const homeName = homeTeam.id ? teamCode(homeTeam, homeLabel) : (homeLabel === '-' ? '-' : pendingTeamLabel(homeLabel));
                         const awayName = awayTeam.id ? teamCode(awayTeam, awayLabel) : (awayLabel === '-' ? '-' : pendingTeamLabel(awayLabel));
                         
-                        const homeScore = (game.home_score !== null && game.home_score !== undefined) ? game.home_score : '-';
-                        const awayScore = (game.away_score !== null && game.away_score !== undefined) ? game.away_score : '-';
-                        const isHomeWin = (homeScore !== '-' && homeScore > awayScore) || (game.home_pen !== null && game.home_pen !== undefined && game.home_pen > game.away_pen);
-                        const isAwayWin = (homeScore !== '-' && homeScore < awayScore) || (game.home_pen !== null && game.home_pen !== undefined && game.home_pen < game.away_pen);
-                        const homePen = (game.home_pen !== null && game.home_pen !== undefined) ? `(${game.home_pen})` : '';
-                        const awayPen = (game.away_pen !== null && game.away_pen !== undefined) ? `(${game.away_pen})` : '';
+                        const hasScore = game.home_score !== null && game.home_score !== undefined && game.away_score !== null && game.away_score !== undefined;
+                        const homeScore = hasScore ? Number(game.home_score) : null;
+                        const awayScore = hasScore ? Number(game.away_score) : null;
+                        const hasPenalties = game.home_penalties !== null && game.home_penalties !== undefined && String(game.home_penalties) !== '';
+                        const homePenaltyScore = hasPenalties ? Number(game.home_penalties) : null;
+                        const awayPenaltyScore = hasPenalties ? Number(game.away_penalties) : null;
+                        const isHomeWin = (hasPenalties && homePenaltyScore > awayPenaltyScore) || (hasScore && homeScore > awayScore);
+                        const isAwayWin = (hasPenalties && homePenaltyScore < awayPenaltyScore) || (hasScore && homeScore < awayScore);
+                        const homePen = hasPenalties ? `(${game.home_penalties})` : '';
+                        const awayPen = hasPenalties ? `(${game.away_penalties})` : '';
                         const isFav = favoriteMatches.has(String(game.id)) || favoriteTeams.has(String(game.home_team_id)) || favoriteTeams.has(String(game.away_team_id));
                         
                         return `
@@ -7328,7 +7362,7 @@
                                         <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
                                     </div>
                                     <div class="bracket-score">
-                                        ${homeScore}${homePen} : ${awayScore}${awayPen}
+                                        ${hasScore ? homeScore : '-'}${homePen} : ${hasScore ? awayScore : '-'}${awayPen}
                                     </div>
                                     <div class="bracket-team ${isAwayWin ? 'winner' : ''} left-align">
                                         <img src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
