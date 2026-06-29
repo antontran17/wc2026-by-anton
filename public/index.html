@@ -5064,6 +5064,7 @@
             flex-direction: column;
             min-width: 230px;
             scroll-snap-align: start;
+            position: relative;
         }
         .bracket-matches-container {
             display: flex;
@@ -5166,6 +5167,30 @@
             border-radius: 6px;
             white-space: nowrap;
         }
+        .bracket-third-place {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 68%;
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+        .bracket-third-place-title {
+            text-align: center;
+            font-size: 11px;
+            line-height: 1;
+            font-weight: 700;
+            color: rgba(255,255,255,.48);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .bracket-third-place .bracket-match {
+            box-shadow: 0 0 14px rgba(143,170,255,.12);
+        }
+        .bracket-match-slot.no-connector::before,
+        .bracket-match-slot.no-connector::after {
+            display: none !important;
+        }
         @media (max-width: 768px) {
             .bracket-match.horizontal-layout {
                 padding: 4px 2px;
@@ -5186,6 +5211,9 @@
             }
             .bracket-wrapper {
                 gap: 12px;
+            }
+            .bracket-third-place {
+                top: 66%;
             }
         }
     </style>
@@ -5600,9 +5628,9 @@
             if (bracket) {
                 const header = document.querySelector('header');
                 const headerOffset = header ? header.offsetHeight : 80;
-                const bracketRect = bracket.getBoundingClientRect();
-                const bracketCenterY = bracketRect.top + window.scrollY + (bracketRect.height / 2);
-                const y = bracketCenterY - (window.innerHeight / 2) + (headerOffset / 2);
+                const section = document.getElementById('tournament-bracket') || bracket;
+                const sectionRect = section.getBoundingClientRect();
+                const y = sectionRect.top + window.scrollY - headerOffset - 18;
                 window.scrollTo({ top: y, behavior: 'smooth' });
                 
                 const scrollLeftPos = (bracket.scrollWidth - bracket.clientWidth) / 2;
@@ -7329,7 +7357,7 @@
                 
                 if (roundGames.length > 0) {
                     const slotHeight = baseHeight * Math.pow(2, roundIndex);
-                    let matchesHtml = roundGames.map(game => {
+                    const renderBracketGame = (game, customSlotHeight = slotHeight, slotClass = '') => {
                         const homeTeam = resolveMatchTeam(game, 'home');
                         const awayTeam = resolveMatchTeam(game, 'away');
                         
@@ -7354,7 +7382,7 @@
                         const isFav = favoriteMatches.has(String(game.id)) || favoriteTeams.has(String(game.home_team_id)) || favoriteTeams.has(String(game.away_team_id));
                         
                         return `
-                            <div class="bracket-match-slot" style="height: ${slotHeight}px">
+                            <div class="bracket-match-slot ${slotClass}" style="height: ${customSlotHeight}px">
                                 <div class="bracket-match horizontal-layout ${isFav ? 'is-favorite' : ''}" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer; position:relative; z-index:1;">
                                     <div class="bracket-team ${isHomeWin ? 'winner' : ''} right-align">
                                         <span>${homeName}</span>
@@ -7370,7 +7398,19 @@
                                 </div>
                             </div>
                         `;
-                    }).join('');
+                    };
+                    let matchesHtml = roundGames.map(game => renderBracketGame(game)).join('');
+                    if (r.id === 'FINAL') {
+                        const thirdPlaceGame = koGames.find(g => String(g.id) === '103' || String(g.group).trim().toUpperCase() === '3RD');
+                        if (thirdPlaceGame) {
+                            matchesHtml += `
+                                <div class="bracket-third-place">
+                                    <div class="bracket-third-place-title">TRANH HẠNG 3</div>
+                                    ${renderBracketGame(thirdPlaceGame, baseHeight, 'no-connector')}
+                                </div>
+                            `;
+                        }
+                    }
                     html += `
                         <div class="bracket-round">
                             <div class="bracket-title" style="height: 30px; margin-bottom: 0px; display: flex; align-items: center; justify-content: center;">${r.title}</div>
