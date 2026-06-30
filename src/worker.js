@@ -6,7 +6,6 @@ import stadiums from '../worker-data/football.stadiums.json';
 const FOOTBALL_DATA_BASE = 'https://api.football-data.org/v4';
 const FOOTBALL_DATA_COMPETITION = 'WC';
 const FOOTBALL_DATA_SEASON = '2026';
-const REMOTE_BASE = 'https://worldcup26.ir';
 const ESPN_SCOREBOARD_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
 const ESPN_STATISTICS_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/statistics?season=2026';
 const LIVE_SOURCE_TIMEOUT_MS = 6500;
@@ -262,6 +261,8 @@ async function fetchEspnFallbackGames() {
         ...local,
         home_score: String(home?.score ?? 0),
         away_score: String(away?.score ?? 0),
+        home_penalties: home?.shootoutScore == null ? '' : String(home.shootoutScore),
+        away_penalties: away?.shootoutScore == null ? '' : String(away.shootoutScore),
         api_utc_date: event.date || local.api_utc_date,
         finished: matchStatus.completed ? 'TRUE' : 'FALSE',
         time_elapsed: matchStatus.completed ? 'finished' : 'live',
@@ -288,8 +289,15 @@ async function liveGames(request, env, ctx) {
       gamesFetchInFlight = fetchLatestGames(env).finally(() => { gamesFetchInFlight = null; });
     }
     const mappedGames = await gamesFetchInFlight;
-    ctx.waitUntil(cacheCompletedMatches(mappedGames, request));
-    return freshGamesResponse({ games: mappedGames, source: 'football-data', cache_ttl_ms: 0 });
+    let responseGames = mappedGames;
+    try {
+      const espnOverrides = await fetchEspnOverridesForGames(mappedGames);
+      if (espnOverrides.length) responseGames = mergeGameOverrides(mappedGames, espnOverrides);
+    } catch (_) {
+      // Football-data remains the baseline; ESPN only corrects known live/penalty edge cases.
+    }
+    ctx.waitUntil(cacheCompletedMatches(responseGames, request));
+    return freshGamesResponse({ games: responseGames, source: 'football-data+espn', cache_ttl_ms: 0 });
   } catch (error) {
     const localSchedule = await completedScheduleFallback(request);
     try {
@@ -301,21 +309,6 @@ async function liveGames(request, env, ctx) {
       // Fall through to the saved final scores and bundled schedule.
     }
     return freshGamesResponse({ games: localSchedule, source: 'local', remote_error: error.message, cache_ttl_ms: 0 });
-  }
-}
-
-async function scorerFeed(request, ctx) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 12000);
-  try {
-    const response = await fetch(`${REMOTE_BASE}/get/games`, {
-      signal: controller.signal,
-      headers: { accept: 'application/json' }
-    });
-    if (!response.ok) throw new Error(`Scorer source ${response.status}`);
-    return response.json();
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
@@ -340,6 +333,31 @@ function espnDateCandidates(localDate) {
   });
 }
 
+function espnDateCandidatesForMatch(match) {
+  const dates = new Set(espnDateCandidates(match?.local_date));
+  const apiDate = Date.parse(match?.api_utc_date || '');
+  if (!Number.isNaN(apiDate)) {
+    [-1, 0, 1].forEach((offset) => {
+      const value = new Date(apiDate);
+      value.setUTCDate(value.getUTCDate() + offset);
+      dates.add(espnScoreboardDate(value));
+    });
+  }
+  return [...dates].filter(Boolean);
+}
+
+function concreteTeamName(value) {
+  const text = String(value || '').trim();
+  if (!text || /^(undefined|null|tbd|-)$/i.test(text)) return '';
+  if (/^(winner|runner-up|3rd|loser)\s+/i.test(text)) return '';
+  return text;
+}
+
+function matchTeamName(match, side) {
+  const id = match?.[`${side}_team_id`];
+  return concreteTeamName(match?.[`${side}_team_name_en`]) || localTeamName(id);
+}
+
 function espnTeamAlias(value) {
   const key = normalized(value).replace(/[^a-z0-9]/g, '');
   const aliases = {
@@ -352,36 +370,143 @@ function espnTeamAlias(value) {
     bosniaandherzegovina: 'bosnia',
     bosniaherzegovina: 'bosnia',
     bosnia: 'bosnia',
+    bosniah: 'bosnia',
     democraticrepublicofthecongo: 'drcongo',
     congodr: 'drcongo',
-    drcongo: 'drcongo'
+    drcongo: 'drcongo',
+    congo: 'drcongo',
+    cod: 'drcongo',
+    ivorycoast: 'cotedivoire',
+    cotedivoire: 'cotedivoire',
+    curacao: 'curacao',
+    curaçao: 'curacao'
   };
   return aliases[key] || key;
 }
 
-async function espnScorers(id) {
-  const local = matches.find((item) => String(item.id) === String(id));
-  const dates = espnDateCandidates(local?.local_date);
-  const homeName = localTeamName(local?.home_team_id);
-  const awayName = localTeamName(local?.away_team_id);
+function espnCompetitors(event) {
+  const competitors = event?.competitions?.[0]?.competitors || event?.header?.competitions?.[0]?.competitors || [];
+  return {
+    home: competitors.find((team) => team.homeAway === 'home'),
+    away: competitors.find((team) => team.homeAway === 'away')
+  };
+}
+
+function espnTeamMatches(espnTeam, localName, localId) {
+  const candidates = [localName, localTeamName(localId), teams.find((team) => String(team.id) === String(localId))?.fifa_code]
+    .map(concreteTeamName)
+    .filter(Boolean)
+    .map(espnTeamAlias);
+  const values = [
+    espnTeam?.team?.displayName,
+    espnTeam?.team?.shortDisplayName,
+    espnTeam?.team?.name,
+    espnTeam?.team?.abbreviation,
+    espnTeam?.displayName,
+    espnTeam?.name,
+    espnTeam?.abbreviation
+  ].map(espnTeamAlias);
+  return candidates.some((candidate) => values.includes(candidate));
+}
+
+function espnEventMatchesGame(event, match) {
+  const { home, away } = espnCompetitors(event);
+  if (!home || !away) return false;
+  return espnTeamMatches(home, matchTeamName(match, 'home'), match?.home_team_id)
+    && espnTeamMatches(away, matchTeamName(match, 'away'), match?.away_team_id);
+}
+
+async function fetchEspnScoreboards(dates, signal) {
+  const responses = await Promise.all([...new Set(dates)].map((date) =>
+    fetch(`${ESPN_SCOREBOARD_BASE}/scoreboard?dates=${date}`, { signal, headers: { accept: 'application/json', 'cache-control': 'no-cache' } })
+      .then((response) => response.ok ? response.json() : { events: [] })
+      .catch(() => ({ events: [] }))
+  ));
+  return responses.flatMap((payload) => payload.events || []);
+}
+
+function espnGameOverride(game, event) {
+  const { home, away } = espnCompetitors(event);
+  const matchStatus = espnMatchStatus(event);
+  const type = event?.status?.type || event?.competitions?.[0]?.status?.type || {};
+  const name = String(type.name || '').toUpperCase();
+  let status = 'TIMED';
+  if (matchStatus.completed) status = 'FINISHED';
+  else if (name.includes('PENALT') || name.includes('SHOOTOUT')) status = 'PENALTY';
+  else if (name.includes('OVERTIME') || name.includes('EXTRA')) status = 'ET';
+  else if (name.includes('HALFTIME')) status = 'HT';
+  else if (matchStatus.live) status = 'IN_PLAY';
+  return {
+    home_score: String(home?.score ?? game.home_score ?? 0),
+    away_score: String(away?.score ?? game.away_score ?? 0),
+    home_penalties: home?.shootoutScore == null ? (game.home_penalties || '') : String(home.shootoutScore),
+    away_penalties: away?.shootoutScore == null ? (game.away_penalties || '') : String(away.shootoutScore),
+    api_utc_date: event?.date || game.api_utc_date || '',
+    finished: matchStatus.completed ? 'TRUE' : 'FALSE',
+    time_elapsed: matchStatus.completed ? 'finished' : (event?.status?.displayClock || event?.status?.type?.detail || 'live'),
+    status,
+    score_duration: event?.status?.type?.shortDetail || event?.status?.type?.detail || game.score_duration || '',
+    source: 'espn'
+  };
+}
+
+async function fetchEspnOverridesForGames(games) {
+  const candidates = games.filter((game) => {
+    const hasTeams = matchTeamName(game, 'home') && matchTeamName(game, 'away');
+    const hasPenalty = String(game.home_penalties || game.away_penalties || game.score_duration || '').toUpperCase().includes('PEN');
+    const active = ['IN_PLAY', 'PAUSED', 'PENALTY', 'ET', 'HT'].includes(String(game.status || '').toUpperCase());
+    return hasTeams && (hasPenalty || active);
+  });
+  if (!candidates.length) return [];
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LIVE_SOURCE_TIMEOUT_MS);
+  try {
+    const dates = candidates.flatMap(espnDateCandidatesForMatch);
+    const events = await fetchEspnScoreboards(dates, controller.signal);
+    return candidates.map((game) => {
+      const event = events.find((candidate) => espnEventMatchesGame(candidate, game));
+      return event ? { ...game, ...espnGameOverride(game, event) } : null;
+    }).filter(Boolean);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function scorerMatchFromRequest(id, request) {
+  const url = new URL(request.url);
+  const local = matches.find((item) => String(item.id) === String(id)) || {};
+  return {
+    ...local,
+    home_team_id: url.searchParams.get('homeTeamId') || local.home_team_id || '',
+    away_team_id: url.searchParams.get('awayTeamId') || local.away_team_id || '',
+    home_team_name_en: url.searchParams.get('homeName') || local.home_team_name_en || '',
+    away_team_name_en: url.searchParams.get('awayName') || local.away_team_name_en || '',
+    local_date: url.searchParams.get('localDate') || local.local_date || '',
+    api_utc_date: url.searchParams.get('apiDate') || local.api_utc_date || ''
+  };
+}
+
+function espnGoalMinute(play) {
+  const base = String(play.clock?.displayValue || '').replace(/'/g, '').trim();
+  if (!base) return '';
+  const added = String(play.addedClock?.displayValue || '').replace(/'/g, '').trim();
+  if (base.includes('+')) return `${base}'`;
+  if (added && added !== '0') return `${base}+${added}'`;
+  return `${base}'`;
+}
+
+async function espnScorers(id, matchHint) {
+  const local = matchHint || matches.find((item) => String(item.id) === String(id));
+  const dates = espnDateCandidatesForMatch(local);
+  const homeName = matchTeamName(local, 'home');
+  const awayName = matchTeamName(local, 'away');
   if (!dates.length || !homeName || !awayName) return null;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), SCORER_SOURCE_TIMEOUT_MS);
   try {
-    let event = null;
-    for (const date of dates) {
-      const scoreboard = await fetch(`${ESPN_SCOREBOARD_BASE}/scoreboard?dates=${date}`, { signal: controller.signal, headers: { accept: 'application/json' } });
-      if (!scoreboard.ok) continue;
-      const scoreboardData = await scoreboard.json();
-      event = (scoreboardData.events || []).find((candidate) => {
-        const competitors = candidate.competitions?.[0]?.competitors || [];
-        const home = competitors.find((team) => team.homeAway === 'home')?.team?.displayName;
-        const away = competitors.find((team) => team.homeAway === 'away')?.team?.displayName;
-        return espnTeamAlias(home) === espnTeamAlias(homeName) && espnTeamAlias(away) === espnTeamAlias(awayName);
-      });
-      if (event) break;
-    }
+    const events = await fetchEspnScoreboards(dates, controller.signal);
+    const event = events.find((candidate) => espnEventMatchesGame(candidate, local));
     if (!event?.id) return null;
 
     const summary = await fetch(`${ESPN_SCOREBOARD_BASE}/summary?event=${event.id}`, { signal: controller.signal, headers: { accept: 'application/json' } });
@@ -391,34 +516,40 @@ async function espnScorers(id) {
     const awayGoals = [];
     const homeGoalDetails = [];
     const awayGoalDetails = [];
-    for (const play of summaryData.keyEvents || []) {
-      if (!play.scoringPlay) continue;
+    const scoringEvents = (summaryData.keyEvents?.length ? summaryData.keyEvents : summaryData.header?.competitions?.[0]?.details) || [];
+    for (const play of scoringEvents) {
+      if (!play.scoringPlay || play.shootout) continue;
       const player = play.participants?.[0]?.athlete?.displayName || play.shortText || 'Goal';
       const scorerId = String(play.participants?.[0]?.athlete?.id || '');
-      const minute = play.clock?.displayValue || '';
+      const minute = espnGoalMinute(play);
       const textAssist = String(play.text || '').match(/assisted by\s+([^\.]+)/i)?.[1]?.trim();
       const participantAssist = play.participants?.[1]?.athlete?.displayName || '';
       const assistId = String(play.participants?.[1]?.athlete?.id || '');
       // ESPN occasionally appends play-by-play prose to the text; the participant is the clean player name.
       const assist = participantAssist || textAssist;
-      const penalty = !play.shootout && /penalty/i.test(`${play.type?.text || ''} ${play.shortText || ''}`);
+      const penalty = Boolean(play.penaltyKick) || /penalty/i.test(`${play.type?.text || ''} ${play.shortText || ''}`);
       const item = `${player}${minute ? ` ${minute}` : ''}${penalty ? ' (P)' : ''}`;
       const detail = { scorer: player, scorer_id: scorerId, minute, assist, assist_id: assistId, penalty };
-      if (espnTeamAlias(play.team?.displayName) === espnTeamAlias(homeName)) {
+      if (espnTeamMatches(play.team, homeName, local?.home_team_id)) {
         homeGoals.push(item);
         homeGoalDetails.push(detail);
       }
-      if (espnTeamAlias(play.team?.displayName) === espnTeamAlias(awayName)) {
+      if (espnTeamMatches(play.team, awayName, local?.away_team_id)) {
         awayGoals.push(item);
         awayGoalDetails.push(detail);
       }
     }
+    const scoreOverride = espnGameOverride(local, event);
     return {
       id: String(id),
       home_scorers: homeGoals.join(', ') || 'null',
       away_scorers: awayGoals.join(', ') || 'null',
       home_goal_details: homeGoalDetails,
       away_goal_details: awayGoalDetails,
+      home_score: scoreOverride.home_score,
+      away_score: scoreOverride.away_score,
+      home_penalties: scoreOverride.home_penalties,
+      away_penalties: scoreOverride.away_penalties,
       source: 'espn'
     };
   } finally {
@@ -428,7 +559,7 @@ async function espnScorers(id) {
 
 function finalScorerCacheKey(id, request) {
   // Versioning discards event payloads cached before score completeness was checked.
-  return new Request(new URL(`/__wc2026/final-scorers-v5/${encodeURIComponent(id)}`, request.url));
+  return new Request(new URL(`/__wc2026/final-scorers-v6/${encodeURIComponent(id)}`, request.url));
 }
 
 function scorerCount(value) {
@@ -461,19 +592,9 @@ async function scorers(id, request, ctx) {
 
   let payload;
   try {
-    payload = await espnScorers(id);
+    payload = await espnScorers(id, scorerMatchFromRequest(id, request));
   } catch (_) {
-    // ESPN is the primary event feed; the legacy feed below remains a fallback.
-  }
-
-  if (!payload) try {
-    const data = await scorerFeed(request, ctx);
-    const game = (data.games || data).find((item) => String(item.id) === String(id));
-    if (game) {
-      payload = { id: String(game.id), home_scorers: game.home_scorers || 'null', away_scorers: game.away_scorers || 'null', source: 'worldcup26.ir' };
-    }
-  } catch (_) {
-    // Fall through to the local schedule so a slow scorer source never breaks the popup.
+    // ESPN is the only trusted scorer feed. A miss is safer than showing goals from another match.
   }
 
   if (!payload) {
@@ -590,10 +711,19 @@ function dueScheduledRefreshes(now = new Date()) {
 
 async function warmFinalScorers(games, task, ctx) {
   const queue = games.filter(isFinishedMatch);
-  const requestFor = (game) => new Request(new URL(
-    `/get/games/${encodeURIComponent(game.id)}/scorers?final=1&home=${encodeURIComponent(Number(game.home_score) || 0)}&away=${encodeURIComponent(Number(game.away_score) || 0)}`,
-    CACHE_ORIGIN
-  ));
+  const requestFor = (game) => {
+    const url = new URL(`/get/games/${encodeURIComponent(game.id)}/scorers`, CACHE_ORIGIN);
+    url.searchParams.set('final', '1');
+    url.searchParams.set('home', String(Number(game.home_score) || 0));
+    url.searchParams.set('away', String(Number(game.away_score) || 0));
+    url.searchParams.set('homeTeamId', game.home_team_id || '');
+    url.searchParams.set('awayTeamId', game.away_team_id || '');
+    url.searchParams.set('homeName', game.home_team_name_en || '');
+    url.searchParams.set('awayName', game.away_team_name_en || '');
+    url.searchParams.set('localDate', game.local_date || '');
+    url.searchParams.set('apiDate', game.api_utc_date || '');
+    return new Request(url);
+  };
   const worker = async () => {
     while (queue.length) {
       const game = queue.shift();

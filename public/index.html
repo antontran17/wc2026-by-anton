@@ -5855,11 +5855,20 @@
         async function fetchEspnFastLiveScores() {
             if (document.hidden) return;
             try {
-                const url = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard";
-                const response = await fetch(url, { cache: 'no-store' });
-                const data = await response.json();
+                const dateKey = (date) => `${date.getUTCFullYear()}${String(date.getUTCMonth() + 1).padStart(2, '0')}${String(date.getUTCDate()).padStart(2, '0')}`;
+                const now = new Date();
+                const dates = [-1, 0, 1].map(offset => {
+                    const value = new Date(now);
+                    value.setUTCDate(value.getUTCDate() + offset);
+                    return dateKey(value);
+                });
+                const responses = await Promise.all(dates.map(date =>
+                    fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${date}`, { cache: 'no-store' })
+                        .then(response => response.ok ? response.json() : { events: [] })
+                        .catch(() => ({ events: [] }))
+                ));
                 let hasChanges = false;
-                const events = data.events || [];
+                const events = responses.flatMap(data => data.events || []);
                 
                 events.forEach(event => {
                     const statusType = event.status && event.status.type;
@@ -6276,17 +6285,17 @@
         }
 
         function scorerStorageKey(id) {
-            return `wc2026_scorers_v5_${id}`;
+            return `wc2026_scorers_v6_${id}`;
         }
 
         function resetLegacyScorerCache() {
             try {
                 const versionKey = 'wc2026_scorers_cache_version';
-                if (localStorage.getItem(versionKey) === 'v5') return;
+                if (localStorage.getItem(versionKey) === 'v6') return;
                 Object.keys(localStorage)
                     .filter(key => key.startsWith('wc2026_scorers_'))
                     .forEach(key => localStorage.removeItem(key));
-                localStorage.setItem(versionKey, 'v5');
+                localStorage.setItem(versionKey, 'v6');
             } catch (_) {
                 // The in-memory cache remains available when browser storage is unavailable.
             }
@@ -6342,7 +6351,16 @@
                 const finalParam = isCompletedGame(game)
                     ? `&final=1&home=${encodeURIComponent(Number(game.home_score) || 0)}&away=${encodeURIComponent(Number(game.away_score) || 0)}`
                     : '';
-                const response = await fetch(`${API_BASE}/get/games/${encodeURIComponent(id)}/scorers?fresh=${Date.now()}${finalParam}`, { cache: 'no-store' });
+                const params = new URLSearchParams({
+                    fresh: String(Date.now()),
+                    homeTeamId: String(game.home_team_id || ''),
+                    awayTeamId: String(game.away_team_id || ''),
+                    homeName: String(game.home_team_name_en || ''),
+                    awayName: String(game.away_team_name_en || ''),
+                    localDate: String(game.local_date || ''),
+                    apiDate: String(game.api_utc_date || '')
+                });
+                const response = await fetch(`${API_BASE}/get/games/${encodeURIComponent(id)}/scorers?${params.toString()}${finalParam}`, { cache: 'no-store' });
                 if (!response.ok) throw new Error('Scorer request failed');
                 return saveCachedScorerDetail(game, await response.json());
             })();
