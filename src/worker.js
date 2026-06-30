@@ -453,7 +453,8 @@ function espnGameOverride(game, event) {
 async function fetchEspnOverridesForGames(games) {
   const candidates = games.filter((game) => {
     const hasTeams = matchTeamName(game, 'home') && matchTeamName(game, 'away');
-    const hasPenalty = String(game.home_penalties || game.away_penalties || game.score_duration || '').toUpperCase().includes('PEN');
+    const hasPenalty = Boolean(String(game.home_penalties || '').trim() || String(game.away_penalties || '').trim())
+      || String(game.score_duration || '').toUpperCase().includes('PEN');
     const active = ['IN_PLAY', 'PAUSED', 'PENALTY', 'ET', 'HT'].includes(String(game.status || '').toUpperCase());
     return hasTeams && (hasPenalty || active);
   });

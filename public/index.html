@@ -6362,7 +6362,11 @@
                 });
                 const response = await fetch(`${API_BASE}/get/games/${encodeURIComponent(id)}/scorers?${params.toString()}${finalParam}`, { cache: 'no-store' });
                 if (!response.ok) throw new Error('Scorer request failed');
-                return saveCachedScorerDetail(game, await response.json());
+                const detail = await response.json();
+                ['home_score', 'away_score', 'home_penalties', 'away_penalties'].forEach(key => {
+                    if (detail[key] !== undefined && detail[key] !== null && String(detail[key]) !== '') game[key] = String(detail[key]);
+                });
+                return saveCachedScorerDetail(game, detail);
             })();
             scorerLoadRequests.set(id, request);
             try {
