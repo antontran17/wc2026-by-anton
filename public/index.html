@@ -5166,6 +5166,21 @@
             padding: 4px 8px;
             border-radius: 6px;
             white-space: nowrap;
+            min-width: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            line-height: 1;
+            text-align: center;
+        }
+        .bracket-penalty-score {
+            color: #ffb347;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            line-height: 1;
         }
         .bracket-third-place {
             position: absolute;
@@ -6221,8 +6236,8 @@
                 return `
                 <div style="display:flex; flex-direction:column; align-items:center;">
                     <span class="score-center"><span>${hs}</span><span>${as}</span></span>
-                    <span class="penalty-score" style="font-size:11px; color:#ff9800; font-weight:300; margin-top:3px; letter-spacing: 0.05em;">
-                        (Pen: ${game.home_penalties} - ${game.away_penalties})
+                    <span class="penalty-score" style="font-size:11px; color:#ffb347; font-weight:800; margin-top:3px; letter-spacing: 0.02em;">
+                        Pen ${game.home_penalties}-${game.away_penalties}
                     </span>
                 </div>`;
             }
@@ -7339,7 +7354,7 @@
             document.getElementById('tournament-bracket').style.display = 'block';
 
             const bracketStructure = [
-                { id: 'R32', title: 'VÒNG 32', visualOrder: ['73', '75', '74', '77', '81', '82', '83', '84', '76', '78', '79', '80', '85', '87', '86', '88'] },
+                { id: 'R32', title: 'VÒNG 32', visualOrder: ['73', '76', '75', '77', '81', '82', '83', '84', '74', '78', '79', '80', '85', '87', '86', '88'] },
                 { id: 'R16', title: 'VÒNG 16', visualOrder: ['89', '90', '94', '93', '91', '92', '96', '95'] },
                 { id: 'QF', title: 'TỨ KẾT', visualOrder: ['97', '98', '99', '100'] },
                 { id: 'SF', title: 'BÁN KẾT', visualOrder: ['101', '102'] },
@@ -7377,8 +7392,7 @@
                         const awayPenaltyScore = hasPenalties ? Number(game.away_penalties) : null;
                         const isHomeWin = (hasPenalties && homePenaltyScore > awayPenaltyScore) || (hasScore && homeScore > awayScore);
                         const isAwayWin = (hasPenalties && homePenaltyScore < awayPenaltyScore) || (hasScore && homeScore < awayScore);
-                        const homePen = hasPenalties ? `(${game.home_penalties})` : '';
-                        const awayPen = hasPenalties ? `(${game.away_penalties})` : '';
+                        const penaltyLine = hasPenalties ? `<span class="bracket-penalty-score">Pen ${game.home_penalties}-${game.away_penalties}</span>` : '';
                         const isFav = favoriteMatches.has(String(game.id)) || favoriteTeams.has(String(game.home_team_id)) || favoriteTeams.has(String(game.away_team_id));
                         
                         return `
@@ -7389,7 +7403,8 @@
                                         <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
                                     </div>
                                     <div class="bracket-score">
-                                        ${hasScore ? homeScore : '-'}${homePen} : ${hasScore ? awayScore : '-'}${awayPen}
+                                        <span>${hasScore ? homeScore : '-'} : ${hasScore ? awayScore : '-'}</span>
+                                        ${penaltyLine}
                                     </div>
                                     <div class="bracket-team ${isAwayWin ? 'winner' : ''} left-align">
                                         <img src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">

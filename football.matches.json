@@ -1810,8 +1810,8 @@
     "finished": "FALSE",
     "time_elapsed": "notstarted",
     "type": "r16",
-    "home_team_label": "Winner Match 74",
-    "away_team_label": "Winner Match 77"
+    "home_team_label": "Winner Match 73",
+    "away_team_label": "Winner Match 76"
   },
   {
     "_id": {
@@ -1832,8 +1832,8 @@
     "finished": "FALSE",
     "time_elapsed": "notstarted",
     "type": "r16",
-    "home_team_label": "Winner Match 73",
-    "away_team_label": "Winner Match 75"
+    "home_team_label": "Winner Match 75",
+    "away_team_label": "Winner Match 77"
   },
   {
     "_id": {
@@ -1854,7 +1854,7 @@
     "finished": "FALSE",
     "time_elapsed": "notstarted",
     "type": "r16",
-    "home_team_label": "Winner Match 76",
+    "home_team_label": "Winner Match 74",
     "away_team_label": "Winner Match 78"
   },
   {
