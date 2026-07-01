@@ -5643,9 +5643,8 @@
             if (bracket) {
                 const header = document.querySelector('header');
                 const headerOffset = header ? header.offsetHeight : 80;
-                const section = document.getElementById('tournament-bracket') || bracket;
-                const sectionRect = section.getBoundingClientRect();
-                const y = sectionRect.top + window.scrollY - headerOffset - 18;
+                const sectionRect = bracket.getBoundingClientRect();
+                const y = sectionRect.top + window.scrollY - headerOffset - 10;
                 window.scrollTo({ top: y, behavior: 'smooth' });
                 
                 const scrollLeftPos = (bracket.scrollWidth - bracket.clientWidth) / 2;
