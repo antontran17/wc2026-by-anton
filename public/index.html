@@ -5156,13 +5156,11 @@
             height: 14px;
             border-radius: 2px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-            opacity: 0.65;
-            filter: grayscale(40%);
             transition: all 0.3s ease;
         }
-        .bracket-match.is-completed .bracket-team img {
-            opacity: 1;
-            filter: none;
+        .bracket-match.dim-flag .bracket-team img {
+            opacity: 0.65;
+            filter: grayscale(40%);
         }
         .bracket-team span {
             font-size: 11px;
@@ -7466,8 +7464,18 @@
 
             let html = '';
             let roundIndex = 0;
+            
+            let activeRoundId = bracketStructure[bracketStructure.length - 1].id;
+            for (let i = 0; i < bracketStructure.length; i++) {
+                const roundGames = koGames.filter(g => String(g.group).trim().toUpperCase() === bracketStructure[i].id);
+                if (roundGames.length > 0 && roundGames.some(g => String(g.finished).toUpperCase() !== 'TRUE')) {
+                    activeRoundId = bracketStructure[i].id;
+                    break;
+                }
+            }
             const baseHeight = 46;
             bracketStructure.forEach(r => {
+                const isCurrentActiveRound = r.id === activeRoundId;
                 const roundGamesUnsorted = koGames.filter(g => String(g.group).trim().toUpperCase() === r.id);
                 // Map theo visualOrder, nếu chưa có thì fallback về unsorted (tránh vỡ bracket)
                 let roundGames = r.visualOrder.map(matchId => roundGamesUnsorted.find(g => String(g.id) === matchId)).filter(Boolean);
