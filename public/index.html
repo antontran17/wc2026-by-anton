@@ -5675,8 +5675,24 @@
                 const y = sectionRect.top + window.scrollY - headerOffset - 10;
                 window.scrollTo({ top: y, behavior: 'smooth' });
                 
-                const scrollLeftPos = (bracket.scrollWidth - bracket.clientWidth) / 2;
-                bracket.scrollTo({ left: scrollLeftPos, behavior: 'smooth' });
+                const rounds = ['R32', 'R16', 'QF', 'SF', 'FINAL'];
+                let activeRoundIndex = 4; // Default to FINAL if all finished
+                for (let i = 0; i < rounds.length; i++) {
+                    const roundGames = gamesData.filter(g => g.group === rounds[i]);
+                    if (roundGames.length > 0 && roundGames.some(g => String(g.finished).toUpperCase() !== 'TRUE')) {
+                        activeRoundIndex = i;
+                        break;
+                    }
+                }
+                
+                const roundElements = bracket.querySelectorAll('.bracket-round');
+                if (roundElements && roundElements[activeRoundIndex]) {
+                    const targetEl = roundElements[activeRoundIndex];
+                    const scrollLeftPos = targetEl.offsetLeft - bracket.offsetLeft - 10;
+                    bracket.scrollTo({ left: Math.max(0, scrollLeftPos), behavior: 'smooth' });
+                } else {
+                    bracket.scrollTo({ left: 0, behavior: 'smooth' });
+                }
             }
         }
 
