@@ -8,6 +8,7 @@ const FOOTBALL_DATA_COMPETITION = 'WC';
 const FOOTBALL_DATA_SEASON = '2026';
 const ESPN_SCOREBOARD_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
 const ESPN_STATISTICS_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/statistics?season=2026';
+const ESPN_KNOCKOUT_SCOREBOARD = `${ESPN_SCOREBOARD_BASE}/scoreboard?limit=200&dates=20260628-20260720`;
 const LIVE_SOURCE_TIMEOUT_MS = 6500;
 const SCORER_SOURCE_TIMEOUT_MS = 5000;
 const CACHE_ORIGIN = 'https://attak.online';
@@ -15,6 +16,40 @@ const CRON_INTERVAL_MS = 15 * 60 * 1000;
 const GROUP_STAGE_SETTLE_MS = 135 * 60 * 1000;
 const KNOCKOUT_SETTLE_MS = 195 * 60 * 1000;
 let gamesFetchInFlight = null;
+const ESPN_KNOCKOUT_EVENT_IDS = {
+  73: '760486',
+  74: '760487',
+  75: '760489',
+  76: '760488',
+  77: '760490',
+  78: '760492',
+  79: '760491',
+  80: '760495',
+  81: '760493',
+  82: '760494',
+  83: '760497',
+  84: '760496',
+  85: '760498',
+  86: '760499',
+  87: '760500',
+  88: '760501',
+  89: '760502',
+  90: '760503',
+  91: '760504',
+  92: '760505',
+  93: '760506',
+  94: '760507',
+  95: '760509',
+  96: '760508',
+  97: '760510',
+  98: '760511',
+  99: '760512',
+  100: '760513',
+  101: '760514',
+  102: '760515',
+  103: '760516',
+  104: '760517'
+};
 const SERVICE_WORKER = `
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
@@ -134,6 +169,132 @@ function mapMatch(match) {
 function isFinishedMatch(match) {
   const status = String(match?.status || '').toUpperCase();
   return String(match?.finished || '').toUpperCase() === 'TRUE' || ['FINISHED', 'AWARDED'].includes(status);
+}
+
+function isKnockoutGame(match) {
+  return ['R32', 'R16', 'QF', 'SF', '3RD', 'FINAL'].includes(String(match?.group || '').trim().toUpperCase());
+}
+
+function espnCompetitorLocalTeam(competitor) {
+  return localTeam({
+    name: competitor?.team?.displayName || competitor?.team?.name,
+    shortName: competitor?.team?.shortDisplayName || competitor?.team?.shortName,
+    tla: competitor?.team?.abbreviation
+  });
+}
+
+function applyEspnTeams(game, event) {
+  const override = espnGameOverride(game, event);
+  const { home, away } = espnCompetitors(event);
+  const homeTeam = espnCompetitorLocalTeam(home);
+  const awayTeam = espnCompetitorLocalTeam(away);
+  if (homeTeam) {
+    override.home_team_id = String(homeTeam.id);
+    override.home_team_name_en = homeTeam.name_en;
+  }
+  if (awayTeam) {
+    override.away_team_id = String(awayTeam.id);
+    override.away_team_name_en = awayTeam.name_en;
+  }
+  override.espn_event_id = String(event?.id || '');
+  return override;
+}
+
+async function fetchEspnKnockoutOverrides(games) {
+  const knockoutGames = games.filter((game) => isKnockoutGame(game) && ESPN_KNOCKOUT_EVENT_IDS[String(game.id)]);
+  if (!knockoutGames.length) return [];
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LIVE_SOURCE_TIMEOUT_MS);
+  try {
+    const response = await fetch(ESPN_KNOCKOUT_SCOREBOARD, {
+      signal: controller.signal,
+      headers: { accept: 'application/json', 'cache-control': 'no-cache' }
+    });
+    if (!response.ok) throw new Error(`ESPN knockout ${response.status}`);
+    const payload = await response.json();
+    const eventsById = new Map((payload.events || []).map((event) => [String(event.id), event]));
+    return knockoutGames.map((game) => {
+      const event = eventsById.get(ESPN_KNOCKOUT_EVENT_IDS[String(game.id)]);
+      return event ? { ...game, ...applyEspnTeams(game, event) } : null;
+    }).filter(Boolean);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function matchTeamIdentity(match, side) {
+  const currentId = String(match?.[`${side}_team_id`] || '').trim();
+  const currentName = concreteTeamName(match?.[`${side}_team_name_en`]) || localTeamName(currentId);
+  const resolved = teamLookup.get(alias(currentName)) || teams.find((team) => String(team.id) === currentId);
+  return {
+    team_id: String(currentId && currentId !== '0' ? currentId : resolved?.id || ''),
+    team_name_en: currentName || resolved?.name_en || ''
+  };
+}
+
+function hasConcreteTeam(match, side) {
+  const team = matchTeamIdentity(match, side);
+  return Boolean(team.team_id || team.team_name_en);
+}
+
+function knockoutResult(match) {
+  if (!isFinishedMatch(match)) return null;
+  const homeScore = Number(match?.home_score);
+  const awayScore = Number(match?.away_score);
+  const homePenalties = String(match?.home_penalties ?? '').trim();
+  const awayPenalties = String(match?.away_penalties ?? '').trim();
+  const hasPenalties = homePenalties !== '' && awayPenalties !== '';
+  let winnerSide = '';
+  if (hasPenalties) {
+    const homePen = Number(homePenalties);
+    const awayPen = Number(awayPenalties);
+    if (Number.isFinite(homePen) && Number.isFinite(awayPen) && homePen !== awayPen) {
+      winnerSide = homePen > awayPen ? 'home' : 'away';
+    }
+  } else if (Number.isFinite(homeScore) && Number.isFinite(awayScore) && homeScore !== awayScore) {
+    winnerSide = homeScore > awayScore ? 'home' : 'away';
+  }
+  if (!winnerSide) return null;
+  const loserSide = winnerSide === 'home' ? 'away' : 'home';
+  const winner = matchTeamIdentity(match, winnerSide);
+  const loser = matchTeamIdentity(match, loserSide);
+  if (!winner.team_name_en && !winner.team_id) return null;
+  return { winner, loser };
+}
+
+function teamFromSourceLabel(label, resultById) {
+  const text = String(label || '').trim();
+  const winnerMatch = text.match(/^winner match\s*(\d+)$/i);
+  const loserMatch = text.match(/^loser match\s*(\d+)$/i);
+  const matchId = winnerMatch?.[1] || loserMatch?.[1];
+  if (!matchId) return null;
+  const result = resultById.get(String(matchId));
+  return winnerMatch ? result?.winner : result?.loser;
+}
+
+function propagateKnockoutTeams(games) {
+  const output = games.map((game) => ({ ...game }));
+  for (let pass = 0; pass < 6; pass++) {
+    const resultById = new Map();
+    for (const game of output) {
+      const result = knockoutResult(game);
+      if (result) resultById.set(String(game.id), result);
+    }
+    let changed = false;
+    for (const game of output) {
+      if (!isKnockoutGame(game)) continue;
+      for (const side of ['home', 'away']) {
+        if (hasConcreteTeam(game, side)) continue;
+        const team = teamFromSourceLabel(game[`${side}_team_label`], resultById);
+        if (!team?.team_name_en && !team?.team_id) continue;
+        game[`${side}_team_id`] = team.team_id || game[`${side}_team_id`] || '';
+        game[`${side}_team_name_en`] = team.team_name_en || game[`${side}_team_name_en`] || '';
+        changed = true;
+      }
+    }
+    if (!changed) break;
+  }
+  return output;
 }
 
 function completedScheduleCacheKey(request) {
@@ -283,7 +444,7 @@ function mergeGameOverrides(schedule, overrides) {
 }
 
 async function liveGames(request, env, ctx) {
-  if (!env.FOOTBALL_DATA_TOKEN) return freshGamesResponse({ games: await completedScheduleFallback(request), source: 'local', error: 'FOOTBALL_DATA_TOKEN is not configured', cache_ttl_ms: 0 });
+  if (!env.FOOTBALL_DATA_TOKEN) return freshGamesResponse({ games: propagateKnockoutTeams(await completedScheduleFallback(request)), source: 'local', error: 'FOOTBALL_DATA_TOKEN is not configured', cache_ttl_ms: 0 });
   try {
     if (!gamesFetchInFlight) {
       gamesFetchInFlight = fetchLatestGames(env).finally(() => { gamesFetchInFlight = null; });
@@ -291,11 +452,18 @@ async function liveGames(request, env, ctx) {
     const mappedGames = await gamesFetchInFlight;
     let responseGames = mappedGames;
     try {
-      const espnOverrides = await fetchEspnOverridesForGames(mappedGames);
-      if (espnOverrides.length) responseGames = mergeGameOverrides(mappedGames, espnOverrides);
+      const espnKnockoutOverrides = await fetchEspnKnockoutOverrides(responseGames);
+      if (espnKnockoutOverrides.length) responseGames = mergeGameOverrides(responseGames, espnKnockoutOverrides);
+    } catch (_) {
+      // ESPN knockout schedule is authoritative when available; fall back gracefully if it misses.
+    }
+    try {
+      const espnOverrides = await fetchEspnOverridesForGames(responseGames);
+      if (espnOverrides.length) responseGames = mergeGameOverrides(responseGames, espnOverrides);
     } catch (_) {
       // Football-data remains the baseline; ESPN only corrects known live/penalty edge cases.
     }
+    responseGames = propagateKnockoutTeams(responseGames);
     ctx.waitUntil(cacheCompletedMatches(responseGames, request));
     return freshGamesResponse({ games: responseGames, source: 'football-data+espn', cache_ttl_ms: 0 });
   } catch (error) {
@@ -303,12 +471,12 @@ async function liveGames(request, env, ctx) {
     try {
       const espnGames = await fetchEspnFallbackGames();
       if (espnGames.length) {
-        return freshGamesResponse({ games: mergeGameOverrides(localSchedule, espnGames), source: 'espn-fallback', remote_error: error.message, cache_ttl_ms: 0 });
+        return freshGamesResponse({ games: propagateKnockoutTeams(mergeGameOverrides(localSchedule, espnGames)), source: 'espn-fallback', remote_error: error.message, cache_ttl_ms: 0 });
       }
     } catch (_) {
       // Fall through to the saved final scores and bundled schedule.
     }
-    return freshGamesResponse({ games: localSchedule, source: 'local', remote_error: error.message, cache_ttl_ms: 0 });
+    return freshGamesResponse({ games: propagateKnockoutTeams(localSchedule), source: 'local', remote_error: error.message, cache_ttl_ms: 0 });
   }
 }
 
