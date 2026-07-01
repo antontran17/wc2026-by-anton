@@ -5047,6 +5047,21 @@
     </style>
     <style id="anton-bracket-css">
         .bracket-section { overflow: hidden; padding-bottom: 20px; }
+        .bracket-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 15vw;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.36);
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 0;
+            user-select: none;
+            letter-spacing: 5px;
+        }
+
         .bracket-wrapper {
             display: flex;
             overflow-x: auto;
@@ -5303,11 +5318,9 @@
     <section id="section-favorites" class="matches-section"></section>
     
     <!-- Knockout Cây đồ thị -->
-    <section id="tournament-bracket" class="bracket-section" style="display:none;">
-        <div class="container">
-            <div class="section-header">
-                <h2>KNOCK OUT</h2>
-            </div>
+    <section id="tournament-bracket" class="bracket-section" style="display:none; position: relative;">
+        <div class="bracket-watermark">KNOCK OUT</div>
+        <div class="container" style="position: relative; z-index: 1;">
             <div class="bracket-wrapper" id="bracket-wrapper">
             </div>
         </div>
