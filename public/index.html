@@ -7506,10 +7506,12 @@
                         const penaltyLine = hasPenalties ? `<span class="bracket-penalty-score">Pen ${game.home_penalties}-${game.away_penalties}</span>` : '';
                         const isFav = favoriteMatches.has(String(game.id)) || favoriteTeams.has(String(game.home_team_id)) || favoriteTeams.has(String(game.away_team_id));
                         const isCompleted = isCompletedGame(game);
+                        const shouldDimFlag = isCurrentActiveRound && !isCompleted && activeRoundId !== 'SF' && activeRoundId !== 'FINAL' && activeRoundId !== '3RD';
+                        const dimClass = shouldDimFlag ? 'dim-flag' : '';
                         
                         return `
                             <div class="bracket-match-slot ${slotClass}" style="height: ${customSlotHeight}px">
-                                <div class="bracket-match horizontal-layout ${isFav ? 'is-favorite' : ''} ${isCompleted ? 'is-completed' : ''}" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer; position:relative; z-index:1;">
+                                <div class="bracket-match horizontal-layout ${isFav ? 'is-favorite' : ''} ${isCompleted ? 'is-completed' : ''} ${dimClass}" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer; position:relative; z-index:1;">
                                     <div class="bracket-team ${isHomeWin ? 'winner' : ''} right-align">
                                         <span>${homeName}</span>
                                         <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
