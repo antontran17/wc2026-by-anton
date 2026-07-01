@@ -5047,7 +5047,7 @@
     </style>
     <style id="anton-bracket-css">
         .bracket-section { overflow: hidden; padding-bottom: 20px; }
-        .mobile-filter-row { display: grid !important; visibility: visible !important; margin-bottom: 20px !important; }
+        .mobile-filter-row { display: grid !important; visibility: visible !important; margin-bottom: 20px !important; } .mobile-filter-select { display: block !important; visibility: visible !important; opacity: 1 !important; width: 100% !important; height: 48px !important; }
         #match-tabs { display: none !important; }
 
         .bracket-watermark {
@@ -5309,15 +5309,13 @@
 
     <!-- 0. Filter Trận Đấu -->
     <section id="section-filters" class="matches-section container" style="padding-top: 12px !important; padding-bottom: 0 !important; margin-bottom: 0 !important;">
-        <div class="global-filter-row" style="margin-bottom: 0 !important;">
+        <div class="mobile-filter-row" style="margin-bottom: 0 !important;">
             <select class="mobile-filter-select" id="match-filter-select" onchange="filterMatches(this.value)" aria-label="Chọn bảng">
                 <option value="all">TẤT CẢ TRẬN</option>
             </select>
         </div>
         
-        <!-- <div class="tabs" id="match-tabs" style="margin-bottom: 0 !important;">
-            <!-- Tabs will be generated dynamically -->
-        </div> -->
+        
     </section>
 
     <!-- 1. Đang diễn ra -->
