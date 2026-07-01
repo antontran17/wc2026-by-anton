@@ -5294,11 +5294,11 @@
         <div class="container">
             <div class="header-content">
                 <nav>
-                    <a href="#bracket-wrapper" data-i18n="nav_bracket" onclick="centerBracket(event)">KNOCK OUT</a>
-                    <a href="#statistics">THÀNH TÍCH</a>
-                    <a href="#groups" data-i18n="nav_groups">VÒNG BẢNG</a>
-                    <a href="#teams" data-i18n="nav_teams">ĐỘI TUYỂN</a>
-                    <a href="#overall-ranking" class="desktop-only">BXH TỔNG</a>
+                    <a href="javascript:void(0)" data-i18n="nav_bracket" onclick="centerBracket(event)">KNOCK OUT</a>
+                    <a href="javascript:void(0)" onclick="scrollToSection('statistics')">THÀNH TÍCH</a>
+                    <a href="javascript:void(0)" data-i18n="nav_groups" onclick="scrollToSection('groups')">VÒNG BẢNG</a>
+                    <a href="javascript:void(0)" data-i18n="nav_teams" onclick="scrollToSection('teams')">ĐỘI TUYỂN</a>
+                    <a href="javascript:void(0)" class="desktop-only" onclick="scrollToSection('overall-ranking')">BXH TỔNG</a>
                 </nav>
             </div>
         </div>
@@ -5681,6 +5681,14 @@
             renderMatchCards(filteredMatchesForCurrentTab());
             if (isAdding) ensureFavoriteNotifications();
         }
+        function scrollToSection(id) {
+            const target = document.getElementById(id);
+            if (target) {
+                const headerOffset = document.querySelector('header') ? document.querySelector('header').offsetHeight : 60;
+                const y = target.getBoundingClientRect().top + window.scrollY - headerOffset - 10;
+                window.scrollTo({top: y, behavior: 'smooth'});
+            }
+        }
 
         function centerBracket(e) {
             e.preventDefault();
@@ -5783,6 +5791,12 @@
 
         // Load All Data
         async function loadAllData() {
+            if (window.location.hash) {
+                history.replaceState(null, null, ' ');
+            }
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
             try {
                 const fresh = Date.now();
                 const [teamsRes, gamesRes, stadiumsRes, groupsRes] = await Promise.all([
