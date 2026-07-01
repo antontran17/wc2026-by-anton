@@ -6243,19 +6243,7 @@
         }
 
         function pendingTeamLabel(label) {
-            const raw = String(label || '').trim();
-            if (!raw) return 'TBD';
-            const winnerMatch = raw.match(/winner match\s*(\d+)/i);
-            if (winnerMatch) return `W${winnerMatch[1]}`;
-            const loserMatch = raw.match(/loser match\s*(\d+)/i);
-            if (loserMatch) return `L${loserMatch[1]}`;
-            const winnerGroup = raw.match(/winner group\s*([A-L])/i);
-            if (winnerGroup) return `W${winnerGroup[1].toUpperCase()}`;
-            const runnerGroup = raw.match(/runner-up group\s*([A-L])/i);
-            if (runnerGroup) return `R${runnerGroup[1].toUpperCase()}`;
-            const thirdGroup = raw.match(/3rd group\s*([A-L/]+)/i);
-            if (thirdGroup) return `3${thirdGroup[1].replace(/\//g, '')}`;
-            return 'TBD';
+            return '';
         }
 
         function renderMatchFlag(team, fallbackLabel, isFavorite) {
