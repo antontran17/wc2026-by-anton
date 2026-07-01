@@ -5156,6 +5156,13 @@
             height: 14px;
             border-radius: 2px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            opacity: 0.35;
+            filter: grayscale(80%);
+            transition: all 0.3s ease;
+        }
+        .bracket-match.is-completed .bracket-team img {
+            opacity: 1;
+            filter: none;
         }
         .bracket-team span {
             font-size: 11px;
