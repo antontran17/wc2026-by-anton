@@ -5052,14 +5052,26 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 15vw;
+            font-size: 13vw;
             font-weight: 900;
             color: rgba(255, 255, 255, 0.12);
             pointer-events: none;
-            white-space: nowrap;
             z-index: 0;
             user-select: none;
             letter-spacing: 5px;
+            text-align: center;
+            line-height: 1.1;
+            width: 100%;
+        }
+        .wm-mobile { display: none; }
+        @media (max-width: 768px) {
+            .wm-desktop { display: none; }
+            .wm-mobile { display: block; }
+            .bracket-watermark {
+                font-size: 22vw;
+                line-height: 1.1;
+                color: rgba(255, 255, 255, 0.07);
+            }
         }
 
         .bracket-wrapper {
@@ -5318,9 +5330,12 @@
     <section id="section-favorites" class="matches-section"></section>
     
     <!-- Knockout Cây đồ thị -->
-    <section id="tournament-bracket" class="bracket-section" style="display:none; position: relative;">
-        <div class="bracket-watermark">KNOCK OUT</div>
+    <section id="tournament-bracket" class="bracket-section" style="display:none;">
         <div class="container" style="position: relative; z-index: 1;">
+            <div class="bracket-watermark">
+                <span class="wm-desktop">KNOCK OUT<br>BRACKET</span>
+                <span class="wm-mobile">KNOCK<br>OUT<br>BRACKET</span>
+            </div>
             <div class="bracket-wrapper" id="bracket-wrapper">
             </div>
         </div>
