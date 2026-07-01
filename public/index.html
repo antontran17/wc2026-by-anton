@@ -5116,9 +5116,7 @@
             color: #ffffff;
             text-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
         }
-        .bracket-match.is-completed .bracket-team span {
-            color: #ffffff;
-        }
+
         .bracket-match.is-favorite {
             border-color: #8faaff !important;
             box-shadow: 0 0 16px rgba(143,170,255,.5) !important;
@@ -5158,9 +5156,14 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.5);
             transition: all 0.3s ease;
         }
-        .bracket-match.dim-flag .bracket-team img {
+        .bracket-match.dim-match .bracket-team img {
             opacity: 0.65;
             filter: grayscale(40%);
+        }
+        .bracket-match.dim-match .bracket-score,
+        .bracket-match.dim-match .bracket-team span {
+            color: rgba(255, 255, 255, 0.35);
+            text-shadow: none;
         }
         .bracket-team span {
             font-size: 11px;
@@ -5204,7 +5207,7 @@
         .bracket-score {
             font-weight: 800;
             font-size: 13px;
-            color: rgba(255, 255, 255, 0.35);
+            color: #ffffff;
             background: rgba(0,0,0,0.4);
             padding: 4px 8px;
             border-radius: 6px;
@@ -7507,7 +7510,7 @@
                         const isFav = favoriteMatches.has(String(game.id)) || favoriteTeams.has(String(game.home_team_id)) || favoriteTeams.has(String(game.away_team_id));
                         const isCompleted = isCompletedGame(game);
                         const shouldDimFlag = isCurrentActiveRound && !isCompleted && activeRoundId !== 'SF' && activeRoundId !== 'FINAL' && activeRoundId !== '3RD';
-                        const dimClass = shouldDimFlag ? 'dim-flag' : '';
+                        const dimClass = shouldDimFlag ? 'dim-match' : '';
                         
                         return `
                             <div class="bracket-match-slot ${slotClass}" style="height: ${customSlotHeight}px">
