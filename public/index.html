@@ -5112,6 +5112,10 @@
             border: 1px solid rgba(255,255,255,0.1);
             width: 100%;
         }
+        .bracket-match.is-completed {
+            background: rgba(50, 50, 70, 0.85);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
         .bracket-match.is-favorite {
             border-color: #8faaff !important;
             box-shadow: 0 0 16px rgba(143,170,255,.5) !important;
@@ -7482,10 +7486,11 @@
                         const isAwayWin = (hasPenalties && homePenaltyScore < awayPenaltyScore) || (hasScore && homeScore < awayScore);
                         const penaltyLine = hasPenalties ? `<span class="bracket-penalty-score">Pen ${game.home_penalties}-${game.away_penalties}</span>` : '';
                         const isFav = favoriteMatches.has(String(game.id)) || favoriteTeams.has(String(game.home_team_id)) || favoriteTeams.has(String(game.away_team_id));
+                        const isCompleted = isCompletedGame(game);
                         
                         return `
                             <div class="bracket-match-slot ${slotClass}" style="height: ${customSlotHeight}px">
-                                <div class="bracket-match horizontal-layout ${isFav ? 'is-favorite' : ''}" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer; position:relative; z-index:1;">
+                                <div class="bracket-match horizontal-layout ${isFav ? 'is-favorite' : ''} ${isCompleted ? 'is-completed' : ''}" onclick="scrollToTeam(''); handleMatchCardClick('${game.id}')" style="cursor:pointer; position:relative; z-index:1;">
                                     <div class="bracket-team ${isHomeWin ? 'winner' : ''} right-align">
                                         <span>${homeName}</span>
                                         <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" onerror="this.style.opacity=0">
