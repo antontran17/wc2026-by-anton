@@ -5054,7 +5054,7 @@
             transform: translate(-50%, -50%);
             font-size: 13vw;
             font-weight: 900;
-            color: rgba(255, 255, 255, 0.02);
+            color: rgba(255, 255, 255, 0.04);
             pointer-events: none;
             z-index: 0;
             user-select: none;
@@ -5070,7 +5070,7 @@
             .bracket-watermark {
                 font-size: 22vw;
                 line-height: 1.1;
-                color: rgba(255, 255, 255, 0.02);
+                color: rgba(255, 255, 255, 0.04);
             }
         }
 
@@ -5707,7 +5707,19 @@
         }
 
         function refreshData() {
-            window.location.reload();
+            const btn = document.getElementById('floating-refresh-btn');
+            if (btn) {
+                btn.style.transform = 'rotate(360deg)';
+                btn.style.transition = 'transform 0.5s ease-out';
+                setTimeout(() => { btn.style.transform = ''; btn.style.transition = ''; }, 500);
+            }
+            
+            const wrapper = document.getElementById('bracket-wrapper');
+            const scrollLeft = wrapper ? wrapper.scrollLeft : 0;
+            
+            refreshLiveScores(true).then(() => {
+                if (wrapper) wrapper.scrollLeft = scrollLeft;
+            });
         }
 
 
@@ -5867,9 +5879,17 @@
                     }
                 });
 
+                const prevScrollY = window.scrollY;
+                const wrapper = document.getElementById('bracket-wrapper');
+                const prevScrollLeft = wrapper ? wrapper.scrollLeft : 0;
+
                 renderMatches(gamesData);
                 renderGroups(groupsData);
                 if (activeScorerMatchId) renderScorerDialog();
+                
+                if (wrapper) wrapper.scrollLeft = prevScrollLeft;
+                window.scrollTo(0, prevScrollY);
+
                 updateCountdowns();
                 scheduleNextLiveCheck();
             } catch (err) {
