@@ -592,13 +592,13 @@ footer {
 
 .swiper-button-prev {
     left: 50% !important;
-    margin-left: -340px !important;
+    margin-left: -360px !important;
 }
 
 .swiper-button-next {
     left: 50% !important;
     right: auto !important;
-    margin-left: 340px !important;
+    margin-left: 320px !important;
 }
 
 .countdown-box {
@@ -635,12 +635,12 @@ footer {
     }
     .swiper-button-prev {
     left: 50% !important;
-    margin-left: -340px !important;
+    margin-left: -360px !important;
 }
     .swiper-button-next {
     left: 50% !important;
     right: auto !important;
-    margin-left: 340px !important;
+    margin-left: 320px !important;
 }
     .countdown-box {
         font-size: 14px;

@@ -1,3 +1,4 @@
+function getTeamAbbr(team) { return team.id === '360' ? 'MUN' : (team.abbreviation || team.shortDisplayName); }
 let countdownInterval;
 let currentCarouselIndex = 0;
 const TEAM_ID = "360"; // Manchester United
@@ -124,12 +125,12 @@ function renderNextMatchesCarousel(matches) {
                     <div class="match-teams">
                         <div class="team-box">
                             <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}" style="width: 90px; height: 90px; object-fit: contain;">
-                            <span style="font-size: 20px; text-transform: uppercase;">${home.team.abbreviation || home.team.shortDisplayName}</span>
+                            <span style="font-size: 20px; text-transform: uppercase;">${getTeamAbbr(home.team)}</span>
                         </div>
                         <div class="match-vs" style="font-size: 30px;">VS</div>
                         <div class="team-box">
                             <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}" style="width: 90px; height: 90px; object-fit: contain;">
-                            <span style="font-size: 20px; text-transform: uppercase;">${away.team.abbreviation || away.team.shortDisplayName}</span>
+                            <span style="font-size: 20px; text-transform: uppercase;">${getTeamAbbr(away.team)}</span>
                         </div>
                     </div>
                     <div class="match-time-info">
@@ -267,14 +268,14 @@ function renderMatchesGrid() {
                 <div class="card-teams-inline" style="display:flex; justify-content:center; align-items:center; gap: 24px;">
                     <div class="team-left" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
                         <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}" style="width:50px; height:50px; object-fit:contain;">
-                        <span class="card-team-name ${home.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight:800; font-family:'Outfit', sans-serif; text-transform: uppercase;">${home.team.abbreviation || home.team.shortDisplayName}</span>
+                        <span class="card-team-name ${home.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight:800; font-family:'Outfit', sans-serif; text-transform: uppercase;">${getTeamAbbr(home.team)}</span>
                     </div>
                     <div class="match-score" style="font-weight:800; font-size:32px; font-family:'Outfit', sans-serif; white-space:nowrap; padding:0 10px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
                         ${scoreDisplay}
                     </div>
                     <div class="team-right" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
                         <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}" style="width:50px; height:50px; object-fit:contain;">
-                        <span class="card-team-name ${away.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight:800; font-family:'Outfit', sans-serif; text-transform: uppercase;">${away.team.abbreviation || away.team.shortDisplayName}</span>
+                        <span class="card-team-name ${away.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight:800; font-family:'Outfit', sans-serif; text-transform: uppercase;">${getTeamAbbr(away.team)}</span>
                     </div>
                 </div>
                 <div class="card-footer" style="text-align:center; color:var(--text-secondary); font-size:12px; font-weight:700; text-transform:uppercase; margin-top:20px; font-family:'Outfit', sans-serif; opacity: 0.8;">
