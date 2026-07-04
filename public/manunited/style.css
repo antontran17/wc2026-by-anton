@@ -842,7 +842,7 @@ footer {
     100% { box-shadow: 0 0 20px rgba(218, 2, 14, 0.4), inset 0 0 10px rgba(218, 2, 14, 0.2); border-color: rgba(255, 50, 50, 0.3); }
 }
 
-.swiper-slide-active .next-match-card.derby-match {
+.swiper-slide-active .next-match-card.derby-match, .match-card.derby-match {
     animation: fireGlow 2.5s infinite;
     border: 1px solid rgba(255, 50, 50, 0.8);
 }

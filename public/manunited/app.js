@@ -320,11 +320,28 @@ function renderMatchesGrid() {
         }
         
         const opponent = home.team.id === TEAM_ID ? away : home;
-        const isBigMatch = ["359", "363", "364", "382", "367", "361"].includes(opponent.team.id);
+        const opponentId = opponent.team.id;
+        
+        let derbyName = "";
+        let derbyClass = "";
+        if (opponentId === "364") {
+            derbyName = "🔥 DERBY NƯỚC ANH 🔥";
+            derbyClass = "derby-match";
+        } else if (opponentId === "382") {
+            derbyName = "⚡ DERBY THÀNH MANCHESTER ⚡";
+            derbyClass = "derby-match";
+        } else if (opponentId === "357") {
+            derbyName = "🌹 DERBY HOA HỒNG 🌹";
+            derbyClass = "derby-match";
+        }
+        
+        const isBigMatch = ["359", "363", "364", "382", "367", "361"].includes(opponentId);
         const bigMatchClass = isBigMatch ? "big-match" : "";
+        const finalClasses = `match-card ${bigMatchClass} ${derbyClass}`.trim();
         
         grid.innerHTML += `
-            <div class="match-card ${bigMatchClass}">
+            <div class="${finalClasses}" style="position: relative;">
+                ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #ff7300); color: #fff; font-size: 11px; font-weight: 900; padding: 4px 15px; border-radius: 12px; margin-bottom: 10px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
                 <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:20px; border-bottom: none; gap:4px;">
                     <div>${formattedTime} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}</div>
                     <div style="font-size:14px; color:#fff; font-weight:800;">${match.leagueName || match.season?.displayName || "Tournament"}</div>
