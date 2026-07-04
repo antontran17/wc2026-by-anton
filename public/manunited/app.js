@@ -51,7 +51,9 @@ async function loadSchedule() {
                     const dataEpl = await resEpl.json();
                     const dataFriendly = await resFriendly.json();
                     
-                    const allMatches2026 = [...(dataEpl.events || []), ...(dataFriendly.events || [])];
+                    const eplEvents = (dataEpl.events || []).map(e => ({...e, leagueName: dataEpl.leagues?.[0]?.name || "English Premier League"}));
+                    const friendlyEvents = (dataFriendly.events || []).map(e => ({...e, leagueName: dataFriendly.leagues?.[0]?.name || "Club Friendlies"}));
+                    const allMatches2026 = [...eplEvents, ...friendlyEvents];
                     return allMatches2026.filter(m => {
                         return m.competitions[0].competitors.some(c => c.team.id === TEAM_ID);
                     });
@@ -117,6 +119,7 @@ function renderNextMatch(match) {
             </div>
             <div class="match-time-info">
                 <strong>${formattedTime}</strong> <br>
+                <span style="font-weight:700; color:#fff;">${match.leagueName || match.season?.displayName || "Tournament"}</span> <br>
                 <small>${comp.venue?.fullName || "Sân chưa xác định"}</small>
             </div>
         </div>
@@ -169,8 +172,9 @@ function renderMatchesGrid() {
         
         grid.innerHTML += `
             <div class="match-card">
-                <div class="card-header" style="justify-content:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:20px; border-bottom: none;">
-                    ${formattedTime} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}
+                <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:20px; border-bottom: none; gap:4px;">
+                    <div>${formattedTime} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}</div>
+                    <div style="font-size:14px; color:#fff; font-weight:800;">${match.leagueName || match.season?.displayName || "Tournament"}</div>
                 </div>
                 <div class="card-teams-inline" style="display:flex; justify-content:center; align-items:center; gap: 24px;">
                     <div class="team-left" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
