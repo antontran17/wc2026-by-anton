@@ -170,6 +170,10 @@ function renderMatchesGrid() {
         let homeScore = home.score !== undefined ? home.score : "-";
         let awayScore = away.score !== undefined ? away.score : "-";
         
+        const opponent = home.team.id === TEAM_ID ? away : home;
+        const isBigMatch = ["359", "363", "364", "382", "367", "361"].includes(opponent.team.id);
+        const bigMatchClass = isBigMatch ? "big-match" : "";
+        
         grid.innerHTML += `
             <div class="match-card ${bigMatchClass}">
                 <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:20px; border-bottom: none; gap:4px;">
