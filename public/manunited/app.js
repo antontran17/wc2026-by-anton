@@ -241,7 +241,7 @@ async function loadStandings() {
 async function loadRoster() {
     const grid = document.getElementById("squad-grid");
     try {
-        const res = await fetch(API_ROSTER);
+        const res = await fetch('roster.json');
         const data = await res.json();
         
         const athletes = data.athletes || [];
