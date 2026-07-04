@@ -161,7 +161,7 @@ function renderNextMatchesCarousel(matches) {
                     <div style="text-align: center;">
                         ${isLive && match.status.displayClock ? `
                             <div style="background: #000; color: #fff; border-radius: 20px; padding: 6px 20px; display: inline-block; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
-                                ${match.status.displayClock}<span class="blink">'</span>
+                                ${match.status.displayClock}'
                             </div>
                         ` : `
                             <div class="countdown-box" id="countdown-${match.id}" data-date="${match.date}">
@@ -188,7 +188,7 @@ function renderNextMatchesCarousel(matches) {
                     </div>
                     
                     ${isLive ? `
-                    <div class="live-scorers-panel" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: space-between; padding: 20px 30px; box-sizing: border-box; backdrop-filter: blur(5px);">
+                    <div class="live-scorers-panel" style="background: rgba(0,0,0,0.6); display: flex; justify-content: space-between; padding: 20px 30px; box-sizing: border-box; margin: 0 -30px -30px -30px;">
                         <div class="home-scorers" style="text-align:left; flex:1; font-size: 13px; color: #fff; font-family: 'Outfit', sans-serif;">${homeScorersHTML}</div>
                         <div class="away-scorers" style="text-align:right; flex:1; font-size: 13px; color: #fff; font-family: 'Outfit', sans-serif;">${awayScorersHTML}</div>
                     </div>
