@@ -556,6 +556,12 @@ footer {
     background-position: center;
     background-size: cover;
     width: 600px;
+    opacity: 0.4;
+    transition: opacity 0.5s ease;
+}
+
+.swiper-slide-active {
+    opacity: 1;
 }
 
 .swiper-slide .next-match-card {
@@ -568,13 +574,14 @@ footer {
     width: 60px !important;
     height: 60px !important;
     border-radius: 50%;
-    border: 2px solid var(--primary-color);
-    box-shadow: 0 0 15px rgba(218, 2, 14, 0.5);
+    border: none;
+    opacity: 0.5;
     transition: all 0.3s ease;
 }
 
 .custom-nav-btn:hover {
-    background: var(--primary-color);
+    background: rgba(0, 0, 0, 0.8);
+    opacity: 1;
     transform: scale(1.1);
 }
 
