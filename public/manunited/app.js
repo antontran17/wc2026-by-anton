@@ -136,12 +136,16 @@ function renderMatchesGrid() {
         filtered = allMatches.filter(m => new Date(m.date) <= now);
     }
     
-    // Sort logic: if upcoming, ascending. If completed, descending. If all, descending.
+    // Sort logic: if upcoming, ascending. If completed, descending. If all, closest match first.
     filtered.sort((a, b) => {
         if (currentFilter === "upcoming") {
             return new Date(a.date) - new Date(b.date);
+        } else if (currentFilter === "completed") {
+            return new Date(b.date) - new Date(a.date);
+        } else {
+            // "all": trận gần nhất (closest to now) lên đầu
+            return Math.abs(new Date(a.date) - now) - Math.abs(new Date(b.date) - now);
         }
-        return new Date(b.date) - new Date(a.date);
     });
     
     if (filtered.length === 0) {
@@ -244,7 +248,45 @@ async function loadRoster() {
         const res = await fetch('roster.json');
         const data = await res.json();
         
+        
         const athletes = data.athletes || [];
+        
+        // Sắp xếp Đội hình:
+        // 1. Group: GK, DF, MF, FW
+        // 2. Không có số (hoặc '-') thì cho xuống cuối
+        // 3. Có số thì xếp theo số
+        const posOrder = {
+            "Goalkeeper": 1,
+            "Defender": 2,
+            "Midfielder": 3,
+            "Forward": 4
+        };
+        
+        athletes.sort((a, b) => {
+            const numA = parseInt(a.jersey);
+            const numB = parseInt(b.jersey);
+            
+            const hasNumA = !isNaN(numA);
+            const hasNumB = !isNaN(numB);
+            
+            // Xử lý không có số xuống cuối
+            if (hasNumA && !hasNumB) return -1;
+            if (!hasNumA && hasNumB) return 1;
+            
+            // Nếu cả 2 đều không có số hoặc đều có số, xét tiếp vị trí
+            const pA = posOrder[a.position?.name] || 5;
+            const pB = posOrder[b.position?.name] || 5;
+            
+            if (pA !== pB) return pA - pB;
+            
+            // Nếu cùng vị trí và có số, xét theo số
+            if (hasNumA && hasNumB) {
+                return numA - numB;
+            }
+            return 0;
+        });
+
+
         
         if (athletes.length === 0) {
             grid.innerHTML = `<p style="grid-column: 1/-1; text-align:center;">Không có dữ liệu đội hình.</p>`;
@@ -256,7 +298,7 @@ async function loadRoster() {
         const renderPlayer = (player) => {
             return `
                 <div class="player-card">
-                    <img class="player-photo" src="${player.headshot?.href || 'https://a.espncdn.com/i/headshots/soccer/players/full/default.png'}" alt="${player.displayName}">
+                    <img class="player-photo" src="${player.headshot?.href || 'placeholder.png'}" alt="${player.displayName}">
                     <div class="player-number">${player.jersey || "-"}</div>
                     <div class="player-name">${player.displayName}</div>
                     <div class="player-position">${player.position?.name || ""}</div>
