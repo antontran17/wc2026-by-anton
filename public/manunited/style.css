@@ -497,22 +497,28 @@ nav a:hover::after, nav a.active::after {
     flex-direction: column;
     gap: 2px;
     flex: 1;
+    min-width: 0;
+    padding-right: 10px;
 }
 
 .first-name {
-    font-size: 16px;
+    font-size: 12px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.8);
     text-transform: uppercase;
     line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .last-name {
-    font-size: 26px;
+    font-size: 20px;
     font-weight: 700;
     color: #fff;
     text-transform: uppercase;
-    line-height: 1;
+    line-height: 1.1;
+    word-wrap: break-word;
 }
 
 .player-number-wrapper {
@@ -520,7 +526,9 @@ nav a:hover::after, nav a.active::after {
     display: flex;
     align-items: flex-end;
     justify-content: flex-end;
-    width: 60px;
+    width: auto;
+    min-width: 40px;
+    flex-shrink: 0;
 }
 
 .card-watermark {
@@ -533,7 +541,7 @@ nav a:hover::after, nav a.active::after {
 }
 
 .player-number {
-    font-size: 48px;
+    font-size: 40px;
     font-weight: 700;
     color: #fff;
     line-height: 0.8;
