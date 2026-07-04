@@ -627,7 +627,7 @@ footer {
     .swiper-slide {
     background-position: center;
     background-size: cover;
-    width: 600px;
+    width: 85vw;
 }
     .custom-nav-btn {
     color: white !important;
@@ -807,4 +807,30 @@ footer {
 }
 .blink {
     animation: blink 1s step-start infinite;
+}
+
+@media (max-width: 768px) {
+    .swiper-slide .next-match-card {
+        padding: 20px !important;
+    }
+    .match-teams .team-box img {
+        width: 60px !important;
+        height: 60px !important;
+    }
+    .match-teams .team-box span {
+        font-size: 16px !important;
+    }
+    .match-vs {
+        font-size: 24px !important;
+    }
+    .live-scorers-panel {
+        padding: 15px 20px !important;
+        margin: 0 -20px 0 -20px !important;
+    }
+    .match-time-info {
+        font-size: 12px;
+    }
+    .match-time-info span {
+        font-size: 14px !important;
+    }
 }
