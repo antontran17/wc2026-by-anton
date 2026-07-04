@@ -28,9 +28,22 @@ function initNavigation() {
 
 async function loadSchedule() {
     try {
-        const res = await fetch(API_SCHEDULE);
-        const data = await res.json();
-        allMatches = data.events || [];
+        const fetchSeason = async (year) => {
+            try {
+                const res = await fetch(`${API_SCHEDULE}?season=${year}`);
+                const data = await res.json();
+                return data.events || [];
+            } catch (e) {
+                return [];
+            }
+        };
+
+        const [events2025, events2026] = await Promise.all([
+            fetchSeason("2025"),
+            fetchSeason("2026")
+        ]);
+        
+        allMatches = [...events2025, ...events2026];
         
         // Find next match
         const now = new Date();
