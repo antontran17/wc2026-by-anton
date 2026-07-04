@@ -7,7 +7,7 @@ window.addEventListener('load', () => {
             preloader.classList.add('loaded');
             setTimeout(() => {
                 preloader.style.display = 'none';
-            }, 2000); // Wait for transition to finish
+            }, 1000); // Wait for transition to finish
         }, 2000); // Artificial delay to ensure user sees it briefly
     }
 });
