@@ -756,7 +756,7 @@
                 "$ref": "http://sports.core.api.espn.pvt/v2/sports/soccer/teams/360?lang=en&region=us"
             },
             "headshot": {
-                "href": "https://cdn.sofifa.net/players/277/150/24_120.png"
+                "href": "red-devil.png"
             }
         },
         {
@@ -4346,7 +4346,7 @@
                 "$ref": "http://sports.core.api.espn.pvt/v2/sports/soccer/teams/360?lang=en&region=us"
             },
             "headshot": {
-                "href": "https://cdn.sofifa.net/players/272/651/24_120.png"
+                "href": "patrick_dorgu.png"
             }
         },
         {
@@ -5885,7 +5885,7 @@
                 "$ref": "http://sports.core.api.espn.pvt/v2/sports/soccer/teams/360?lang=en&region=us"
             },
             "headshot": {
-                "href": "https://resources.premierleague.com/premierleague/photos/players/250x250/p466848.png"
+                "href": "red-devil.png"
             }
         },
         {
@@ -7678,7 +7678,7 @@
                 "$ref": "http://sports.core.api.espn.pvt/v2/sports/soccer/teams/360?lang=en&region=us"
             },
             "headshot": {
-                "href": "https://a.espncdn.com/i/headshots/soccer/players/full/289155.png"
+                "href": "benjamin_sesko.png"
             }
         },
         {

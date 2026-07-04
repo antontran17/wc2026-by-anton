@@ -468,12 +468,12 @@ async function loadRoster() {
             const lastName = player.lastName || player.displayName.substring(firstName.length).trim() || '';
             return `
                 <div class="player-card">
+                    ${player.displayName === 'Bruno Fernandes' ? '<div class="captain-badge">C</div>' : ''}
                     <img class="player-photo" src="${player.headshot?.href || 'red-devil.png'}" alt="${player.displayName}">
                     <div class="player-info">
                         <div class="player-name-wrapper">
                             <span class="first-name">${firstName}</span>
                             <span class="last-name">${lastName}</span>
-                            ${player.displayName === 'Bruno Fernandes' ? '<span class="captain-label" style="color: #f7b731; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; margin-top: 2px; text-transform: uppercase;">Captain</span>' : ''}
                         </div>
                         <div class="player-number-wrapper">
                             <img class="card-watermark" src="https://a.espncdn.com/i/teamlogos/soccer/500/360.png" alt="MU">

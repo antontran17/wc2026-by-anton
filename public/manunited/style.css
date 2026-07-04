@@ -967,3 +967,22 @@ footer {
         text-transform: uppercase;
     }
 }
+
+.captain-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: linear-gradient(135deg, #f7b731, #e58e26);
+    color: #fff;
+    font-weight: 900;
+    font-size: 14px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 15px rgba(247, 183, 49, 0.4);
+    border: 2px solid #fff;
+}
