@@ -558,7 +558,7 @@ footer {
     width: 600px;
 }
 
-.swiper-slide-active {
+.swiper-slide-active, .swiper-slide-duplicate-active {
     /* No longer need anything here, it will be handled by inner card */
 }
 
@@ -658,19 +658,21 @@ footer {
 }
 
 /* Clean up inactive slides */
-.swiper-slide:not(.swiper-slide-active) .countdown-box {
+.swiper-slide:not(.swiper-slide-active):not(.swiper-slide-duplicate-active) .countdown-box {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease;
 }
 
-.swiper-slide:not(.swiper-slide-active) .next-match-card::before {
+.swiper-slide:not(.swiper-slide-active):not(.swiper-slide-duplicate-active) .next-match-card::before {
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
 .swiper-slide-active .countdown-box,
-.swiper-slide-active .next-match-card::before {
+.swiper-slide-duplicate-active .countdown-box,
+.swiper-slide-active .next-match-card::before,
+.swiper-slide-duplicate-active .next-match-card::before {
     opacity: 1;
     visibility: visible;
     transition: opacity 0.5s ease 0.2s;
@@ -682,7 +684,8 @@ footer {
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.swiper-slide-active .next-match-card {
+.swiper-slide-active .next-match-card,
+.swiper-slide-duplicate-active .next-match-card {
     background: linear-gradient(145deg, rgba(218, 2, 14, 0.8), rgba(0, 0, 0, 0.9));
     backdrop-filter: blur(10px);
     border: 1px solid rgba(218, 2, 14, 0.6);
