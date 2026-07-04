@@ -6,7 +6,6 @@
     --primary-glow: rgba(218, 2, 14, 0.5);
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.6);
-    --gold: #fbe122;
 }
 
 * {
@@ -84,7 +83,7 @@ nav a {
 }
 
 nav a:hover, nav a.active {
-    color: var(--gold);
+    color: var(--primary-color);
 }
 
 nav a::after {
@@ -95,7 +94,7 @@ nav a::after {
     transform: translateX(-50%);
     width: 0;
     height: 2px;
-    background: var(--gold);
+    background: var(--primary-color);
     transition: width 0.3s ease;
 }
 
@@ -364,7 +363,7 @@ nav a:hover::after, nav a.active::after {
 }
 
 .card-winner {
-    color: var(--gold);
+    color: #ffffff;
 }
 
 /* Table */
@@ -415,13 +414,13 @@ nav a:hover::after, nav a.active::after {
     background: rgba(218, 2, 14, 0.1);
 }
 .standings-table tr.highlight-mu .col-pos {
-    color: var(--gold);
+    color: var(--primary-color);
     font-weight: 800;
 }
 
 .col-pts {
     font-weight: 700;
-    color: var(--gold);
+    color: #ffffff;
 }
 
 /* Squad Grid */
