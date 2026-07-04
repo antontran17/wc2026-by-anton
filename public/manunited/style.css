@@ -226,6 +226,7 @@ nav a:hover::after, nav a.active::after {
     background: rgba(0,0,0,0.3);
     padding: 10px;
     border-radius: 10px;
+    margin-bottom: 30px;
 }
 
 /* Sections */
@@ -786,7 +787,7 @@ footer {
     padding-bottom: 0 !important;
     display: flex;
     flex-direction: column;
-    height: 480px !important;
+    height: 360px !important;
     justify-content: space-between;
 }
 
