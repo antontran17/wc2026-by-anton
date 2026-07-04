@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Manchester United - Red Devils</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header id="header">
+        <div class="container">
+            <div class="header-inner">
+                <a href="#" class="logo">
+                    <img src="https://a.espncdn.com/i/teamlogos/soccer/500/360.png" alt="MU Logo">
+                    <span>MAN UNITED</span>
+                </a>
+                <nav>
+                    <a href="#matches" class="active">LỊCH THI ĐẤU</a>
+                    <a href="#standings">BẢNG XẾP HẠNG</a>
+                    <a href="#squad">ĐỘI HÌNH</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" id="hero">
+            <div class="hero-bg"></div>
+            <div class="container">
+                <div class="hero-content">
+                    <h1>GLORY GLORY<br><span class="highlight">MAN UNITED</span></h1>
+                    <p>Theo dõi mọi diễn biến của Quỷ Đỏ thành Manchester.</p>
+                </div>
+                
+                <!-- Next Match Card Container -->
+                <div id="next-match-container" class="next-match-wrapper">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Matches Section -->
+        <section id="matches" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-calendar-days"></i> LỊCH THI ĐẤU & KẾT QUẢ</h2>
+                    <div class="tabs">
+                        <button class="tab-btn active" data-filter="all">Tất cả</button>
+                        <button class="tab-btn" data-filter="upcoming">Sắp tới</button>
+                        <button class="tab-btn" data-filter="completed">Đã đá</button>
+                    </div>
+                </div>
+                <div id="matches-grid" class="cards-grid">
+                    <!-- Injected by JS -->
+                    <div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Standings Section -->
+        <section id="standings" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-list-ol"></i> BẢNG XẾP HẠNG PREMIER LEAGUE</h2>
+                </div>
+                <div class="table-container">
+                    <table class="standings-table">
+                        <thead>
+                            <tr>
+                                <th class="col-pos">#</th>
+                                <th class="col-team">Đội bóng</th>
+                                <th class="col-pld" title="Số trận">Tr</th>
+                                <th class="col-w" title="Thắng">T</th>
+                                <th class="col-d" title="Hòa">H</th>
+                                <th class="col-l" title="Thua">B</th>
+                                <th class="col-gd" title="Hiệu số">HS</th>
+                                <th class="col-pts" title="Điểm">Đ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standings-body">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Squad Section -->
+        <section id="squad" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-users"></i> ĐỘI HÌNH HIỆN TẠI</h2>
+                </div>
+                <div id="squad-grid" class="squad-grid">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Dữ liệu được cập nhật tự động từ ESPN.</p>
+            <p>© 2026 Manchester United Fan Page.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
