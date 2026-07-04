@@ -844,5 +844,10 @@ footer {
 }
 
 .match-card.derby-match {
-    background: linear-gradient(145deg, rgba(218, 2, 14, 0.8), rgba(0, 0, 0, 0.9)) !important;
+    background: linear-gradient(145deg, #610004, #0f0000) !important;
+}
+
+.next-match-card.derby-match::before,
+.next-match-card.super-match::before {
+    display: none !important;
 }
