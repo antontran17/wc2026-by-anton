@@ -43,11 +43,16 @@ async function loadSchedule() {
         const fetchSeason = async (year) => {
             try {
                 if (year === "2026") {
-                    // Endpoint schedule bị rỗng, dùng scoreboard để lấy toàn bộ giải EPL năm 2026 và lọc ra MU
-                    const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=20260801-20270530&limit=380`);
-                    const data = await res.json();
-                    const allEplMatches = data.events || [];
-                    return allEplMatches.filter(m => {
+                    // Fetch both EPL and Club Friendlies for 2026
+                    const [resEpl, resFriendly] = await Promise.all([
+                        fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=20260801-20270530&limit=380`),
+                        fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/club.friendly/scoreboard?dates=20260701-20260830&limit=380`)
+                    ]);
+                    const dataEpl = await resEpl.json();
+                    const dataFriendly = await resFriendly.json();
+                    
+                    const allMatches2026 = [...(dataEpl.events || []), ...(dataFriendly.events || [])];
+                    return allMatches2026.filter(m => {
                         return m.competitions[0].competitors.some(c => c.team.id === TEAM_ID);
                     });
                 } else {
@@ -163,16 +168,16 @@ function renderMatchesGrid() {
                 <div class="card-header" style="justify-content:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:20px; border-bottom: none;">
                     ${formattedTime} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}
                 </div>
-                <div class="card-teams-inline" style="display:flex; justify-content:center; align-items:center; gap: 16px;">
-                    <div class="team-left" style="display:flex; align-items:center; gap:12px; flex:1; justify-content:flex-end;">
+                <div class="card-teams-inline" style="display:flex; justify-content:center; align-items:center; gap: 24px;">
+                    <div class="team-left" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
+                        <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}" style="width:50px; height:50px; object-fit:contain;">
                         <span class="card-team-name ${home.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight:800; font-family:'Outfit', sans-serif; text-transform: uppercase;">${home.team.abbreviation || home.team.shortDisplayName}</span>
-                        <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}" style="width:40px; height:40px; object-fit:contain;">
                     </div>
-                    <div class="match-score" style="font-weight:800; font-size:28px; font-family:'Outfit', sans-serif; white-space:nowrap; padding:0 8px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
+                    <div class="match-score" style="font-weight:800; font-size:32px; font-family:'Outfit', sans-serif; white-space:nowrap; padding:0 10px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
                         ${homeScore} : ${awayScore}
                     </div>
-                    <div class="team-right" style="display:flex; align-items:center; gap:12px; flex:1; justify-content:flex-start;">
-                        <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}" style="width:40px; height:40px; object-fit:contain;">
+                    <div class="team-right" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
+                        <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}" style="width:50px; height:50px; object-fit:contain;">
                         <span class="card-team-name ${away.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight:800; font-family:'Outfit', sans-serif; text-transform: uppercase;">${away.team.abbreviation || away.team.shortDisplayName}</span>
                     </div>
                 </div>
