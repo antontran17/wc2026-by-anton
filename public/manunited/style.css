@@ -682,3 +682,9 @@ footer {
     border: 1px solid rgba(218, 2, 14, 0.4);
     box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 20px rgba(218, 2, 14, 0.2);
 }
+
+/* Add edge fading mask to the swiper wrapper */
+.swiper-wrapper {
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+}
