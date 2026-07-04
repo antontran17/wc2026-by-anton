@@ -171,7 +171,7 @@ function renderMatchesGrid() {
         let awayScore = away.score !== undefined ? away.score : "-";
         
         grid.innerHTML += `
-            <div class="match-card">
+            <div class="match-card ${bigMatchClass}">
                 <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:20px; border-bottom: none; gap:4px;">
                     <div>${formattedTime} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}</div>
                     <div style="font-size:14px; color:#fff; font-weight:800;">${match.leagueName || match.season?.displayName || "Tournament"}</div>
