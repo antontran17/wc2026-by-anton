@@ -464,12 +464,21 @@ async function loadRoster() {
         grid.innerHTML = "";
         
         const renderPlayer = (player) => {
+            const firstName = player.firstName || player.displayName.split(' ')[0] || '';
+            const lastName = player.lastName || player.displayName.substring(firstName.length).trim() || '';
             return `
                 <div class="player-card">
-                    <img class="player-photo" src="${player.headshot?.href || 'placeholder.png'}" alt="${player.displayName}">
-                    <div class="player-number">${player.jersey || "-"}</div>
-                    <div class="player-name">${player.displayName}</div>
-                    <div class="player-position">${player.position?.name || ""}</div>
+                    <img class="player-photo" src="${player.headshot?.href || 'red-devil.png'}" alt="${player.displayName}">
+                    <div class="player-info">
+                        <div class="player-name-wrapper">
+                            <span class="first-name">${firstName}</span>
+                            <span class="last-name">${lastName}</span>
+                        </div>
+                        <div class="player-number-wrapper">
+                            <img class="card-watermark" src="https://a.espncdn.com/i/teamlogos/soccer/500/360.png" alt="MU">
+                            <span class="player-number">${player.jersey || "-"}</span>
+                        </div>
+                    </div>
                 </div>
             `;
         };
