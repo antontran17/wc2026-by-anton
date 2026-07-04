@@ -981,3 +981,28 @@ footer {
     z-index: 10;
     border-radius: 4px 0 0 4px;
 }
+
+@media (max-width: 768px) {
+    .squad-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15px !important;
+    }
+    .player-card {
+        height: 300px !important;
+    }
+    .player-number {
+        font-size: 32px !important;
+    }
+    .last-name {
+        font-size: 13px !important;
+    }
+    .first-name {
+        font-size: 10px !important;
+    }
+    .captain-badge {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 14px !important;
+        top: 15px !important;
+    }
+}
