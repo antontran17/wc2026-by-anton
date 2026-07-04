@@ -120,13 +120,13 @@ function renderNextMatchesCarousel(matches) {
         let derbyName = "";
         let derbyClass = "";
         if (opponentId === "364") {
-            derbyName = "🔥 DERBY NƯỚC ANH 🔥";
+            derbyName = "DERBY";
             derbyClass = "derby-match";
         } else if (opponentId === "382") {
-            derbyName = "⚡ DERBY THÀNH MANCHESTER ⚡";
+            derbyName = "DERBY";
             derbyClass = "derby-match";
         } else if (opponentId === "357") {
-            derbyName = "🌹 DERBY HOA HỒNG 🌹";
+            derbyName = "DERBY";
             derbyClass = "derby-match";
         }
 
@@ -325,13 +325,13 @@ function renderMatchesGrid() {
         let derbyName = "";
         let derbyClass = "";
         if (opponentId === "364") {
-            derbyName = "🔥 DERBY NƯỚC ANH 🔥";
+            derbyName = "DERBY";
             derbyClass = "derby-match";
         } else if (opponentId === "382") {
-            derbyName = "⚡ DERBY THÀNH MANCHESTER ⚡";
+            derbyName = "DERBY";
             derbyClass = "derby-match";
         } else if (opponentId === "357") {
-            derbyName = "🌹 DERBY HOA HỒNG 🌹";
+            derbyName = "DERBY";
             derbyClass = "derby-match";
         }
         
