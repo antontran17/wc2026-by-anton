@@ -732,6 +732,9 @@ footer {
     opacity: 1;
     visibility: visible;
     transition: opacity 0.5s ease 0.2s;
+}
+
+.swiper-slide .next-match-card::before {
     display: none !important;
 }
 
