@@ -1,3 +1,17 @@
+
+// Preloader logic
+window.addEventListener('load', () => {
+    const preloader = document.getElementById('preloader');
+    if (preloader) {
+        setTimeout(() => {
+            preloader.classList.add('loaded');
+            setTimeout(() => {
+                preloader.style.display = 'none';
+            }, 600); // Wait for transition to finish
+        }, 800); // Artificial delay to ensure user sees it briefly
+    }
+});
+
 function getTeamAbbr(team) { return team.id === '360' ? 'MUN' : (team.abbreviation || team.shortDisplayName); }
 let countdownInterval;
 let currentCarouselIndex = 0;
