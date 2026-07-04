@@ -101,21 +101,6 @@ function renderNextMatchesCarousel(matches) {
         container.innerHTML = `<p style="text-align:center; color: var(--text-secondary)">Hiện chưa có lịch thi đấu tiếp theo.</p>`;
         return;
     }
-
-
-    // --- START MOCK LIVE DEMO ---
-    if (matches.length > 0) {
-        matches[0].status.type.state = 'in';
-        matches[0].competitions[0].competitors[0].score = "2";
-        matches[0].competitions[0].competitors[1].score = "1";
-        matches[0].status.displayClock = "60";
-        matches[0].competitions[0].details = [
-            { team: { id: matches[0].competitions[0].competitors[0].team.id }, scoringPlay: true, type: {text: 'Goal'}, athletesInvolved: [{ displayName: 'Bruno Fernandez' }], clock: { displayValue: "32'" } },
-            { team: { id: matches[0].competitions[0].competitors[0].team.id }, scoringPlay: true, type: {text: 'Goal'}, athletesInvolved: [{ displayName: 'Marcus Rashford' }, { displayName: 'Cunha' }], clock: { displayValue: "55'" } },
-            { team: { id: matches[0].competitions[0].competitors[1].team.id }, scoringPlay: true, type: {text: 'Goal'}, athletesInvolved: [{ displayName: 'Cunha' }], clock: { displayValue: "12'" } }
-        ];
-    }
-    // --- END MOCK LIVE DEMO ---
     
     let slidesHTML = "";
     
