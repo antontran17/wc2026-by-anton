@@ -1074,7 +1074,27 @@ footer {
         -webkit-overflow-scrolling: touch;
     }
     .standings-table {
-        min-width: 420px; /* Ensure T H B are pushed off-screen */
+        width: max-content;
+        min-width: 460px;
+    }
+    .col-pos {
+        width: 25px;
+        min-width: 25px;
+    }
+    .col-team {
+        width: 220px;
+        min-width: 220px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .col-pld, .col-gd, .col-pts {
+        width: 40px;
+        min-width: 40px;
+    }
+    .col-w, .col-d, .col-l {
+        width: 40px;
+        min-width: 40px;
     }
 }
 
