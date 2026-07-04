@@ -608,17 +608,17 @@ footer {
 }
 
 .countdown-box {
-    background: #ffffff;
+    background: #000000;
     border: none;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
     padding: 6px 18px;
     border-radius: 20px;
     display: inline-block;
-    color: #000000;
+    color: #ffffff;
     font-family: 'Outfit', sans-serif;
     font-weight: 800;
     font-size: 16px;
-    letter-spacing: 2px;
+    letter-spacing: 0px;
     margin-bottom: 15px;
 }
 
@@ -653,7 +653,7 @@ footer {
     .countdown-box {
         font-size: 14px;
         padding: 4px 12px;
-        letter-spacing: 1px;
+        letter-spacing: 0px;
     }
 }
 
