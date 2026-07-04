@@ -833,6 +833,7 @@ footer {
 .swiper-slide-active .next-match-card.super-match, .match-card.super-match {
     animation: fireGlow 2.5s infinite;
     border: 1px solid rgba(255, 50, 50, 0.8);
+    background: linear-gradient(145deg, rgba(218, 2, 14, 0.15), rgba(0,0,0,0.6)) !important;
 }
 
 .match-card.derby-match,
