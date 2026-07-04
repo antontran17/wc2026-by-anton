@@ -91,12 +91,12 @@ function renderNextMatch(match) {
             </div>
             <div class="match-teams">
                 <div class="team-box">
-                    <img src="${home.team.logos?.[0]?.href || ''}" alt="${home.team.name}">
+                    <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}">
                     <span>${home.team.shortDisplayName}</span>
                 </div>
                 <div class="match-vs">VS</div>
                 <div class="team-box">
-                    <img src="${away.team.logos?.[0]?.href || ''}" alt="${away.team.name}">
+                    <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}">
                     <span>${away.team.shortDisplayName}</span>
                 </div>
             </div>
@@ -157,12 +157,12 @@ function renderMatchesGrid() {
                 </div>
                 <div class="card-teams">
                     <div class="card-team-row">
-                        <img src="${home.team.logos?.[0]?.href || ''}" alt="${home.team.name}">
+                        <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}">
                         <div class="card-team-name">${home.team.displayName}</div>
                         <div class="card-team-score ${home.winner ? "card-winner" : ""}">${homeScore}</div>
                     </div>
                     <div class="card-team-row">
-                        <img src="${away.team.logos?.[0]?.href || ''}" alt="${away.team.name}">
+                        <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}">
                         <div class="card-team-name">${away.team.displayName}</div>
                         <div class="card-team-score ${away.winner ? "card-winner" : ""}">${awayScore}</div>
                     </div>
