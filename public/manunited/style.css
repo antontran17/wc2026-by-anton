@@ -1100,12 +1100,16 @@ footer {
 
 .preloader-text .glory-text {
     color: #ffffff;
-    font-size: 24px;
+    font-size: clamp(16px, 5vw, 24px);
+    white-space: nowrap;
+    text-transform: uppercase;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .preloader-text .mu-text {
     color: #da020e;
-    font-size: 42px;
+    font-size: clamp(24px, 9vw, 42px);
+    white-space: nowrap;
+    text-transform: uppercase;
     text-shadow: 0 0 20px rgba(218, 2, 14, 0.6);
 }
