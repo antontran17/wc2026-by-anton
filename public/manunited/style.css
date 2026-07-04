@@ -836,6 +836,8 @@ footer {
 }
 
 .match-card.derby-match,
-.match-card.super-match {
+.match-card.super-match,
+.next-match-card.derby-match,
+.next-match-card.super-match {
     overflow: visible !important;
 }

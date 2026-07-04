@@ -157,7 +157,7 @@ function renderNextMatchesCarousel(matches) {
             <div class="swiper-slide">
                 <div class="next-match-card ${derbyClass}" style="margin: 0; width: 100%; box-sizing: border-box; position: relative;">
                     <div style="text-align: center;">
-                        ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #ff7300); color: #fff; font-size: 11px; font-weight: 900; padding: 4px 15px; border-radius: 12px; margin-bottom: 10px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6);">${derbyName}</div><br>` : ''}
+                        ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #ff7300); color: #fff; font-size: 11px; font-weight: 900; padding: 4px 15px; border-radius: 12px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
                         ${isLive && match.status.displayClock ? `
                             <div style="background: #000; color: #fff; border-radius: 20px; padding: 6px 20px; display: inline-block; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
                                 ${match.status.displayClock}'
