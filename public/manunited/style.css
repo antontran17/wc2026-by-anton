@@ -548,7 +548,7 @@ footer {
 
 .swiper {
     width: 100%;
-    padding-top: 20px;
+    padding-top: 50px;
     padding-bottom: 50px;
 }
 
@@ -569,6 +569,9 @@ footer {
 }
 
 .custom-nav-btn {
+    top: 50% !important;
+    margin-top: -30px !important; /* height is 60px, so half is 30px */
+
     color: white !important;
     background: transparent !important;
     width: 40px !important;
