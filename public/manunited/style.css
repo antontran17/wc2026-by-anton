@@ -834,3 +834,8 @@ footer {
     animation: fireGlow 2.5s infinite;
     border: 1px solid rgba(255, 50, 50, 0.8);
 }
+
+.match-card.derby-match,
+.match-card.super-match {
+    overflow: visible !important;
+}
