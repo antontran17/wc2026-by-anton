@@ -114,8 +114,8 @@ function renderNextMatchesCarousel(matches) {
         const leagueName = match.leagueName || match.season?.displayName || "Tournament";
         
         slidesHTML += `
-            <div class="carousel-slide ${index === 0 ? 'active' : ''}" id="slide-${index}">
-                <div class="next-match-card" style="margin: 0;">
+            <div class="swiper-slide">
+                <div class="next-match-card" style="margin: 0; width: 100%; box-sizing: border-box;">
                     <div style="text-align: center;">
                         <div class="countdown-box" id="countdown-${match.id}" data-date="${match.date}">
                             <span class="countdown-value">-- : -- : -- : --</span>
@@ -123,13 +123,13 @@ function renderNextMatchesCarousel(matches) {
                     </div>
                     <div class="match-teams">
                         <div class="team-box">
-                            <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}">
-                            <span>${home.team.shortDisplayName}</span>
+                            <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}" style="width: 90px; height: 90px; object-fit: contain;">
+                            <span style="font-size: 20px;">${home.team.shortDisplayName}</span>
                         </div>
-                        <div class="match-vs">VS</div>
+                        <div class="match-vs" style="font-size: 30px;">VS</div>
                         <div class="team-box">
-                            <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}">
-                            <span>${away.team.shortDisplayName}</span>
+                            <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}" style="width: 90px; height: 90px; object-fit: contain;">
+                            <span style="font-size: 20px;">${away.team.shortDisplayName}</span>
                         </div>
                     </div>
                     <div class="match-time-info">
@@ -144,72 +144,41 @@ function renderNextMatchesCarousel(matches) {
     
     container.innerHTML = `
         <div class="carousel-wrapper-full">
-            <div class="carousel-track" id="carousel-track">
-                ${slidesHTML}
+            <div class="swiper mySwiper">
+                <div class="swiper-wrapper">
+                    ${slidesHTML}
+                </div>
+                ${matches.length > 1 ? `
+                <div class="swiper-button-next custom-nav-btn"></div>
+                <div class="swiper-button-prev custom-nav-btn"></div>
+                ` : ''}
             </div>
-            ${matches.length > 1 ? `
-            <button class="carousel-btn prev" onclick="moveCarousel(-1)">&#10094;</button>
-            <button class="carousel-btn next" onclick="moveCarousel(1)">&#10095;</button>
-            ` : ''}
         </div>
     `;
     
-    currentCarouselIndex = 0;
-    
-    // Fix width after render
-    setTimeout(() => {
-        goToSlide(0);
-    }, 50);
-    
-    // Add window resize listener to adjust carousel position
-    window.addEventListener('resize', () => goToSlide(currentCarouselIndex));
+    // Initialize Swiper
+    if (matches.length > 1) {
+        new Swiper('.mySwiper', {
+            effect: 'coverflow',
+            grabCursor: true,
+            centeredSlides: true,
+            slidesPerView: 'auto',
+            loop: true,
+            coverflowEffect: {
+                rotate: 0,
+                stretch: 0,
+                depth: 150,
+                modifier: 1.5,
+                slideShadows: false,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+        });
+    }
     
     startCountdown();
-}
-
-function moveCarousel(direction) {
-    const slides = document.querySelectorAll('.carousel-slide');
-    const totalSlides = slides.length;
-    
-    if (totalSlides <= 1) return;
-    
-    currentCarouselIndex = (currentCarouselIndex + direction + totalSlides) % totalSlides;
-    goToSlide(currentCarouselIndex);
-}
-
-function goToSlide(index) {
-    const track = document.getElementById('carousel-track');
-    const slides = document.querySelectorAll('.carousel-slide');
-    if (!track || slides.length === 0) return;
-    
-    // Find the center of the viewport
-    const viewportCenter = window.innerWidth / 2;
-    // Find the slide element
-    const slide = slides[index];
-    
-    // Standard slide width is 600px + 40px gap = 640px. 
-    // We can calculate offset purely based on index:
-    // center of track should be at index * 640 + 320
-    const slideWidth = 600;
-    const margin = 20; // 20px each side
-    const totalSlideWidth = slideWidth + margin * 2;
-    
-    // Offset = windowWidth/2 - (slideWidth/2 + margin) - index * totalSlideWidth
-    const offset = (window.innerWidth / 2) - (slideWidth / 2) - margin - (index * totalSlideWidth);
-    
-    track.style.transform = `translateX(${offset}px)`;
-    
-    slides.forEach((s, i) => {
-        if (i === index) {
-            s.classList.add('active');
-            s.style.opacity = '1';
-            s.style.transform = 'scale(1)';
-        } else {
-            s.classList.remove('active');
-            s.style.opacity = '0.4';
-            s.style.transform = 'scale(0.85)';
-        }
-    });
 }
 
 function startCountdown() {
@@ -239,6 +208,7 @@ function startCountdown() {
         });
     }, 1000);
 }
+
 
 
 
