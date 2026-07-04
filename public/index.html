@@ -5809,10 +5809,17 @@
                 const teams = await teamsRes.json();
                 const games = await gamesRes.json();
                 
+
+                const stadiums = await stadiumsRes.json();
+                const groups = await groupsRes.json();
+                
+                teamsData = teams.teams || (Array.isArray(teams) ? teams : []);
+                gamesData = games.games || (Array.isArray(games) ? games : []);
+                
                 // --- PATCH ESPN API GLITCH FOR MATCH 96 ---
-                const m96 = games.find(g => String(g.id) === '96');
-                const m85 = games.find(g => String(g.id) === '85');
-                const m88 = games.find(g => String(g.id) === '88');
+                const m96 = gamesData.find(g => String(g.id) === '96');
+                const m85 = gamesData.find(g => String(g.id) === '85');
+                const m88 = gamesData.find(g => String(g.id) === '88');
                 if (m96 && m85 && m88 && m88.home_score !== null && m88.home_score !== undefined && String(m88.home_score).trim() !== '') {
                     const getWinner = (m) => {
                         const hs = Number(m.home_score), as = Number(m.away_score);
@@ -5829,11 +5836,6 @@
                     if (w88) { m96.away_team_id = w88.id; m96.away_team_name_en = w88.name; }
                 }
                 // ------------------------------------------
-                const stadiums = await stadiumsRes.json();
-                const groups = await groupsRes.json();
-                
-                teamsData = teams.teams || (Array.isArray(teams) ? teams : []);
-                gamesData = games.games || (Array.isArray(games) ? games : []);
                 stadiumsData = stadiums.stadiums || (Array.isArray(stadiums) ? stadiums : []);
                 groupsData = groups.groups || (Array.isArray(groups) ? groups : []);
 
@@ -5934,6 +5936,27 @@
                 if (!response.ok) throw new Error('Live score refresh failed');
                 const games = await response.json();
                 gamesData = games.games || (Array.isArray(games) ? games : []);
+                
+                // --- PATCH ESPN API GLITCH FOR MATCH 96 ---
+                const m96 = gamesData.find(g => String(g.id) === '96');
+                const m85 = gamesData.find(g => String(g.id) === '85');
+                const m88 = gamesData.find(g => String(g.id) === '88');
+                if (m96 && m85 && m88 && m88.home_score !== null && m88.home_score !== undefined && String(m88.home_score).trim() !== '') {
+                    const getWinner = (m) => {
+                        const hs = Number(m.home_score), as = Number(m.away_score);
+                        if (hs > as) return { id: m.home_team_id, name: m.home_team_name_en };
+                        if (as > hs) return { id: m.away_team_id, name: m.away_team_name_en };
+                        const hp = Number(m.home_penalties || 0), ap = Number(m.away_penalties || 0);
+                        if (hp > ap) return { id: m.home_team_id, name: m.home_team_name_en };
+                        if (ap > hp) return { id: m.away_team_id, name: m.away_team_name_en };
+                        return null;
+                    };
+                    const w85 = getWinner(m85);
+                    const w88 = getWinner(m88);
+                    if (w85) { m96.home_team_id = w85.id; m96.home_team_name_en = w85.name; }
+                    if (w88) { m96.away_team_id = w88.id; m96.away_team_name_en = w88.name; }
+                }
+                // ------------------------------------------
                 
                 gamesData.forEach(game => {
                     if (espnOverrides.has(game.id)) {
