@@ -80,7 +80,7 @@ async function loadSchedule() {
         const upcomingMatches = allMatches.filter(m => new Date(m.date) > now).sort((a, b) => new Date(a.date) - new Date(b.date));
         
         if (upcomingMatches.length > 0) {
-            renderNextMatchesCarousel(upcomingMatches.slice(0, 4));
+            renderNextMatchesCarousel(upcomingMatches.slice(0, 7));
         } else {
             document.getElementById("next-match-container").innerHTML = `<p style="text-align:center; color: var(--text-secondary)">Hiện chưa có lịch thi đấu tiếp theo.</p>`;
         }
@@ -102,7 +102,6 @@ function renderNextMatchesCarousel(matches) {
     }
 
     let slidesHTML = "";
-    let dotsHTML = "";
     
     matches.forEach((match, index) => {
         const comp = match.competitions[0];
@@ -115,12 +114,11 @@ function renderNextMatchesCarousel(matches) {
         const leagueName = match.leagueName || match.season?.displayName || "Tournament";
         
         slidesHTML += `
-            <div class="carousel-slide">
+            <div class="carousel-slide ${index === 0 ? 'active' : ''}" id="slide-${index}">
                 <div class="next-match-card" style="margin: 0;">
                     <div style="text-align: center;">
                         <div class="countdown-box" id="countdown-${match.id}" data-date="${match.date}">
-                            <span class="countdown-label">KICK-OFF IN</span>
-                            <span class="countdown-value">--:--:--:--</span>
+                            <span class="countdown-value">-- : -- : -- : --</span>
                         </div>
                     </div>
                     <div class="match-teams">
@@ -142,31 +140,36 @@ function renderNextMatchesCarousel(matches) {
                 </div>
             </div>
         `;
-        
-        dotsHTML += `<div class="dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></div>`;
     });
     
     container.innerHTML = `
-        <div class="carousel-wrapper">
+        <div class="carousel-wrapper-full">
             <div class="carousel-track" id="carousel-track">
                 ${slidesHTML}
             </div>
             ${matches.length > 1 ? `
             <button class="carousel-btn prev" onclick="moveCarousel(-1)">&#10094;</button>
             <button class="carousel-btn next" onclick="moveCarousel(1)">&#10095;</button>
-            <div class="carousel-dots" id="carousel-dots">${dotsHTML}</div>
             ` : ''}
         </div>
     `;
     
     currentCarouselIndex = 0;
+    
+    // Fix width after render
+    setTimeout(() => {
+        goToSlide(0);
+    }, 50);
+    
+    // Add window resize listener to adjust carousel position
+    window.addEventListener('resize', () => goToSlide(currentCarouselIndex));
+    
     startCountdown();
 }
 
 function moveCarousel(direction) {
-    const track = document.getElementById('carousel-track');
-    const dots = document.querySelectorAll('.dot');
-    const totalSlides = dots.length;
+    const slides = document.querySelectorAll('.carousel-slide');
+    const totalSlides = slides.length;
     
     if (totalSlides <= 1) return;
     
@@ -176,13 +179,36 @@ function moveCarousel(direction) {
 
 function goToSlide(index) {
     const track = document.getElementById('carousel-track');
-    const dots = document.querySelectorAll('.dot');
+    const slides = document.querySelectorAll('.carousel-slide');
+    if (!track || slides.length === 0) return;
     
-    currentCarouselIndex = index;
-    track.style.transform = `translateX(-${currentCarouselIndex * 100}%)`;
+    // Find the center of the viewport
+    const viewportCenter = window.innerWidth / 2;
+    // Find the slide element
+    const slide = slides[index];
     
-    dots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === currentCarouselIndex);
+    // Standard slide width is 600px + 40px gap = 640px. 
+    // We can calculate offset purely based on index:
+    // center of track should be at index * 640 + 320
+    const slideWidth = 600;
+    const margin = 20; // 20px each side
+    const totalSlideWidth = slideWidth + margin * 2;
+    
+    // Offset = windowWidth/2 - (slideWidth/2 + margin) - index * totalSlideWidth
+    const offset = (window.innerWidth / 2) - (slideWidth / 2) - margin - (index * totalSlideWidth);
+    
+    track.style.transform = `translateX(${offset}px)`;
+    
+    slides.forEach((s, i) => {
+        if (i === index) {
+            s.classList.add('active');
+            s.style.opacity = '1';
+            s.style.transform = 'scale(1)';
+        } else {
+            s.classList.remove('active');
+            s.style.opacity = '0.4';
+            s.style.transform = 'scale(0.85)';
+        }
     });
 }
 
@@ -196,6 +222,7 @@ function startCountdown() {
             const distance = matchDate - now;
             
             const valueSpan = box.querySelector('.countdown-value');
+            if(!valueSpan) return;
             
             if (distance < 0) {
                 valueSpan.innerHTML = "MATCH STARTED";
@@ -208,10 +235,12 @@ function startCountdown() {
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             
             const pad = (n) => n < 10 ? '0' + n : n;
-            valueSpan.innerHTML = `${days}D : ${pad(hours)}H : ${pad(minutes)}M : ${pad(seconds)}S`;
+            valueSpan.innerHTML = `${days} : ${pad(hours)} : ${pad(minutes)} : ${pad(seconds)}`;
         });
     }, 1000);
 }
+
+
 
 
 function renderMatchesGrid() {
