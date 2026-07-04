@@ -1031,7 +1031,7 @@ footer {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+    transition: opacity 2s ease-out, visibility 2s ease-out;
 }
 
 .preloader-content {
