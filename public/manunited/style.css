@@ -1067,3 +1067,13 @@ footer {
     opacity: 0;
     visibility: hidden;
 }
+
+@media (max-width: 768px) {
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .standings-table {
+        min-width: 420px; /* Ensure T H B are pushed off-screen */
+    }
+}

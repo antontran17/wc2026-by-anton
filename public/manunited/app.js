@@ -409,11 +409,11 @@ async function loadStandings() {
                         <span class="desktop-name">${team.name}</span>
                     </td>
                     <td class="col-pld">${getStat("GP") || getStat("gamesPlayed")}</td>
+                    <td class="col-gd">${getStat("GD") || getStat("pointDifferential")}</td>
+                    <td class="col-pts">${getStat("P") || getStat("points")}</td>
                     <td class="col-w">${getStat("W") || getStat("wins")}</td>
                     <td class="col-d">${getStat("D") || getStat("ties")}</td>
                     <td class="col-l">${getStat("L") || getStat("losses")}</td>
-                    <td class="col-gd">${getStat("GD") || getStat("pointDifferential")}</td>
-                    <td class="col-pts">${getStat("P") || getStat("points")}</td>
                 </tr>
             `;
         });
