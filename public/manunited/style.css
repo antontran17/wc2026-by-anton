@@ -696,3 +696,98 @@ footer {
 }
 
 
+
+
+/* Live Match UI */
+.live-clock-box {
+    background: #000000;
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    padding: 6px 24px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.scorers-container {
+    background: rgba(0, 0, 0, 0.4);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 30px;
+    margin-top: 20px;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    min-height: 80px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.scorer-list {
+    width: 45%;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #e0e0e0;
+}
+
+.scorer-left {
+    text-align: left;
+}
+
+.scorer-right {
+    text-align: right;
+}
+
+.scorer-item {
+    margin-bottom: 8px;
+}
+
+.scorer-item strong {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.scorer-assist {
+    color: #999999;
+    font-size: 11px;
+}
+
+/* Hide scoreres container on inactive slides */
+.swiper-slide:not(.swiper-slide-active):not(.swiper-slide-duplicate-active) .scorers-container {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+}
+
+.swiper-slide-active .scorers-container,
+.swiper-slide-duplicate-active .scorers-container {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease 0.2s;
+}
+
+.swiper-slide:not(.swiper-slide-active):not(.swiper-slide-duplicate-active) .live-clock-box {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+}
+.swiper-slide-active .live-clock-box,
+.swiper-slide-duplicate-active .live-clock-box {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease 0.2s;
+}
+
+/* For live matches, remove the inner padding of the card to let the scorers container flush to the bottom */
+.swiper-slide .next-match-card {
+    padding-bottom: 0 !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.match-teams {
+    padding-bottom: 20px; /* add spacing since we removed card bottom padding */
+}

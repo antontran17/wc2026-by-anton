@@ -115,6 +115,31 @@ function renderNextMatchesCarousel(matches) {
         
         const leagueName = match.leagueName || match.season?.displayName || "Tournament";
         
+        
+        const isLive = match.status.type.state === 'in';
+        let homeScorersHTML = '';
+        let awayScorersHTML = '';
+        
+        if (isLive) {
+            const details = match.competitions[0].details || [];
+            const goals = details.filter(d => d.scoringPlay === true || d.type.text === "Goal" || d.type.text === "Penalty - Scored");
+            
+            const homeGoals = goals.filter(g => g.team.id === home.team.id);
+            const awayGoals = goals.filter(g => g.team.id === away.team.id);
+            
+            homeScorersHTML = homeGoals.map(g => {
+                const scorer = g.athletesInvolved?.[0]?.displayName || 'Unknown';
+                const assist = g.athletesInvolved?.[1]?.displayName ? `<br><span class="scorer-assist">(${g.athletesInvolved[1].displayName})</span>` : '';
+                return `<div class="scorer-item"><strong>${scorer} ${g.clock.displayValue}</strong>${assist}</div>`;
+            }).join('');
+            
+            awayScorersHTML = awayGoals.map(g => {
+                const scorer = g.athletesInvolved?.[0]?.displayName || 'Unknown';
+                const assist = g.athletesInvolved?.[1]?.displayName ? `<br><span class="scorer-assist">(${g.athletesInvolved[1].displayName})</span>` : '';
+                return `<div class="scorer-item"><strong>${scorer} ${g.clock.displayValue}</strong>${assist}</div>`;
+            }).join('');
+        }
+        
         slidesHTML += `
             <div class="swiper-slide">
                 <div class="next-match-card" style="margin: 0; width: 100%; box-sizing: border-box;">
