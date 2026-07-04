@@ -1077,3 +1077,15 @@ footer {
         min-width: 420px; /* Ensure T H B are pushed off-screen */
     }
 }
+
+.preloader-text .glory-text {
+    color: #ffffff;
+    font-size: 24px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.preloader-text .mu-text {
+    color: #da020e;
+    font-size: 42px;
+    text-shadow: 0 0 20px rgba(218, 2, 14, 0.6);
+}
