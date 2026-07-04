@@ -157,9 +157,9 @@ function renderNextMatchesCarousel(matches) {
             <div class="swiper-slide">
                 <div class="next-match-card ${derbyClass}" style="margin: 0; width: 100%; box-sizing: border-box; position: relative;">
                     <div style="text-align: center;">
-                        ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 900; padding: 4px 15px; border-radius: 12px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
+                        ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 15px; border-radius: 12px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
                         ${isLive && match.status.displayClock ? `
-                            <div style="background: #000; color: #fff; border-radius: 20px; padding: 6px 20px; display: inline-block; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+                            <div style="background: #000; color: #fff; border-radius: 20px; padding: 6px 20px; display: inline-block; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
                                 ${match.status.displayClock}'
                             </div>
                         ` : `
@@ -175,7 +175,7 @@ function renderNextMatchesCarousel(matches) {
                         </div>
                         
                         <div class="match-vs-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex: 1;">
-                            <div class="match-vs" style="font-size: ${isLive ? '48px' : '30px'}; font-weight:900; color: #fff; margin-bottom: 5px; text-shadow: ${isLive ? '0 5px 15px rgba(0,0,0,0.5)' : 'none'};">
+                            <div class="match-vs" style="font-size: ${isLive ? '48px' : '30px'}; font-weight: 700; color: #fff; margin-bottom: 5px; text-shadow: ${isLive ? '0 5px 15px rgba(0,0,0,0.5)' : 'none'};">
                                 ${isLive ? (home.score !== undefined ? home.score : "0") + ' : ' + (away.score !== undefined ? away.score : "0") : 'VS'}
                             </div>
                         </div>
@@ -194,7 +194,7 @@ function renderNextMatchesCarousel(matches) {
                     ` : `
                     <div class="match-time-info">
                         <strong>${formattedTime}</strong> <br>
-                        <span style="font-weight:900; color:#fff; text-transform:uppercase; font-size:18px; letter-spacing:1px;">${leagueName}</span> <br>
+                        <span style="font-weight: 700; color:#fff; text-transform:uppercase; font-size:18px; letter-spacing:1px;">${leagueName}</span> <br>
                         <small>${comp.venue?.fullName || "Sân chưa xác định"}</small>
                     </div>
                     `}
@@ -335,22 +335,22 @@ function renderMatchesGrid() {
         
         grid.innerHTML += `
             <div class="${finalClasses}" style="position: relative;">
-                ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 900; padding: 4px 15px; border-radius: 12px; margin-bottom: 10px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
+                ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 15px; border-radius: 12px; margin-bottom: 10px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
                 <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:20px; border-bottom: none; gap:4px;">
                     <div>${formattedTime} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}</div>
-                    <div style="font-size:14px; color:#fff; font-weight:800;">${match.leagueName || match.season?.displayName || "Tournament"}</div>
+                    <div style="font-size:14px; color:#fff; font-weight: 700;">${match.leagueName || match.season?.displayName || "Tournament"}</div>
                 </div>
                 <div class="card-teams-inline" style="display:flex; justify-content:center; align-items:center; gap: 24px;">
                     <div class="team-left" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
                         <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}" style="width:50px; height:50px; object-fit:contain;">
-                        <span class="card-team-name ${home.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight:800; font-family:'Outfit', sans-serif; text-transform: uppercase;">${getTeamAbbr(home.team)}</span>
+                        <span class="card-team-name ${home.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight: 700; font-family:'Outfit', sans-serif; text-transform: uppercase;">${getTeamAbbr(home.team)}</span>
                     </div>
-                    <div class="match-score" style="font-weight:800; font-size:32px; font-family:'Outfit', sans-serif; white-space:nowrap; padding:0 10px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
+                    <div class="match-score" style="font-weight: 700; font-size:32px; font-family:'Outfit', sans-serif; white-space:nowrap; padding:0 10px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
                         ${scoreDisplay}
                     </div>
                     <div class="team-right" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
                         <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}" style="width:50px; height:50px; object-fit:contain;">
-                        <span class="card-team-name ${away.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight:800; font-family:'Outfit', sans-serif; text-transform: uppercase;">${getTeamAbbr(away.team)}</span>
+                        <span class="card-team-name ${away.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight: 700; font-family:'Outfit', sans-serif; text-transform: uppercase;">${getTeamAbbr(away.team)}</span>
                     </div>
                 </div>
                 <div class="card-footer" style="text-align:center; color:var(--text-secondary); font-size:12px; font-weight:700; text-transform:uppercase; margin-top:20px; font-family:'Outfit', sans-serif; opacity: 0.8;">
