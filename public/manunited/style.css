@@ -632,3 +632,34 @@ footer {
         letter-spacing: 1px;
     }
 }
+
+/* Clean up inactive slides */
+.swiper-slide:not(.swiper-slide-active) .countdown-box {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+}
+
+.swiper-slide:not(.swiper-slide-active) .next-match-card::before {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.swiper-slide-active .countdown-box,
+.swiper-slide-active .next-match-card::before {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease 0.2s;
+}
+
+/* Adjust card style slightly to look better in coverflow */
+.swiper-slide .next-match-card {
+    background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(10, 10, 10, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.swiper-slide-active .next-match-card {
+    background: linear-gradient(145deg, rgba(218, 2, 14, 0.15), rgba(0,0,0,0.8));
+    border: 1px solid rgba(218, 2, 14, 0.4);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 20px rgba(218, 2, 14, 0.2);
+}
