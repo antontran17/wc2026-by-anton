@@ -518,20 +518,7 @@ footer {
     position: relative;
     overflow: hidden;
 }
-.match-card.big-match::after {
-    content: 'SUPER MATCH';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    font-size: 10px;
-    font-weight: 800;
-    color: var(--primary-color);
-    background: rgba(218, 2, 14, 0.15);
-    padding: 3px 0;
-    letter-spacing: 2px;
-}
+
 .match-card.big-match:hover {
     box-shadow: 0 0 35px rgba(218, 2, 14, 0.4);
     transform: translateY(-5px) scale(1.02);

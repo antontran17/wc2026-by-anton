@@ -119,15 +119,12 @@ function renderNextMatchesCarousel(matches) {
         const opponentId = opponent.team.id;
         let derbyName = "";
         let derbyClass = "";
-        if (opponentId === "364") {
+        if (["364", "382", "357"].includes(opponentId)) {
             derbyName = "DERBY";
             derbyClass = "derby-match";
-        } else if (opponentId === "382") {
-            derbyName = "DERBY";
-            derbyClass = "derby-match";
-        } else if (opponentId === "357") {
-            derbyName = "DERBY";
-            derbyClass = "derby-match";
+        } else if (["359", "363", "367", "361"].includes(opponentId)) {
+            derbyName = "SUPER MATCH";
+            derbyClass = "super-match";
         }
 
         
@@ -324,15 +321,12 @@ function renderMatchesGrid() {
         
         let derbyName = "";
         let derbyClass = "";
-        if (opponentId === "364") {
+        if (["364", "382", "357"].includes(opponentId)) {
             derbyName = "DERBY";
             derbyClass = "derby-match";
-        } else if (opponentId === "382") {
-            derbyName = "DERBY";
-            derbyClass = "derby-match";
-        } else if (opponentId === "357") {
-            derbyName = "DERBY";
-            derbyClass = "derby-match";
+        } else if (["359", "363", "367", "361"].includes(opponentId)) {
+            derbyName = "SUPER MATCH";
+            derbyClass = "super-match";
         }
         
         const isBigMatch = ["359", "363", "364", "382", "367", "361"].includes(opponentId);
