@@ -159,7 +159,7 @@ function renderNextMatchesCarousel(matches) {
                     <div style="text-align: center;">
                         ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 15px; border-radius: 12px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
                         ${isLive && match.status.displayClock ? `
-                            <div style="background: #000; color: #fff; border-radius: 20px; padding: 6px 20px; display: inline-block; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+                            <div style="background: #000; color: #fff; border-radius: 20px; padding: 6px 20px; display: inline-block; font-family: 'Google Sans Flex', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
                                 ${match.status.displayClock}'
                             </div>
                         ` : `
@@ -188,8 +188,8 @@ function renderNextMatchesCarousel(matches) {
                     
                     ${isLive ? `
                     <div class="live-scorers-panel" style="background: rgba(0,0,0,0.6); display: flex; justify-content: space-between; padding: 20px 30px; box-sizing: border-box; margin: 0 -30px 0 -30px;">
-                        <div class="home-scorers" style="text-align:left; flex:1; font-size: 13px; color: #fff; font-family: 'Outfit', sans-serif;">${homeScorersHTML}</div>
-                        <div class="away-scorers" style="text-align:right; flex:1; font-size: 13px; color: #fff; font-family: 'Outfit', sans-serif;">${awayScorersHTML}</div>
+                        <div class="home-scorers" style="text-align:left; flex:1; font-size: 13px; color: #fff; font-family: 'Google Sans Flex', sans-serif;">${homeScorersHTML}</div>
+                        <div class="away-scorers" style="text-align:right; flex:1; font-size: 13px; color: #fff; font-family: 'Google Sans Flex', sans-serif;">${awayScorersHTML}</div>
                     </div>
                     ` : `
                     <div class="match-time-info">
@@ -343,17 +343,17 @@ function renderMatchesGrid() {
                 <div class="card-teams-inline" style="display:flex; justify-content:center; align-items:center; gap: 24px;">
                     <div class="team-left" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
                         <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}" style="width:50px; height:50px; object-fit:contain;">
-                        <span class="card-team-name ${home.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight: 700; font-family:'Outfit', sans-serif; text-transform: uppercase;">${getTeamAbbr(home.team)}</span>
+                        <span class="card-team-name ${home.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase;">${getTeamAbbr(home.team)}</span>
                     </div>
-                    <div class="match-score" style="font-weight: 700; font-size:32px; font-family:'Outfit', sans-serif; white-space:nowrap; padding:0 10px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
+                    <div class="match-score" style="font-weight: 700; font-size:32px; font-family: 'Google Sans Flex', sans-serif; white-space:nowrap; padding:0 10px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
                         ${scoreDisplay}
                     </div>
                     <div class="team-right" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
                         <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}" style="width:50px; height:50px; object-fit:contain;">
-                        <span class="card-team-name ${away.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight: 700; font-family:'Outfit', sans-serif; text-transform: uppercase;">${getTeamAbbr(away.team)}</span>
+                        <span class="card-team-name ${away.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase;">${getTeamAbbr(away.team)}</span>
                     </div>
                 </div>
-                <div class="card-footer" style="text-align:center; color:var(--text-secondary); font-size:12px; font-weight:700; text-transform:uppercase; margin-top:20px; font-family:'Outfit', sans-serif; opacity: 0.8;">
+                <div class="card-footer" style="text-align:center; color:var(--text-secondary); font-size:12px; font-weight:700; text-transform:uppercase; margin-top:20px; font-family: 'Google Sans Flex', sans-serif; opacity: 0.8;">
                     ${comp.venue?.fullName || "Sân chưa xác định"}
                 </div>
             </div>
