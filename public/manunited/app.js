@@ -30,9 +30,19 @@ async function loadSchedule() {
     try {
         const fetchSeason = async (year) => {
             try {
-                const res = await fetch(`${API_SCHEDULE}?season=${year}`);
-                const data = await res.json();
-                return data.events || [];
+                if (year === "2026") {
+                    // Endpoint schedule bị rỗng, dùng scoreboard để lấy toàn bộ giải EPL năm 2026 và lọc ra MU
+                    const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=20260801-20270530&limit=380`);
+                    const data = await res.json();
+                    const allEplMatches = data.events || [];
+                    return allEplMatches.filter(m => {
+                        return m.competitions[0].competitors.some(c => c.team.id === TEAM_ID);
+                    });
+                } else {
+                    const res = await fetch(`${API_SCHEDULE}?season=${year}`);
+                    const data = await res.json();
+                    return data.events || [];
+                }
             } catch (e) {
                 return [];
             }
