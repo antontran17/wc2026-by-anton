@@ -3,6 +3,18 @@ const API_SCHEDULE = `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1
 const API_STANDINGS = `https://site.api.espn.com/apis/v2/sports/soccer/eng.1/standings`;
 const API_ROSTER = `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/${TEAM_ID}/roster`;
 
+
+function formatMatchTime(dateObj) {
+    const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const day = dayNames[dateObj.getDay()];
+    const dd = String(dateObj.getDate()).padStart(2, '0');
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const yyyy = dateObj.getFullYear();
+    const hh = String(dateObj.getHours()).padStart(2, '0');
+    const min = String(dateObj.getMinutes()).padStart(2, '0');
+    return `${hh}:${min}, ${day} ${dd}.${mm}.${yyyy}`;
+}
+
 // State
 let allMatches = [];
 let currentFilter = "all"; // all, upcoming, completed
@@ -48,12 +60,11 @@ async function loadSchedule() {
             }
         };
 
-        const [events2025, events2026] = await Promise.all([
-            fetchSeason("2025"),
+        const [events2026] = await Promise.all([
             fetchSeason("2026")
         ]);
         
-        allMatches = [...events2025, ...events2026];
+        allMatches = [...events2026];
         
         // Find next match
         const now = new Date();
@@ -79,8 +90,7 @@ function renderNextMatch(match) {
     const away = comp.competitors.find(c => c.homeAway === "away");
     
     const dateObj = new Date(match.date);
-    const dateStr = dateObj.toLocaleDateString("vi-VN", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
-    const timeStr = dateObj.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+    const formattedTime = formatMatchTime(dateObj);
     
     const statusText = comp.status.type.detail;
     
@@ -101,7 +111,7 @@ function renderNextMatch(match) {
                 </div>
             </div>
             <div class="match-time-info">
-                <strong>${timeStr}</strong> &bull; ${dateStr} <br>
+                <strong>${formattedTime}</strong> <br>
                 <small>${comp.venue?.fullName || "Sân chưa xác định"}</small>
             </div>
         </div>
@@ -140,8 +150,7 @@ function renderMatchesGrid() {
         const away = comp.competitors.find(c => c.homeAway === "away");
         
         const dateObj = new Date(match.date);
-        const dateStr = dateObj.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
-        const timeStr = dateObj.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+    const formattedTime = formatMatchTime(dateObj);
         
         const statusType = comp.status.type.state; // "pre", "in", "post"
         const isLive = statusType === "in";
@@ -152,19 +161,20 @@ function renderMatchesGrid() {
         grid.innerHTML += `
             <div class="match-card">
                 <div class="card-header">
-                    <span>${dateStr} - ${timeStr}</span>
+                    <span>${formattedTime}</span>
                     <span class="card-status ${isLive ? "live" : ""}">${isLive ? "LIVE" : comp.status.type.detail}</span>
                 </div>
-                <div class="card-teams">
-                    <div class="card-team-row">
-                        <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}">
-                        <div class="card-team-name">${home.team.displayName}</div>
-                        <div class="card-team-score ${home.winner ? "card-winner" : ""}">${homeScore}</div>
+                <div class="card-teams-inline" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="team-left" style="display:flex; align-items:center; gap:8px; width:40%; justify-content:flex-end; text-align:right;">
+                        <span class="card-team-name ${home.winner ? 'card-winner' : ''}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${home.team.shortDisplayName}</span>
+                        <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}" style="width:28px; height:28px; object-fit:contain;">
                     </div>
-                    <div class="card-team-row">
-                        <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}">
-                        <div class="card-team-name">${away.team.displayName}</div>
-                        <div class="card-team-score ${away.winner ? "card-winner" : ""}">${awayScore}</div>
+                    <div class="match-score" style="font-weight:800; font-size:22px; font-family:'Outfit', sans-serif; white-space:nowrap; padding:0 10px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}">
+                        ${homeScore} : ${awayScore}
+                    </div>
+                    <div class="team-right" style="display:flex; align-items:center; gap:8px; width:40%; justify-content:flex-start; text-align:left;">
+                        <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}" style="width:28px; height:28px; object-fit:contain;">
+                        <span class="card-team-name ${away.winner ? 'card-winner' : ''}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${away.team.shortDisplayName}</span>
                     </div>
                 </div>
             </div>
