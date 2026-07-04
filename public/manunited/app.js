@@ -163,7 +163,7 @@ function renderNextMatchesCarousel(matches) {
             grabCursor: true,
             centeredSlides: true,
             slidesPerView: 'auto',
-            spaceBetween: 40,
+            spaceBetween: 120,
             loop: true,
             navigation: {
                 nextEl: '.swiper-button-next',
