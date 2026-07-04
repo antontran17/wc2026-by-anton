@@ -1049,7 +1049,7 @@ footer {
 .preloader-text {
     font-family: 'Google Sans Flex', sans-serif;
     font-size: 32px;
-    font-weight: 900;
+    font-weight: 700; /* Changed from 900 to 700 to match headings */
     color: #da020e;
     margin: 0;
     line-height: 1.2;
