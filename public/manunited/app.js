@@ -169,7 +169,7 @@ function renderNextMatchesCarousel(matches) {
                             </div>
                         `}
                     </div>
-                    <div class="match-teams" style="margin-top: 10px;">
+                    <div class="match-teams" style="margin: auto 0;">
                         <div class="team-box">
                             <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}" style="width: 90px; height: 90px; object-fit: contain;">
                             <span style="font-size: 20px; text-transform: uppercase;">${getTeamAbbr(home.team)}</span>
@@ -188,7 +188,7 @@ function renderNextMatchesCarousel(matches) {
                     </div>
                     
                     ${isLive ? `
-                    <div class="live-scorers-panel" style="background: rgba(0,0,0,0.6); display: flex; justify-content: space-between; padding: 20px 30px; box-sizing: border-box; margin: 0 -30px -30px -30px;">
+                    <div class="live-scorers-panel" style="background: rgba(0,0,0,0.6); display: flex; justify-content: space-between; padding: 20px 30px; box-sizing: border-box; margin: 0 -30px 0 -30px;">
                         <div class="home-scorers" style="text-align:left; flex:1; font-size: 13px; color: #fff; font-family: 'Outfit', sans-serif;">${homeScorersHTML}</div>
                         <div class="away-scorers" style="text-align:right; flex:1; font-size: 13px; color: #fff; font-family: 'Outfit', sans-serif;">${awayScorersHTML}</div>
                     </div>
