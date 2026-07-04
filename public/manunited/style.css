@@ -519,7 +519,7 @@ footer {
     overflow: hidden;
 }
 .match-card.big-match::after {
-    content: '🔥 SUPER MATCH';
+    content: 'SUPER MATCH';
     position: absolute;
     top: 0;
     left: 0;
