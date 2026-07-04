@@ -534,14 +534,7 @@ nav a:hover::after, nav a.active::after {
     flex-shrink: 0;
 }
 
-.card-watermark {
-    position: absolute;
-    right: 25px;
-    bottom: 5px;
-    width: 65px;
-    opacity: 0.15;
-    z-index: -1;
-}
+
 
 .player-number {
     font-size: 40px;

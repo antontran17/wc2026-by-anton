@@ -756,7 +756,7 @@
                 "$ref": "http://sports.core.api.espn.pvt/v2/sports/soccer/teams/360?lang=en&region=us"
             },
             "headshot": {
-                "href": "red-devil.png"
+                "href": "nopic.png"
             }
         },
         {
@@ -5885,7 +5885,7 @@
                 "$ref": "http://sports.core.api.espn.pvt/v2/sports/soccer/teams/360?lang=en&region=us"
             },
             "headshot": {
-                "href": "red-devil.png"
+                "href": "nopic.png"
             }
         },
         {
