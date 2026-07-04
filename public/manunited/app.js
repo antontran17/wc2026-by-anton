@@ -157,7 +157,7 @@ function renderNextMatchesCarousel(matches) {
             <div class="swiper-slide">
                 <div class="next-match-card ${derbyClass}" style="margin: 0; width: 100%; box-sizing: border-box; position: relative;">
                     <div style="text-align: center;">
-                        ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #ff7300); color: #fff; font-size: 11px; font-weight: 900; padding: 4px 15px; border-radius: 12px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
+                        ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 900; padding: 4px 15px; border-radius: 12px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
                         ${isLive && match.status.displayClock ? `
                             <div style="background: #000; color: #fff; border-radius: 20px; padding: 6px 20px; display: inline-block; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
                                 ${match.status.displayClock}'
@@ -335,7 +335,7 @@ function renderMatchesGrid() {
         
         grid.innerHTML += `
             <div class="${finalClasses}" style="position: relative;">
-                ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #ff7300); color: #fff; font-size: 11px; font-weight: 900; padding: 4px 15px; border-radius: 12px; margin-bottom: 10px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
+                ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 900; padding: 4px 15px; border-radius: 12px; margin-bottom: 10px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
                 <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:20px; border-bottom: none; gap:4px;">
                     <div>${formattedTime} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}</div>
                     <div style="font-size:14px; color:#fff; font-weight:800;">${match.leagueName || match.season?.displayName || "Tournament"}</div>
