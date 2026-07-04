@@ -124,7 +124,7 @@ nav a:hover::after, nav a.active::after {
 
 .hero h1 {
     font-family: 'Google Sans Flex', sans-serif;
-    font-size: 64px;
+    font-size: 52px;
     font-weight: 700;
     line-height: 1.1;
     margin-bottom: 16px;
@@ -133,6 +133,9 @@ nav a:hover::after, nav a.active::after {
 }
 
 .hero .highlight {
+    font-size: 84px;
+    display: inline-block;
+    margin-top: 5px;
     color: var(--primary-color);
     text-shadow: 0 0 30px var(--primary-glow);
 }
@@ -169,6 +172,7 @@ nav a:hover::after, nav a.active::after {
     height: 4px;
     background: linear-gradient(90deg, var(--primary-color), #8b0000);
     border-radius: 20px 20px 0 0;
+    display: none !important;
 }
 
 .match-status-badge {
@@ -503,7 +507,8 @@ footer {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .hero h1 { font-size: 42px; }
+    .hero h1 { font-size: 36px; }
+    .hero .highlight { font-size: 54px; margin-top: 0; }
     .hero p { font-size: 16px; }
     .section-header { flex-direction: column; gap: 16px; align-items: flex-start; }
     .tabs { width: 100%; overflow-x: auto; padding-bottom: 8px; }
@@ -655,6 +660,7 @@ footer {
 .swiper-slide:not(.swiper-slide-active):not(.swiper-slide-duplicate-active) .next-match-card::before {
     opacity: 0;
     transition: opacity 0.3s ease;
+    display: none !important;
 }
 
 .swiper-slide-active .countdown-box,
@@ -664,6 +670,7 @@ footer {
     opacity: 1;
     visibility: visible;
     transition: opacity 0.5s ease 0.2s;
+    display: none !important;
 }
 
 /* Adjust card style slightly to look better in coverflow */
