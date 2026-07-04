@@ -535,3 +535,91 @@ footer {
     box-shadow: 0 0 35px rgba(218, 2, 14, 0.4);
     transform: translateY(-5px) scale(1.02);
 }
+
+/* Carousel Styles */
+.carousel-wrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 16px;
+    margin-bottom: 40px;
+}
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.carousel-slide {
+    flex: 0 0 100%;
+    min-width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+}
+.carousel-btn:hover {
+    background: var(--primary-color);
+}
+.carousel-btn.prev {
+    left: 10px;
+}
+.carousel-btn.next {
+    right: 10px;
+}
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: -20px;
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+}
+.dot {
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.dot.active {
+    background: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
+}
+.countdown-box {
+    background: linear-gradient(135deg, #1a1a1a, #000);
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 0 15px rgba(218, 2, 14, 0.3);
+    padding: 8px 20px;
+    border-radius: 20px;
+    display: inline-block;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 2px;
+}
+.countdown-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+    display: block;
+}

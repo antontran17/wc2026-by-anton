@@ -1,3 +1,5 @@
+let countdownInterval;
+let currentCarouselIndex = 0;
 const TEAM_ID = "360"; // Manchester United
 const API_SCHEDULE = `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/${TEAM_ID}/schedule`;
 const API_STANDINGS = `https://site.api.espn.com/apis/v2/sports/soccer/eng.1/standings`;
@@ -78,7 +80,7 @@ async function loadSchedule() {
         const upcomingMatches = allMatches.filter(m => new Date(m.date) > now).sort((a, b) => new Date(a.date) - new Date(b.date));
         
         if (upcomingMatches.length > 0) {
-            renderNextMatch(upcomingMatches[0]);
+            renderNextMatchesCarousel(upcomingMatches.slice(0, 4));
         } else {
             document.getElementById("next-match-container").innerHTML = `<p style="text-align:center; color: var(--text-secondary)">Hiện chưa có lịch thi đấu tiếp theo.</p>`;
         }
@@ -90,41 +92,127 @@ async function loadSchedule() {
     }
 }
 
-function renderNextMatch(match) {
+function renderNextMatchesCarousel(matches) {
     const container = document.getElementById("next-match-container");
-    const comp = match.competitions[0];
-    const home = comp.competitors.find(c => c.homeAway === "home");
-    const away = comp.competitors.find(c => c.homeAway === "away");
+    if (countdownInterval) clearInterval(countdownInterval);
     
-    const dateObj = new Date(match.date);
-    const formattedTime = formatMatchTime(dateObj);
+    if (!matches || matches.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color: var(--text-secondary)">Hiện chưa có lịch thi đấu tiếp theo.</p>`;
+        return;
+    }
+
+    let slidesHTML = "";
+    let dotsHTML = "";
     
-    const statusText = comp.status.type.detail;
+    matches.forEach((match, index) => {
+        const comp = match.competitions[0];
+        const home = comp.competitors.find(c => c.homeAway === "home");
+        const away = comp.competitors.find(c => c.homeAway === "away");
+        
+        const dateObj = new Date(match.date);
+        const formattedTime = formatMatchTime(dateObj);
+        
+        const leagueName = match.leagueName || match.season?.displayName || "Tournament";
+        
+        slidesHTML += `
+            <div class="carousel-slide">
+                <div class="next-match-card" style="margin: 0;">
+                    <div style="text-align: center;">
+                        <div class="countdown-box" id="countdown-${match.id}" data-date="${match.date}">
+                            <span class="countdown-label">KICK-OFF IN</span>
+                            <span class="countdown-value">--:--:--:--</span>
+                        </div>
+                    </div>
+                    <div class="match-teams">
+                        <div class="team-box">
+                            <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}">
+                            <span>${home.team.shortDisplayName}</span>
+                        </div>
+                        <div class="match-vs">VS</div>
+                        <div class="team-box">
+                            <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}">
+                            <span>${away.team.shortDisplayName}</span>
+                        </div>
+                    </div>
+                    <div class="match-time-info">
+                        <strong>${formattedTime}</strong> <br>
+                        <span style="font-weight:900; color:#fff; text-transform:uppercase; font-size:18px; letter-spacing:1px;">${leagueName}</span> <br>
+                        <small>${comp.venue?.fullName || "Sân chưa xác định"}</small>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        dotsHTML += `<div class="dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></div>`;
+    });
     
     container.innerHTML = `
-        <div class="next-match-card">
-            <div style="text-align: center;">
-                <div class="match-status-badge">${statusText}</div>
+        <div class="carousel-wrapper">
+            <div class="carousel-track" id="carousel-track">
+                ${slidesHTML}
             </div>
-            <div class="match-teams">
-                <div class="team-box">
-                    <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}">
-                    <span>${home.team.shortDisplayName}</span>
-                </div>
-                <div class="match-vs">VS</div>
-                <div class="team-box">
-                    <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}">
-                    <span>${away.team.shortDisplayName}</span>
-                </div>
-            </div>
-            <div class="match-time-info">
-                <strong>${formattedTime}</strong> <br>
-                <span style="font-weight:700; color:#fff;">${match.leagueName || match.season?.displayName || "Tournament"}</span> <br>
-                <small>${comp.venue?.fullName || "Sân chưa xác định"}</small>
-            </div>
+            ${matches.length > 1 ? `
+            <button class="carousel-btn prev" onclick="moveCarousel(-1)">&#10094;</button>
+            <button class="carousel-btn next" onclick="moveCarousel(1)">&#10095;</button>
+            <div class="carousel-dots" id="carousel-dots">${dotsHTML}</div>
+            ` : ''}
         </div>
     `;
+    
+    currentCarouselIndex = 0;
+    startCountdown();
 }
+
+function moveCarousel(direction) {
+    const track = document.getElementById('carousel-track');
+    const dots = document.querySelectorAll('.dot');
+    const totalSlides = dots.length;
+    
+    if (totalSlides <= 1) return;
+    
+    currentCarouselIndex = (currentCarouselIndex + direction + totalSlides) % totalSlides;
+    goToSlide(currentCarouselIndex);
+}
+
+function goToSlide(index) {
+    const track = document.getElementById('carousel-track');
+    const dots = document.querySelectorAll('.dot');
+    
+    currentCarouselIndex = index;
+    track.style.transform = `translateX(-${currentCarouselIndex * 100}%)`;
+    
+    dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentCarouselIndex);
+    });
+}
+
+function startCountdown() {
+    countdownInterval = setInterval(() => {
+        const countdowns = document.querySelectorAll('.countdown-box');
+        const now = new Date().getTime();
+        
+        countdowns.forEach(box => {
+            const matchDate = new Date(box.getAttribute('data-date')).getTime();
+            const distance = matchDate - now;
+            
+            const valueSpan = box.querySelector('.countdown-value');
+            
+            if (distance < 0) {
+                valueSpan.innerHTML = "MATCH STARTED";
+                return;
+            }
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            const pad = (n) => n < 10 ? '0' + n : n;
+            valueSpan.innerHTML = `${days}D : ${pad(hours)}H : ${pad(minutes)}M : ${pad(seconds)}S`;
+        });
+    }, 1000);
+}
+
 
 function renderMatchesGrid() {
     const grid = document.getElementById("matches-grid");
@@ -167,8 +255,12 @@ function renderMatchesGrid() {
         const statusType = comp.status.type.state; // "pre", "in", "post"
         const isLive = statusType === "in";
         
-        let homeScore = home.score !== undefined ? home.score : "-";
-        let awayScore = away.score !== undefined ? away.score : "-";
+        let scoreDisplay = "VS";
+        if (statusType === "in" || statusType === "post") {
+            let hs = home.score !== undefined ? home.score : "0";
+            let as = away.score !== undefined ? away.score : "0";
+            scoreDisplay = `${hs} : ${as}`;
+        }
         
         const opponent = home.team.id === TEAM_ID ? away : home;
         const isBigMatch = ["359", "363", "364", "382", "367", "361"].includes(opponent.team.id);
@@ -186,7 +278,7 @@ function renderMatchesGrid() {
                         <span class="card-team-name ${home.winner ? 'card-winner' : ''}" style="font-size:18px; font-weight:800; font-family:'Outfit', sans-serif; text-transform: uppercase;">${home.team.abbreviation || home.team.shortDisplayName}</span>
                     </div>
                     <div class="match-score" style="font-weight:800; font-size:32px; font-family:'Outfit', sans-serif; white-space:nowrap; padding:0 10px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
-                        ${homeScore} : ${awayScore}
+                        ${scoreDisplay}
                     </div>
                     <div class="team-right" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
                         <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}" style="width:50px; height:50px; object-fit:contain;">
