@@ -165,6 +165,7 @@ function renderNextMatchesCarousel(matches) {
             slidesPerView: 'auto',
             spaceBetween: 120,
             loop: true,
+            loopAdditionalSlides: 5,
             navigation: {
                 nextEl: '.swiper-button-next',
                 prevEl: '.swiper-button-prev',

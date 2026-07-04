@@ -556,20 +556,19 @@ footer {
     background-position: center;
     background-size: cover;
     width: 600px;
-    opacity: 0.3;
-    filter: blur(4px);
-    transform: scale(0.95);
-    transition: all 0.5s ease;
 }
 
 .swiper-slide-active {
-    opacity: 1;
-    filter: blur(0px);
-    transform: scale(1);
+    /* No longer need anything here, it will be handled by inner card */
 }
 
 .swiper-slide .next-match-card {
-    transition: transform 0.3s;
+    background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(10, 10, 10, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.5s ease;
+    transform: scale(0.95);
+    opacity: 0.3;
+    filter: blur(4px);
 }
 
 .custom-nav-btn {
@@ -625,8 +624,10 @@ footer {
 
 @media (max-width: 768px) {
     .swiper-slide {
-        width: 90vw;
-    }
+    background-position: center;
+    background-size: cover;
+    width: 600px;
+}
     .custom-nav-btn {
     color: white !important;
     background: transparent !important;
@@ -686,6 +687,9 @@ footer {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(218, 2, 14, 0.6);
     box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(218, 2, 14, 0.4);
+    transform: scale(1);
+    opacity: 1;
+    filter: blur(0px);
 }
 
 
