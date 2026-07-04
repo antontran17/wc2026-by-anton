@@ -794,3 +794,17 @@ footer {
 .match-teams {
     padding-bottom: 20px; /* add spacing since we removed card bottom padding */
 }
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+.blink {
+    animation: blink 1s step-start infinite;
+}

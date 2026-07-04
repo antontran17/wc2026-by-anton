@@ -102,6 +102,21 @@ function renderNextMatchesCarousel(matches) {
         return;
     }
 
+
+    // --- START MOCK LIVE DEMO ---
+    if (matches.length > 0) {
+        matches[0].status.type.state = 'in';
+        matches[0].competitions[0].competitors[0].score = "2";
+        matches[0].competitions[0].competitors[1].score = "1";
+        matches[0].status.displayClock = "75:24";
+        matches[0].competitions[0].details = [
+            { team: { id: matches[0].competitions[0].competitors[0].team.id }, scoringPlay: true, type: {text: 'Goal'}, athletesInvolved: [{ displayName: 'Bruno Fernandes' }], clock: { displayValue: "32'" } },
+            { team: { id: matches[0].competitions[0].competitors[0].team.id }, scoringPlay: true, type: {text: 'Goal'}, athletesInvolved: [{ displayName: 'Marcus Rashford' }, { displayName: 'A. Garnacho' }], clock: { displayValue: "55'" } },
+            { team: { id: matches[0].competitions[0].competitors[1].team.id }, scoringPlay: true, type: {text: 'Goal'}, athletesInvolved: [{ displayName: 'P. Mullin' }], clock: { displayValue: "12'" } }
+        ];
+    }
+    // --- END MOCK LIVE DEMO ---
+    
     let slidesHTML = "";
     
     const renderMatches = [...matches, ...matches, ...matches]; // Duplicate 3x to ensure enough slides for auto loop
@@ -145,7 +160,7 @@ function renderNextMatchesCarousel(matches) {
                 <div class="next-match-card" style="margin: 0; width: 100%; box-sizing: border-box;">
                     <div style="text-align: center;">
                         <div class="countdown-box" id="countdown-${match.id}" data-date="${match.date}">
-                            <span class="countdown-value">--:--:--:--</span>
+                            <span class="countdown-value">${isLive ? 'MATCH LIVE' : '--:--:--:--'}</span>
                         </div>
                     </div>
                     <div class="match-teams">
@@ -153,12 +168,25 @@ function renderNextMatchesCarousel(matches) {
                             <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}" style="width: 90px; height: 90px; object-fit: contain;">
                             <span style="font-size: 20px; text-transform: uppercase;">${getTeamAbbr(home.team)}</span>
                         </div>
-                        <div class="match-vs" style="font-size: 30px;">VS</div>
+                        
+                        <div class="match-vs-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex: 1;">
+                            <div class="match-vs" style="font-size: ${isLive ? '48px' : '30px'}; font-weight:900; color: ${isLive ? 'var(--primary-color)' : '#fff'}; text-shadow: ${isLive ? '0 0 20px var(--primary-color)' : 'none'}; margin-bottom: 5px;">
+                                ${isLive ? (home.score !== undefined ? home.score : "0") + ' - ' + (away.score !== undefined ? away.score : "0") : 'VS'}
+                            </div>
+                            ${isLive && match.status.displayClock ? `<div style="color:var(--primary-color); font-weight:bold; font-size:16px; animation: pulse 1.5s infinite;">${match.status.displayClock}<span class="blink">'</span></div>` : ''}
+                        </div>
+
                         <div class="team-box">
                             <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}" style="width: 90px; height: 90px; object-fit: contain;">
                             <span style="font-size: 20px; text-transform: uppercase;">${getTeamAbbr(away.team)}</span>
                         </div>
                     </div>
+                    ${isLive ? `
+                    <div class="live-scorers-container" style="display:flex; justify-content:space-between; padding: 0 40px; margin-top: 15px; width: 100%; box-sizing: border-box; font-size: 13px; color: #ccc;">
+                        <div class="home-scorers" style="text-align:left; flex:1;">${homeScorersHTML}</div>
+                        <div class="away-scorers" style="text-align:right; flex:1;">${awayScorersHTML}</div>
+                    </div>
+                    ` : ''}
                     <div class="match-time-info">
                         <strong>${formattedTime}</strong> <br>
                         <span style="font-weight:900; color:#fff; text-transform:uppercase; font-size:18px; letter-spacing:1px;">${leagueName}</span> <br>
