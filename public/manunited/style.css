@@ -570,19 +570,19 @@ footer {
 
 .custom-nav-btn {
     color: white !important;
-    background: rgba(0, 0, 0, 0.6);
-    width: 60px !important;
+    background: transparent !important;
+    width: 40px !important;
     height: 60px !important;
-    border-radius: 50%;
+    border-radius: 0;
     border: none;
     opacity: 0.5;
     transition: all 0.3s ease;
 }
 
 .custom-nav-btn:hover {
-    background: rgba(0, 0, 0, 0.8);
+    background: transparent !important;
     opacity: 1;
-    transform: scale(1.1);
+    transform: scale(1.2);
 }
 
 .custom-nav-btn:after {
@@ -591,11 +591,14 @@ footer {
 }
 
 .swiper-button-prev {
-    left: 30px !important;
+    left: 50% !important;
+    margin-left: -340px !important;
 }
 
 .swiper-button-next {
-    right: 30px !important;
+    left: 50% !important;
+    right: auto !important;
+    margin-left: 340px !important;
 }
 
 .countdown-box {
@@ -618,14 +621,27 @@ footer {
         width: 90vw;
     }
     .custom-nav-btn {
-        width: 40px !important;
-        height: 40px !important;
-    }
+    color: white !important;
+    background: transparent !important;
+    width: 40px !important;
+    height: 60px !important;
+    border-radius: 0;
+    border: none;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
     .custom-nav-btn:after {
         font-size: 16px !important;
     }
-    .swiper-button-prev { left: 10px !important; }
-    .swiper-button-next { right: 10px !important; }
+    .swiper-button-prev {
+    left: 50% !important;
+    margin-left: -340px !important;
+}
+    .swiper-button-next {
+    left: 50% !important;
+    right: auto !important;
+    margin-left: 340px !important;
+}
     .countdown-box {
         font-size: 14px;
         padding: 4px 12px;

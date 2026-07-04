@@ -118,7 +118,7 @@ function renderNextMatchesCarousel(matches) {
                 <div class="next-match-card" style="margin: 0; width: 100%; box-sizing: border-box;">
                     <div style="text-align: center;">
                         <div class="countdown-box" id="countdown-${match.id}" data-date="${match.date}">
-                            <span class="countdown-value">-- : -- : -- : --</span>
+                            <span class="countdown-value">--:--:--:--</span>
                         </div>
                     </div>
                     <div class="match-teams">
@@ -197,7 +197,7 @@ function startCountdown() {
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             
             const pad = (n) => n < 10 ? '0' + n : n;
-            valueSpan.innerHTML = `${days} : ${pad(hours)} : ${pad(minutes)} : ${pad(seconds)}`;
+            valueSpan.innerHTML = `${pad(days)}:${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
         });
     }, 1000);
 }
