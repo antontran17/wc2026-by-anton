@@ -786,6 +786,8 @@ footer {
     padding-bottom: 0 !important;
     display: flex;
     flex-direction: column;
+    height: 480px !important;
+    justify-content: space-between;
 }
 
 .match-teams {
