@@ -159,18 +159,11 @@ function renderNextMatchesCarousel(matches) {
     // Initialize Swiper
     if (matches.length > 1) {
         new Swiper('.mySwiper', {
-            effect: 'coverflow',
             grabCursor: true,
             centeredSlides: true,
             slidesPerView: 'auto',
+            spaceBetween: 40,
             loop: true,
-            coverflowEffect: {
-                rotate: 0,
-                stretch: 80,
-                depth: 200,
-                modifier: 1,
-                slideShadows: false,
-            },
             navigation: {
                 nextEl: '.swiper-button-next',
                 prevEl: '.swiper-button-prev',
