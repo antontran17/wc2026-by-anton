@@ -104,7 +104,8 @@ function renderNextMatchesCarousel(matches) {
 
     let slidesHTML = "";
     
-    matches.forEach((match, index) => {
+    const renderMatches = [...matches, ...matches, ...matches]; // Duplicate 3x to ensure enough slides for auto loop
+    renderMatches.forEach((match, index) => {
         const comp = match.competitions[0];
         const home = comp.competitors.find(c => c.homeAway === "home");
         const away = comp.competitors.find(c => c.homeAway === "away");
@@ -165,7 +166,7 @@ function renderNextMatchesCarousel(matches) {
             slidesPerView: 'auto',
             spaceBetween: 120,
             loop: true,
-            loopAdditionalSlides: 5,
+            
             navigation: {
                 nextEl: '.swiper-button-next',
                 prevEl: '.swiper-button-prev',
