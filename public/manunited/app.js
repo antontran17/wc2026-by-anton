@@ -108,11 +108,11 @@ function renderNextMatchesCarousel(matches) {
         matches[0].status.type.state = 'in';
         matches[0].competitions[0].competitors[0].score = "2";
         matches[0].competitions[0].competitors[1].score = "1";
-        matches[0].status.displayClock = "75:24";
+        matches[0].status.displayClock = "60";
         matches[0].competitions[0].details = [
-            { team: { id: matches[0].competitions[0].competitors[0].team.id }, scoringPlay: true, type: {text: 'Goal'}, athletesInvolved: [{ displayName: 'Bruno Fernandes' }], clock: { displayValue: "32'" } },
-            { team: { id: matches[0].competitions[0].competitors[0].team.id }, scoringPlay: true, type: {text: 'Goal'}, athletesInvolved: [{ displayName: 'Marcus Rashford' }, { displayName: 'A. Garnacho' }], clock: { displayValue: "55'" } },
-            { team: { id: matches[0].competitions[0].competitors[1].team.id }, scoringPlay: true, type: {text: 'Goal'}, athletesInvolved: [{ displayName: 'P. Mullin' }], clock: { displayValue: "12'" } }
+            { team: { id: matches[0].competitions[0].competitors[0].team.id }, scoringPlay: true, type: {text: 'Goal'}, athletesInvolved: [{ displayName: 'Bruno Fernandez' }], clock: { displayValue: "32'" } },
+            { team: { id: matches[0].competitions[0].competitors[0].team.id }, scoringPlay: true, type: {text: 'Goal'}, athletesInvolved: [{ displayName: 'Marcus Rashford' }, { displayName: 'Cunha' }], clock: { displayValue: "55'" } },
+            { team: { id: matches[0].competitions[0].competitors[1].team.id }, scoringPlay: true, type: {text: 'Goal'}, athletesInvolved: [{ displayName: 'Cunha' }], clock: { displayValue: "12'" } }
         ];
     }
     // --- END MOCK LIVE DEMO ---
@@ -145,35 +145,40 @@ function renderNextMatchesCarousel(matches) {
             homeScorersHTML = homeGoals.map(g => {
                 const scorer = g.athletesInvolved?.[0]?.displayName || 'Unknown';
                 const assist = g.athletesInvolved?.[1]?.displayName ? `<br><span class="scorer-assist">(${g.athletesInvolved[1].displayName})</span>` : '';
-                return `<div class="scorer-item"><strong>${scorer} ${g.clock.displayValue}</strong>${assist}</div>`;
+                return `<div class="scorer-item" style="margin-bottom:4px;"><strong>${scorer} ${g.clock.displayValue}</strong>${assist}</div>`;
             }).join('');
             
             awayScorersHTML = awayGoals.map(g => {
                 const scorer = g.athletesInvolved?.[0]?.displayName || 'Unknown';
                 const assist = g.athletesInvolved?.[1]?.displayName ? `<br><span class="scorer-assist">(${g.athletesInvolved[1].displayName})</span>` : '';
-                return `<div class="scorer-item"><strong>${scorer} ${g.clock.displayValue}</strong>${assist}</div>`;
+                return `<div class="scorer-item" style="margin-bottom:4px;"><strong>${scorer} ${g.clock.displayValue}</strong>${assist}</div>`;
             }).join('');
         }
         
         slidesHTML += `
             <div class="swiper-slide">
-                <div class="next-match-card" style="margin: 0; width: 100%; box-sizing: border-box;">
+                <div class="next-match-card" style="margin: 0; width: 100%; box-sizing: border-box; position: relative;">
                     <div style="text-align: center;">
-                        <div class="countdown-box" id="countdown-${match.id}" data-date="${match.date}">
-                            <span class="countdown-value">${isLive ? 'MATCH LIVE' : '--:--:--:--'}</span>
-                        </div>
+                        ${isLive && match.status.displayClock ? `
+                            <div style="background: #000; color: #fff; border-radius: 20px; padding: 6px 20px; display: inline-block; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 16px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+                                ${match.status.displayClock}<span class="blink">'</span>
+                            </div>
+                        ` : `
+                            <div class="countdown-box" id="countdown-${match.id}" data-date="${match.date}">
+                                <span class="countdown-value">--:--:--:--</span>
+                            </div>
+                        `}
                     </div>
-                    <div class="match-teams">
+                    <div class="match-teams" style="margin-top: 10px;">
                         <div class="team-box">
                             <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}" style="width: 90px; height: 90px; object-fit: contain;">
                             <span style="font-size: 20px; text-transform: uppercase;">${getTeamAbbr(home.team)}</span>
                         </div>
                         
                         <div class="match-vs-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex: 1;">
-                            <div class="match-vs" style="font-size: ${isLive ? '48px' : '30px'}; font-weight:900; color: ${isLive ? 'var(--primary-color)' : '#fff'}; text-shadow: ${isLive ? '0 0 20px var(--primary-color)' : 'none'}; margin-bottom: 5px;">
-                                ${isLive ? (home.score !== undefined ? home.score : "0") + ' - ' + (away.score !== undefined ? away.score : "0") : 'VS'}
+                            <div class="match-vs" style="font-size: ${isLive ? '48px' : '30px'}; font-weight:900; color: #fff; margin-bottom: 5px; text-shadow: ${isLive ? '0 5px 15px rgba(0,0,0,0.5)' : 'none'};">
+                                ${isLive ? (home.score !== undefined ? home.score : "0") + ' : ' + (away.score !== undefined ? away.score : "0") : 'VS'}
                             </div>
-                            ${isLive && match.status.displayClock ? `<div style="color:var(--primary-color); font-weight:bold; font-size:16px; animation: pulse 1.5s infinite;">${match.status.displayClock}<span class="blink">'</span></div>` : ''}
                         </div>
 
                         <div class="team-box">
@@ -181,17 +186,19 @@ function renderNextMatchesCarousel(matches) {
                             <span style="font-size: 20px; text-transform: uppercase;">${getTeamAbbr(away.team)}</span>
                         </div>
                     </div>
+                    
                     ${isLive ? `
-                    <div class="live-scorers-container" style="display:flex; justify-content:space-between; padding: 0 40px; margin-top: 15px; width: 100%; box-sizing: border-box; font-size: 13px; color: #ccc;">
-                        <div class="home-scorers" style="text-align:left; flex:1;">${homeScorersHTML}</div>
-                        <div class="away-scorers" style="text-align:right; flex:1;">${awayScorersHTML}</div>
+                    <div class="live-scorers-panel" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: space-between; padding: 20px 30px; box-sizing: border-box; backdrop-filter: blur(5px);">
+                        <div class="home-scorers" style="text-align:left; flex:1; font-size: 13px; color: #fff; font-family: 'Outfit', sans-serif;">${homeScorersHTML}</div>
+                        <div class="away-scorers" style="text-align:right; flex:1; font-size: 13px; color: #fff; font-family: 'Outfit', sans-serif;">${awayScorersHTML}</div>
                     </div>
-                    ` : ''}
+                    ` : `
                     <div class="match-time-info">
                         <strong>${formattedTime}</strong> <br>
                         <span style="font-weight:900; color:#fff; text-transform:uppercase; font-size:18px; letter-spacing:1px;">${leagueName}</span> <br>
                         <small>${comp.venue?.fullName || "Sân chưa xác định"}</small>
                     </div>
+                    `}
                 </div>
             </div>
         `;
