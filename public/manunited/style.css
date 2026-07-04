@@ -226,7 +226,7 @@ nav a:hover::after, nav a.active::after {
     background: rgba(0,0,0,0.3);
     padding: 10px;
     border-radius: 10px;
-    margin-bottom: 30px;
+    margin-bottom: 60px;
 }
 
 /* Sections */
@@ -238,7 +238,7 @@ nav a:hover::after, nav a.active::after {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 60px;
     border-bottom: 1px solid var(--card-border);
     padding-bottom: 16px;
 }
