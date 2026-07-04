@@ -124,12 +124,12 @@ function renderNextMatchesCarousel(matches) {
                     <div class="match-teams">
                         <div class="team-box">
                             <img src="${home.team.logo || home.team.logos?.[0]?.href || ''}" alt="${home.team.name}" style="width: 90px; height: 90px; object-fit: contain;">
-                            <span style="font-size: 20px;">${home.team.shortDisplayName}</span>
+                            <span style="font-size: 20px; text-transform: uppercase;">${home.team.abbreviation || home.team.shortDisplayName}</span>
                         </div>
                         <div class="match-vs" style="font-size: 30px;">VS</div>
                         <div class="team-box">
                             <img src="${away.team.logo || away.team.logos?.[0]?.href || ''}" alt="${away.team.name}" style="width: 90px; height: 90px; object-fit: contain;">
-                            <span style="font-size: 20px;">${away.team.shortDisplayName}</span>
+                            <span style="font-size: 20px; text-transform: uppercase;">${away.team.abbreviation || away.team.shortDisplayName}</span>
                         </div>
                     </div>
                     <div class="match-time-info">
