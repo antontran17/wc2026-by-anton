@@ -508,7 +508,7 @@ footer {
     .section-header { flex-direction: column; gap: 16px; align-items: flex-start; }
     .tabs { width: 100%; overflow-x: auto; padding-bottom: 8px; }
     .tab-btn { white-space: nowrap; }
-    nav { display: none; } /* Hide desktop nav on mobile, could add a bottom bar later */
+    /* nav { display: none; } removed for mobile menu */ /* Hide desktop nav on mobile, could add a bottom bar later */
 }
 
 .match-card.big-match {
@@ -864,22 +864,24 @@ footer {
     }
     .nav-links {
         position: fixed;
-        top: 70px;
+        top: 0;
         left: 0;
         width: 100%;
-        background: rgba(13, 13, 18, 0.95);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        height: 100vh;
+        background: rgba(13, 13, 18, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        display: flex !important;
         flex-direction: column;
+        justify-content: center;
         align-items: center;
-        padding: 30px 0;
-        gap: 20px !important;
-        transform: translateY(-150%);
+        padding-top: 70px; /* offset for header */
+        gap: 30px !important;
+        transform: translateY(-100%);
         opacity: 0;
         visibility: hidden;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        border-bottom: 1px solid var(--card-border);
-        z-index: 99;
+        z-index: 90;
     }
     .nav-links.active {
         transform: translateY(0);
@@ -887,6 +889,8 @@ footer {
         visibility: visible;
     }
     .nav-links a {
-        font-size: 18px !important;
+        font-size: 24px !important;
+        font-weight: 800;
+        text-transform: uppercase;
     }
 }
