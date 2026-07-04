@@ -812,6 +812,7 @@ footer {
 @media (max-width: 768px) {
     .swiper-slide .next-match-card {
         padding: 20px !important;
+        height: 280px !important;
     }
     .match-teams .team-box img {
         width: 60px !important;
