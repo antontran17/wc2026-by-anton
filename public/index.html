@@ -5808,6 +5808,27 @@
                 
                 const teams = await teamsRes.json();
                 const games = await gamesRes.json();
+                
+                // --- PATCH ESPN API GLITCH FOR MATCH 96 ---
+                const m96 = games.find(g => String(g.id) === '96');
+                const m85 = games.find(g => String(g.id) === '85');
+                const m88 = games.find(g => String(g.id) === '88');
+                if (m96 && m85 && m88 && m88.home_score !== null && m88.home_score !== undefined && String(m88.home_score).trim() !== '') {
+                    const getWinner = (m) => {
+                        const hs = Number(m.home_score), as = Number(m.away_score);
+                        if (hs > as) return { id: m.home_team_id, name: m.home_team_name_en };
+                        if (as > hs) return { id: m.away_team_id, name: m.away_team_name_en };
+                        const hp = Number(m.home_penalties || 0), ap = Number(m.away_penalties || 0);
+                        if (hp > ap) return { id: m.home_team_id, name: m.home_team_name_en };
+                        if (ap > hp) return { id: m.away_team_id, name: m.away_team_name_en };
+                        return null;
+                    };
+                    const w85 = getWinner(m85);
+                    const w88 = getWinner(m88);
+                    if (w85) { m96.home_team_id = w85.id; m96.home_team_name_en = w85.name; }
+                    if (w88) { m96.away_team_id = w88.id; m96.away_team_name_en = w88.name; }
+                }
+                // ------------------------------------------
                 const stadiums = await stadiumsRes.json();
                 const groups = await groupsRes.json();
                 
@@ -7454,7 +7475,7 @@
             document.getElementById('tournament-bracket').style.display = 'block';
 
             const bracketStructure = [
-                { id: 'R32', title: 'VÒNG 32', visualOrder: ['73', '76', '75', '77', '83', '84', '81', '82', '74', '78', '79', '80', '86', '88', '85', '87'] },
+                { id: 'R32', title: 'VÒNG 32', visualOrder: ['73', '76', '75', '78', '83', '84', '81', '82', '74', '77', '79', '80', '87', '86', '85', '88'] },
                 { id: 'R16', title: 'VÒNG 16', visualOrder: ['89', '90', '93', '94', '91', '92', '95', '96'] },
                 { id: 'QF', title: 'TỨ KẾT', visualOrder: ['97', '98', '99', '100'] },
                 { id: 'SF', title: 'BÁN KẾT', visualOrder: ['101', '102'] },

@@ -1942,8 +1942,8 @@
     "finished": "FALSE",
     "time_elapsed": "notstarted",
     "type": "r16",
-    "home_team_label": "Winner Match 86",
-    "away_team_label": "Winner Match 88"
+    "home_team_label": "Winner Match 87",
+    "away_team_label": "Winner Match 86"
   },
   {
     "_id": {
@@ -1965,7 +1965,7 @@
     "time_elapsed": "notstarted",
     "type": "r16",
     "home_team_label": "Winner Match 85",
-    "away_team_label": "Winner Match 87"
+    "away_team_label": "Winner Match 88"
   },
   {
     "_id": {
