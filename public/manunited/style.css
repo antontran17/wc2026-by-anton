@@ -718,7 +718,7 @@ footer {
     display: flex;
     justify-content: space-between;
     padding: 15px 30px;
-    margin-top: 20px;
+    margin-top: auto;
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
     min-height: 80px;
@@ -786,6 +786,8 @@ footer {
     padding-bottom: 0 !important;
     display: flex;
     flex-direction: column;
+    height: 240px !important;
+    justify-content: space-between;
 }
 
 .match-teams {
