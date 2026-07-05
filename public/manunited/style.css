@@ -1169,6 +1169,8 @@ footer p {
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
+    overflow-y: auto;
+    padding: 60px 0;
 }
 
 .match-modal-overlay.active {
@@ -1188,7 +1190,7 @@ footer p {
     transform: translateY(20px) scale(0.95);
     transition: all 0.3s ease;
     max-height: 90vh;
-    overflow-y: auto;
+    overflow: visible;
 }
 
 .match-modal-overlay.active .match-modal-content {

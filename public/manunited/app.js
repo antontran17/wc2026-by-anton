@@ -588,47 +588,40 @@ document.addEventListener('DOMContentLoaded', () => {
 function openMatchModal(matchId, element) {
     const match = allMatches.find(m => m.id === matchId);
     if (!match) return;
+
+    const modalContainer = document.getElementById("modal-match-details");
+    modalContainer.innerHTML = '';
     
-    const dateObj = new Date(match.date);
-    const dayNames = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    const timeStr = `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
-    const dateStr = `${dayNames[dateObj.getDay()]}, ${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`;
-    
-    const comp = match.competitions[0];
-    const home = comp.competitors.find(c => c.homeAway === 'home');
-    const away = comp.competitors.find(c => c.homeAway === 'away');
-    
-    const isLive = match.status.type.state === 'in';
-    let scoreDisplay = "VS";
-    if (match.status.type.state === 'in' || match.status.type.state === 'post') {
-        scoreDisplay = `${home.score} - ${away.score}`;
-    }
-    
-    const TEAM_ID = "360";
-    const opponent = home.team.id === TEAM_ID ? away : home;
-    const opponentId = opponent.team.id;
-    let derbyName = "";
-    let derbyClass = "";
-    if (["364", "382", "357"].includes(opponentId)) {
-        derbyName = "DERBY";
-        derbyClass = "derby-match";
-    } else if (["359", "363", "367", "361"].includes(opponentId)) {
-        derbyName = "SUPER MATCH";
-        derbyClass = "super-match";
-    }
-    const isBigMatch = ["359", "363", "364", "382", "367", "361"].includes(opponentId);
-    const bigMatchClass = isBigMatch ? "big-match" : "";
-    
-    let finalClasses = `next-match-card ${bigMatchClass} ${derbyClass}`.trim();
+    let clonedCard = null;
     if (element) {
-        const classList = Array.from(element.classList).filter(c => !['clickable-card', 'swiper-slide-active', 'swiper-slide-duplicate-active'].includes(c));
-        if (classList.length > 0) {
-            finalClasses = classList.join(' ');
+        clonedCard = element.cloneNode(true);
+        // Remove clickability
+        clonedCard.removeAttribute('onclick');
+        clonedCard.classList.remove('clickable-card');
+        clonedCard.style.cursor = 'default';
+        clonedCard.style.transform = 'none';
+        clonedCard.style.margin = '0';
+        clonedCard.style.width = '100%';
+        clonedCard.style.position = 'relative';
+        
+        // Remove swiper specific classes to avoid styling conflicts
+        clonedCard.classList.remove('swiper-slide-active', 'swiper-slide-duplicate-active');
+        
+        // Ensure overflow is visible so labels don't get clipped
+        clonedCard.style.overflow = 'visible';
+        
+        // For carousel cards, remove fixed height
+        if (clonedCard.classList.contains('next-match-card')) {
+            clonedCard.style.height = 'auto';
+            clonedCard.style.paddingBottom = '30px'; // Restore padding instead of flex space-between
         }
+    } else {
+        return; // Safety fallback
     }
-    
-    const leagueName = match.leagueName || match.season?.displayName || "Giải đấu";
+
+    const comp = match.competitions[0];
     const venue = comp.venue?.fullName || "Chưa xác định";
+    const home = comp.competitors.find(c => c.homeAway === 'home');
     
     let homeScorersHTML = '';
     let awayScorersHTML = '';
@@ -642,47 +635,24 @@ function openMatchModal(matchId, element) {
         });
     }
     
-    const isSmallCard = finalClasses.includes('match-card') && !finalClasses.includes('next-match-card');
-    const nameFontSize = isSmallCard ? '16px' : '20px';
-    const scoreFontSize = isSmallCard ? '32px' : '42px';
-    const logoSize = isSmallCard ? '50px' : '70px';
-
-    const modalContent = `
-        <div class="${finalClasses}" style="margin: 0; width: 100%; cursor: default; transform: none; position: relative; overflow: visible !important;">
-            ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 15px; border-radius: 12px; margin-bottom: 10px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
-            
-            <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:13px; margin-bottom:15px; border-bottom: none; gap:4px;">
-                <div>${timeStr}, ${dateStr} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}</div>
-                <div style="font-size:14px; color:#fff; font-weight: 700; text-transform: uppercase;">${leagueName}</div>
-            </div>
-            
-            <div class="card-teams-inline" style="display:flex; justify-content:center; align-items:center; gap: 15px;">
-                <div class="team-left" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
-                    <img src="${home.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${home.team.name}" style="width:${logoSize}; height:${logoSize}; object-fit:contain;">
-                    <span class="card-team-name" style="font-size:${nameFontSize}; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase; text-align:center;">${home.team.abbreviation || home.team.name}</span>
-                </div>
-                <div class="match-score" style="font-weight: 700; font-size:${scoreFontSize}; font-family: 'Google Sans Flex', sans-serif; white-space:nowrap; padding:0 10px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
-                    ${scoreDisplay}
-                </div>
-                <div class="team-right" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
-                    <img src="${away.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${away.team.name}" style="width:${logoSize}; height:${logoSize}; object-fit:contain;">
-                    <span class="card-team-name" style="font-size:${nameFontSize}; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase; text-align:center;">${away.team.abbreviation || away.team.name}</span>
-                </div>
-            </div>
-            
-            <div style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
-                ${venue}
-            </div>
-            
-            ${(homeScorersHTML || awayScorersHTML) ? `
-            <div class="modal-scorers" style="margin-top: 20px; display:flex; justify-content:space-between; font-size:13px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
-                <div class="modal-scorers-home" style="width:48%; text-align: left;">${homeScorersHTML}</div>
-                <div class="modal-scorers-away" style="width:48%; text-align: right;">${awayScorersHTML}</div>
-            </div>` : ''}
+    const extraInfo = document.createElement('div');
+    extraInfo.style.marginTop = "25px";
+    extraInfo.style.borderTop = "1px solid rgba(255,255,255,0.1)";
+    extraInfo.style.paddingTop = "15px";
+    extraInfo.innerHTML = `
+        <div style="text-align: center; font-size: 13px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">
+            ${venue}
         </div>
+        ${(homeScorersHTML || awayScorersHTML) ? `
+        <div class="modal-scorers" style="display:flex; justify-content:space-between; font-size:13px;">
+            <div class="modal-scorers-home" style="width:48%; text-align: left;">${homeScorersHTML}</div>
+            <div class="modal-scorers-away" style="width:48%; text-align: right;">${awayScorersHTML}</div>
+        </div>` : ''}
     `;
     
-    document.getElementById("modal-match-details").innerHTML = modalContent;
+    clonedCard.appendChild(extraInfo);
+    modalContainer.appendChild(clonedCard);
+    
     document.getElementById("match-modal").classList.add("active");
     document.body.style.overflow = "hidden";
 }
