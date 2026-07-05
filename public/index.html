@@ -5354,7 +5354,19 @@
             min-height: 360px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .swiper-slide-active .next-match-card.is-favorite-card {
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.6), inset 0 0 20px rgba(255, 204, 0, 0.3) !important;
+            border: 1px solid rgba(255, 204, 0, 0.8) !important;
+            animation: pulseFav 2s infinite;
+        }
+        @keyframes pulseFav {
+            0% { box-shadow: 0 0 30px rgba(255, 204, 0, 0.6), inset 0 0 20px rgba(255, 204, 0, 0.3); }
+            50% { box-shadow: 0 0 50px rgba(255, 204, 0, 0.9), inset 0 0 30px rgba(255, 204, 0, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(255, 204, 0, 0.6), inset 0 0 20px rgba(255, 204, 0, 0.3); }
         }
         .swiper-slide-next .next-match-card,
         .swiper-slide-prev .next-match-card,
@@ -5392,9 +5404,10 @@
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
         }
         .team-box-carousel .team-name {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
             text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            margin-top: 5px;
         }
         .match-info-carousel {
             text-align: center;
@@ -6916,7 +6929,7 @@
                 let stageName = roundLabels[rawGroup] || game.group || 'Knockout Stage';
                 if (/^[A-L]$/.test(rawGroup)) stageName = 'Bảng ' + rawGroup;
 
-                const stadiumName = stadiumsData.find(s => String(s.id) === String(game.stadium_id))?.name || '';
+                const stadiumName = stadiumsData.find(s => String(s.id) === String(game.stadium_id))?.name_en || '';
 
                 const homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || 'TBD';
                 const awayLabel = game.away_team_name_en || awayTeam.name_en || game.away_team_label || 'TBD';
@@ -6934,12 +6947,15 @@
                     }
                 }
 
+                const isFavCard = favoriteMatches.has(String(game.id)) || favoriteTeams.has(String(homeTeam.id)) || favoriteTeams.has(String(awayTeam.id));
+                const favClass = isFavCard ? 'is-favorite-card' : '';
+
                 html += `
                     <div class="swiper-slide">
-                        <div class="next-match-card ${isLive ? 'is-live' : ''}" onclick="handleMatchCardClick('${game.id}')">
-                            <div style="text-align: center; margin-bottom: 5px;">${topStatusHtml}</div>
+                        <div class="next-match-card ${isLive ? 'is-live' : ''} ${favClass}" onclick="handleMatchCardClick('${game.id}')">
+                            <div style="position: absolute; top: 30px; left: 0; width: 100%; text-align: center;">${topStatusHtml}</div>
                             
-                            <div class="match-teams-carousel">
+                            <div class="match-teams-carousel" style="width: 100%; margin-top: 10px;">
                                 <div class="team-box-carousel">
                                     <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${homeLabel}">
                                     <div class="team-name">${homeName}</div>
@@ -6951,9 +6967,9 @@
                                 </div>
                             </div>
                             
-                            <div class="match-info-carousel" style="margin-top: auto; padding-bottom: 5px; text-align: center;">
+                            <div class="match-info-carousel" style="position: absolute; bottom: 30px; left: 0; width: 100%; text-align: center;">
                                 <div style="color: #fff; font-size: 15px; font-weight: bold; line-height: 1.6; letter-spacing: 1px;">${timeStr} - ${dateStr.split('/').join('.')}</div>
-                                <div style="color: #ccc; font-size: 14px; line-height: 1.6;">${stageName} • ${stadiumName}</div>
+                                <div style="color: #ccc; font-size: 14px; line-height: 1.6;">${stageName}${stadiumName ? ' • ' + stadiumName : ''}</div>
                                 ${scorersHtml}
                             </div>
                         </div>
