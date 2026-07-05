@@ -6896,9 +6896,18 @@
                 const timeStr = d ? d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
                 
                 const isLive = matchStatusClass(game).includes('is-live');
-                const statusBadge = isLive ? `<div class="match-status-badge">LIVE</div>` : `<div style="color: #aaa; margin-bottom: 10px;">${timeStr}, ${dateStr}</div>`;
                 
-                const scoreDisplay = isLive ? `<h2 style="margin:0">${game.home_score} - ${game.away_score}</h2>` : `<h2 style="margin:0">VS</h2>`;
+                // Trạng thái / Đếm ngược
+                let topStatusHtml = '';
+                if (isLive) {
+                    const statusText = liveMinute(game) || String(game.status || 'LIVE').toUpperCase();
+                    topStatusHtml = `<div class="match-status-badge">${statusText}</div>`;
+                } else {
+                    topStatusHtml = `<div class="carousel-countdown" data-date="${d ? d.toISOString() : ''}" style="font-weight: bold; color: #ffcc00; margin-bottom: 10px;">ĐANG TÍNH...</div>`;
+                }
+                
+                // Tỉ số hoặc VS
+                const scoreDisplay = isLive ? `<h2 style="margin:0">${game.home_score} : ${game.away_score}</h2>` : `<h2 style="margin:0">VS</h2>`;
 
                 const rawGroup = String(game.group).trim().toUpperCase();
                 let stageName = roundLabels[rawGroup] || game.group || 'Knockout Stage';
@@ -6910,11 +6919,23 @@
                 const awayLabel = game.away_team_name_en || awayTeam.name_en || game.away_team_label || 'TBD';
                 const homeName = homeTeam.id ? teamCode(homeTeam, homeLabel) : homeLabel;
                 const awayName = awayTeam.id ? teamCode(awayTeam, awayLabel) : awayLabel;
+                
+                // Goal Scorers if live
+                let scorersHtml = '';
+                if (isLive && game.events && game.events.length > 0) {
+                    const goals = game.events.filter(e => e.type === 'goal' || e.type_en === 'Goal' || String(e.detail).toLowerCase().includes('goal'));
+                    if (goals.length > 0) {
+                        scorersHtml = `<div style="font-size: 11px; margin-top: 5px; color: #ccc;">
+                            ${goals.map(g => `<i class="fa-solid fa-futbol"></i> ${g.player || g.player_name} ${g.time}'`).join('<br>')}
+                        </div>`;
+                    }
+                }
 
                 html += `
                     <div class="swiper-slide">
-                        <div class="next-match-card ${isLive ? 'is-live' : ''}">
-                            <div style="text-align: center;">${statusBadge}</div>
+                        <div class="next-match-card ${isLive ? 'is-live' : ''}" onclick="handleMatchCardClick('${game.id}')">
+                            <div style="text-align: center; margin-bottom: 5px;">${topStatusHtml}</div>
+                            
                             <div class="match-teams-carousel">
                                 <div class="team-box-carousel">
                                     <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${homeLabel}">
@@ -6926,8 +6947,11 @@
                                     <div class="team-name">${awayName}</div>
                                 </div>
                             </div>
-                            <div class="match-info-carousel">
-                                ${stageName} • ${stadiumName}
+                            
+                            <div class="match-info-carousel" style="margin-top: 10px;">
+                                <div style="color: #ccc; font-size: 12px; margin-bottom: 3px;">${timeStr} ${dateStr.split('/').join('.')}</div>
+                                <div>${stageName} • ${stadiumName}</div>
+                                ${scorersHtml}
                             </div>
                         </div>
                     </div>
@@ -6958,7 +6982,38 @@
                         },
                     });
                 }
+                startCarouselCountdowns();
             }, 100);
+        }
+
+        function startCarouselCountdowns() {
+            if (window.carouselCountdownInterval) clearInterval(window.carouselCountdownInterval);
+            
+            function update() {
+                const els = document.querySelectorAll('.carousel-countdown');
+                const now = new Date().getTime();
+                els.forEach(el => {
+                    const dateStr = el.getAttribute('data-date');
+                    if (!dateStr) return;
+                    const target = new Date(dateStr).getTime();
+                    const diff = target - now;
+                    if (diff <= 0) {
+                        el.innerHTML = 'SẮP DIỄN RA';
+                        return;
+                    }
+                    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((diff % (1000 * 60)) / 1000);
+                    
+                    let out = '';
+                    if (d > 0) out += `${d}D `;
+                    out += `${h.toString().padStart(2, '0')}H ${m.toString().padStart(2, '0')}M ${s.toString().padStart(2, '0')}S`;
+                    el.innerHTML = out;
+                });
+            }
+            update();
+            window.carouselCountdownInterval = setInterval(update, 1000);
         }
         function renderMatches(games) {
             const grid = document.getElementById('matches-grid');
@@ -7405,10 +7460,8 @@
         function renderMatchCards(games) {
             resolveKnockoutTeams(gamesData, buildGroupStandings(groupsData));
             if (games.length === 0) {
-                document.getElementById('section-live').innerHTML = '';
-                document.getElementById('section-results').innerHTML = '';
-                document.getElementById('section-upcoming').innerHTML = '';
-                document.getElementById('section-favorites').innerHTML = '';
+                                document.getElementById('section-results').innerHTML = '';
+                                document.getElementById('section-favorites').innerHTML = '';
                 document.getElementById('section-knockout').innerHTML = '';
                 document.getElementById('group-matches-content').innerHTML = `<div class="no-data"><p>KHÔNG CÓ TRẬN ĐẤU NÀO</p></div>`;
                 return;
@@ -7439,10 +7492,8 @@
             const upcomingHtml = upcoming.length > 0 ? renderMatchGroup('SẮP DIỄN RA', upcoming, 'upcoming-group', true) : '';
             const favoritesHtml = renderMatchGroup('YÊU THÍCH', favorites, 'favorite-group');
 
-            document.getElementById('section-live').innerHTML = liveHtml ? '<div class="container">' + liveHtml + '</div>' : '';
-            document.getElementById('section-results').innerHTML = resultsHtml ? '<div class="container">' + resultsHtml + '</div>' : '';
-            document.getElementById('section-upcoming').innerHTML = upcomingHtml ? '<div class="container">' + upcomingHtml + '</div>' : '';
-            document.getElementById('section-favorites').innerHTML = favoritesHtml ? '<div class="container">' + favoritesHtml + '</div>' : '';
+                        document.getElementById('section-results').innerHTML = resultsHtml ? '<div class="container">' + resultsHtml + '</div>' : '';
+                        document.getElementById('section-favorites').innerHTML = favoritesHtml ? '<div class="container">' + favoritesHtml + '</div>' : '';
 
             const stageBuckets = new Map();
             rest.forEach(game => {
