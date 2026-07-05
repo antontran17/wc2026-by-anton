@@ -636,9 +636,18 @@ footer {
     background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(10, 10, 10, 0.98));
     border: 1px solid rgba(255, 255, 255, 0.05);
     transition: all 0.5s ease;
+    transform: scale(0.9);
+    opacity: 0.15;
+    filter: blur(8px);
+}
+
+.swiper-slide-next .next-match-card,
+.swiper-slide-prev .next-match-card,
+.swiper-slide-duplicate-next .next-match-card,
+.swiper-slide-duplicate-prev .next-match-card {
     transform: scale(0.95);
-    opacity: 0.3;
-    filter: blur(4px);
+    opacity: 0.4;
+    filter: blur(3px);
 }
 
 .custom-nav-btn {
