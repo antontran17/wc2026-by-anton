@@ -69,9 +69,14 @@ function initNavigation() {
         { id: 'Other', label: 'Other' }
     ];
     
+    // Determine which groups actually have matches
+    const activeGroups = new Set(allMatches.map(m => getMatchGroup(m.leagueName)));
+    
     let buttonsHTML = '';
     filterGroups.forEach(group => {
-        buttonsHTML += `<button class="tab-btn ${group.id === 'all' ? 'active' : ''}" data-filter="${group.id}">${group.label}</button>`;
+        if (group.id === 'all' || activeGroups.has(group.id)) {
+            buttonsHTML += `<button class="tab-btn ${group.id === 'all' ? 'active' : ''}" data-filter="${group.id}">${group.label}</button>`;
+        }
     });
     
     filterContainer.innerHTML = buttonsHTML;
