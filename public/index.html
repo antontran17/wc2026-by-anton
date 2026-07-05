@@ -7900,8 +7900,7 @@
             backdrop-filter: blur(10px);
             transition: all 0.5s ease;
             transform: scale(0.9);
-            opacity: 0.15;
-            border-radius: 12px;
+            opacity: 0.1; filter: blur(6px); border-radius: 12px;
             padding: 50px 20px;
             color: #fff;
             min-height: 360px;
@@ -7925,8 +7924,7 @@
         .swiper-slide-prev .next-match-card,
         .swiper-slide-duplicate-next .next-match-card,
         .swiper-slide-duplicate-prev .next-match-card {
-            transform: scale(0.95);
-            opacity: 0.4;
+            transform: scale(0.95); opacity: 0.4; filter: blur(2px);
             filter: blur(3px);
         }
         .swiper-slide-active .next-match-card,
@@ -7957,10 +7955,15 @@
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
         }
         .team-box-carousel .team-name {
-            font-size: 40px;
-            font-weight: bold;
+            font-size: 28px;
+            font-weight: 800;
             text-shadow: 0 2px 4px rgba(0,0,0,0.6);
-            margin-top: 5px;
+            margin-top: 8px;
+        }
+        .vs-box h2 {
+            font-size: 28px !important;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
         }
         .match-info-carousel {
             text-align: center;
