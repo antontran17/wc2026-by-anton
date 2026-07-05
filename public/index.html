@@ -6867,11 +6867,9 @@
                 return;
             }
 
-            let limit = 10;
+            let limit = 7;
             const currentStage = String(upcomingOrLive[0]?.group).trim().toUpperCase();
-            if (currentStage === 'R32') limit = 7;
-            else if (currentStage === 'R16') limit = 8;
-            else if (currentStage === 'QF') limit = 4;
+            if (currentStage === 'QF') limit = 4;
             else if (currentStage === 'SF') limit = 2;
             else if (currentStage === 'FINAL' || currentStage === '3RD') limit = 1;
 
