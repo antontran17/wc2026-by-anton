@@ -7911,12 +7911,37 @@
             position: relative;
         }
         .swiper-slide-active .next-match-card.is-favorite-card {
-            box-shadow: 0 0 30px rgba(255, 204, 0, 0.6), inset 0 0 20px rgba(255, 204, 0, 0.3) !important;
-            border: 1px solid rgba(255, 204, 0, 0.8) !important;
-            animation: pulseFav 2s infinite;
+            border-color: rgba(123,220,255,.62) !important;
+            animation: favoritePinkBlueBreath 2.4s ease-in-out infinite !important;
+            box-shadow: 0 18px 44px rgba(0,0,0,.24), 0 0 22px rgba(255,88,174,.26), 0 0 54px rgba(123,220,255,.20), inset 0 1px 0 rgba(255,255,255,.14) !important;
+            position: relative !important;
+            overflow: visible !important;
+            z-index: 2;
         }
-        @keyframes pulseFav {
-            0% { box-shadow: 0 0 30px rgba(255, 204, 0, 0.6), inset 0 0 20px rgba(255, 204, 0, 0.3); }
+        .swiper-slide-active .next-match-card.is-favorite-card::after {
+            content: "" !important;
+            position: absolute !important;
+            inset: -12px !important;
+            border-radius: calc(12px + 12px) !important;
+            background: radial-gradient(circle at 0% 0%, rgba(255,88,174,.18) 0%, transparent 64%),
+                        radial-gradient(circle at 100% 100%, rgba(123,220,255,.24) 0%, transparent 64%) !important;
+            z-index: -1 !important;
+            filter: blur(8px) !important;
+            pointer-events: none !important;
+        }
+        .swiper-slide-active .next-match-card.is-favorite-card::before {
+            content: "" !important;
+            position: absolute !important;
+            inset: -2px !important;
+            border-radius: inherit !important;
+            pointer-events: none !important;
+            background: linear-gradient(135deg, rgba(255,88,174,.3) 0%, rgba(123,220,255,.3) 100%) !important;
+            z-index: 1 !important;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important;
+            -webkit-mask-composite: xor !important;
+            mask-composite: exclude !important;
+            padding: 2px !important;
+        }
             50% { box-shadow: 0 0 50px rgba(255, 204, 0, 0.9), inset 0 0 30px rgba(255, 204, 0, 0.5); }
             100% { box-shadow: 0 0 30px rgba(255, 204, 0, 0.6), inset 0 0 20px rgba(255, 204, 0, 0.3); }
         }
@@ -9588,7 +9613,7 @@
                     const statusText = liveMinute(game) || String(game.status || 'LIVE').toUpperCase();
                     topStatusHtml = `<div class="match-status-badge">${statusText}</div>`;
                 } else {
-                    topStatusHtml = `<div class="carousel-countdown" data-date="${d ? d.toISOString() : ''}" style="display: inline-block; background-color: #ff0000; border-radius: 50px; padding: 12px 24px; font-weight: 700; color: #fff; font-size: 15px; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);">ĐANG TÍNH...</div>`;
+                    topStatusHtml = `<div class="carousel-countdown" data-date="${d ? d.toISOString() : ''}" style="display: inline-block; background-color: #ff0000; border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);">ĐANG TÍNH...</div>`;
                 }
                 
                 // Tỉ số hoặc VS
