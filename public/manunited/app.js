@@ -37,7 +37,6 @@ let allMatches = [];
 let currentFilter = "all"; // all, upcoming, completed
 
 document.addEventListener("DOMContentLoaded", () => {
-    initNavigation();
     loadSchedule();
     loadStandings();
     loadRoster();
@@ -138,6 +137,7 @@ async function loadSchedule() {
             document.getElementById("next-match-container").innerHTML = `<p style="text-align:center; color: var(--text-secondary)">Hiện chưa có lịch thi đấu tiếp theo.</p>`;
         }
         
+        initNavigation(); // Initialize dynamic filters now that allMatches is populated
         renderMatchesGrid();
     } catch (err) {
         console.error("Lỗi khi tải lịch thi đấu:", err);
