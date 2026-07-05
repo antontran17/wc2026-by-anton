@@ -675,15 +675,32 @@ footer {
     font-weight: bold;
 }
 
+@keyframes teaseLeft {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(-6px); }
+}
+@keyframes teaseRight {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(6px); }
+}
+
 .swiper-button-prev {
     left: 50% !important;
     margin-left: -360px !important;
+}
+.swiper-button-prev:not(:hover):after {
+    display: inline-block;
+    animation: teaseLeft 1.5s infinite ease-in-out;
 }
 
 .swiper-button-next {
     left: 50% !important;
     right: auto !important;
     margin-left: 320px !important;
+}
+.swiper-button-next:not(:hover):after {
+    display: inline-block;
+    animation: teaseRight 1.5s infinite ease-in-out;
 }
 
 .countdown-box {
