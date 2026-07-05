@@ -5323,6 +5323,97 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <style id="anton-swiper-css">
+        .swiper {
+            width: 100%;
+            padding-top: 10px;
+            padding-bottom: 20px;
+        }
+        .swiper-slide {
+            background-position: center;
+            background-size: cover;
+            width: 600px;
+        }
+        @media (max-width: 768px) {
+            .swiper-slide {
+                width: 85vw;
+            }
+        }
+        .swiper-slide .next-match-card {
+            background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(10, 10, 10, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.5s ease;
+            transform: scale(0.9);
+            opacity: 0.15;
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .swiper-slide-next .next-match-card,
+        .swiper-slide-prev .next-match-card,
+        .swiper-slide-duplicate-next .next-match-card,
+        .swiper-slide-duplicate-prev .next-match-card {
+            transform: scale(0.95);
+            opacity: 0.4;
+            filter: blur(3px);
+        }
+        .swiper-slide-active .next-match-card,
+        .swiper-slide-duplicate-active .next-match-card {
+            background: linear-gradient(145deg, rgba(216, 0, 20, 0.8), rgba(0, 0, 0, 0.9));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(216, 0, 20, 0.6);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(216, 0, 20, 0.4);
+            transform: scale(1);
+            opacity: 1;
+            filter: blur(0px);
+            z-index: 10;
+        }
+        .match-teams-carousel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .team-box-carousel {
+            text-align: center;
+            width: 40%;
+        }
+        .team-box-carousel img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
+        .team-box-carousel .team-name {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .match-info-carousel {
+            text-align: center;
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 15px;
+        }
+        .match-status-badge {
+            background: #ff3e46;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .swiper-slide-active .next-match-card.is-live {
+            animation: liveBreath 1.6s ease-in-out infinite !important;
+            border-color: rgba(255, 62, 70, .86) !important;
+        }
+    </style>
 </head>
 <body>
     <!-- SEO fallback content for crawlers that don't execute JavaScript -->
@@ -5364,6 +5455,13 @@
                     <img src="/assets/hero-pc.webp" alt="WORLD CUP 2026" width="1920" height="360" decoding="async" fetchpriority="high">
                 </picture>
                 <h1 class="hero-banner-fallback">WORLD CUP 2026</h1>
+                <!-- Swiper Carousel -->
+                <div class="swiper mySwiper" style="margin-top: 20px; padding-bottom: 30px;">
+                    <div class="swiper-wrapper" id="next-match-container">
+                        <!-- Matches will be injected here -->
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
@@ -6753,8 +6851,95 @@
 
 
         // Render Matches
+        
+        let carouselSwiper = null;
+
+        function renderNextMatchesCarousel(games) {
+            const container = document.getElementById('next-match-container');
+            if (!container) return;
+
+            // Lọc ra các trận sắp diễn ra (chưa đá) và đang đá
+            const now = new Date();
+            const upcomingOrLive = games.filter(g => g.status === 'Live' || new Date(g.date) > now)
+                                        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            if (upcomingOrLive.length === 0) {
+                container.innerHTML = '<p style="color: #aaa;">No upcoming matches</p>';
+                return;
+            }
+
+            const renderMatchesList = upcomingOrLive.slice(0, 10);
+            
+            // Duplicate to make swiper loop nicely if few matches
+            const slidesData = renderMatchesList.length < 3 ? [...renderMatchesList, ...renderMatchesList, ...renderMatchesList] : renderMatchesList;
+
+            let html = '';
+            slidesData.forEach(game => {
+                const homeTeam = getTeamInfo(game.home_team_id);
+                const awayTeam = getTeamInfo(game.away_team_id);
+                const d = new Date(game.date);
+                const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                
+                const isLive = game.status === 'Live';
+                const statusBadge = isLive ? `<div class="match-status-badge">LIVE</div>` : `<div style="color: #aaa; margin-bottom: 10px;">${timeStr}, ${dateStr}</div>`;
+                
+                const scoreDisplay = isLive ? `<h2 style="margin:0">${game.home_score} - ${game.away_score}</h2>` : `<h2 style="margin:0">VS</h2>`;
+
+                html += `
+                    <div class="swiper-slide">
+                        <div class="next-match-card ${isLive ? 'is-live' : ''}">
+                            <div style="text-align: center;">${statusBadge}</div>
+                            <div class="match-teams-carousel">
+                                <div class="team-box-carousel">
+                                    <img src="${homeTeam.flag}" alt="${homeTeam.name}">
+                                    <div class="team-name">${homeTeam.short_name || homeTeam.name}</div>
+                                </div>
+                                <div class="vs-box">${scoreDisplay}</div>
+                                <div class="team-box-carousel">
+                                    <img src="${awayTeam.flag}" alt="${awayTeam.name}">
+                                    <div class="team-name">${awayTeam.short_name || awayTeam.name}</div>
+                                </div>
+                            </div>
+                            <div class="match-info-carousel">
+                                ${game.group_name || 'Knockout Stage'} • ${getStadiumInfo(game.stadium_id)?.name || ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+
+            if (carouselSwiper) {
+                carouselSwiper.destroy(true, true);
+            }
+
+            // Must use setTimeout to let DOM update before initializing Swiper
+            setTimeout(() => {
+                if (typeof Swiper !== 'undefined') {
+                    carouselSwiper = new Swiper('.mySwiper', {
+                        effect: 'coverflow',
+                        grabCursor: true,
+                        centeredSlides: true,
+                        slidesPerView: 'auto',
+                        loop: true,
+                        mousewheel: true,
+                        coverflowEffect: {
+                            rotate: 0,
+                            stretch: -40,
+                            depth: 300,
+                            modifier: 1,
+                            slideShadows: false,
+                        },
+                    });
+                }
+            }, 100);
+        }
+
         function renderMatches(games) {
             const grid = document.getElementById('matches-grid');
+            renderNextMatchesCarousel(games);
             const tabsContainer = document.getElementById('match-tabs');
             const selectContainer = document.getElementById('match-filter-select');
 
@@ -7896,6 +8081,7 @@
             }
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 </body>
 </html>
 
