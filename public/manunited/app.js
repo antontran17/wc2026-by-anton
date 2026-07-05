@@ -207,7 +207,7 @@ function renderNextMatchesCarousel(matches) {
         
         slidesHTML += `
             <div class="swiper-slide">
-                <div class="next-match-card ${derbyClass}" style="margin: 0; width: 100%; box-sizing: border-box; position: relative;">
+                <div class="next-match-card clickable-card ${derbyClass}" onclick="openMatchModal('${match.id}')" style="margin: 0; width: 100%; box-sizing: border-box; position: relative;">
                     <div style="text-align: center;">
                         ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 15px; border-radius: 12px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
                         ${isLive && match.status.displayClock ? `
@@ -577,6 +577,118 @@ document.addEventListener('DOMContentLoaded', () => {
                     icon.classList.add('fa-bars');
                 }
             });
+        });
+    }
+});
+
+
+// Modal Logic
+function openMatchModal(matchId) {
+    const match = allMatches.find(m => m.id === matchId);
+    if (!match) return;
+    
+    const dateObj = new Date(match.date);
+    const dayNames = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    const timeStr = `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+    const dateStr = `${dayNames[dateObj.getDay()]}, ${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`;
+    
+    const comp = match.competitions[0];
+    const home = comp.competitors.find(c => c.homeAway === 'home');
+    const away = comp.competitors.find(c => c.homeAway === 'away');
+    
+    const isLive = comp.status.type.state === 'in';
+    const isPost = comp.status.type.state === 'post';
+    
+    let scoreDisplay = "VS";
+    let statusDisplay = timeStr;
+    
+    if (isLive || isPost) {
+        scoreDisplay = `${home.score || 0} - ${away.score || 0}`;
+        statusDisplay = isLive ? (comp.status.displayClock ? comp.status.displayClock + "'" : "LIVE") : "FT";
+    }
+    
+    // Parse Scorers
+    let homeScorersHTML = '';
+    let awayScorersHTML = '';
+    
+    if (isLive || isPost) {
+        const details = comp.details || [];
+        const goals = details.filter(d => d.scoringPlay === true || d.type.text === "Goal" || d.type.text === "Penalty - Scored");
+        
+        goals.forEach(g => {
+            let scorer = "Unknown";
+            let teamId = null;
+            if (g.participants && g.participants[0] && g.participants[0].athlete) {
+                scorer = g.participants[0].athlete.shortName || g.participants[0].athlete.displayName;
+            }
+            if (g.team && g.team.id) {
+                teamId = g.team.id;
+            }
+            const isPenalty = g.type.text.includes("Penalty") ? " (P)" : "";
+            const isOwnGoal = g.type.text.includes("Own") ? " (OG)" : "";
+            const time = g.clock && g.clock.displayValue ? g.clock.displayValue : "?'";
+            
+            const itemHTML = `<div class="modal-scorer-item">⚽ ${scorer} ${time}${isPenalty}${isOwnGoal}</div>`;
+            if (teamId === home.team.id) homeScorersHTML += itemHTML;
+            if (teamId === away.team.id) awayScorersHTML += itemHTML;
+        });
+    }
+
+    const venue = comp.venue && comp.venue.fullName ? comp.venue.fullName : "Chưa xác định";
+    const leagueName = match.leagueName || "Tournament";
+
+    const modalContent = `
+        <div class="modal-header">
+            ${leagueName}
+        </div>
+        <div class="modal-teams">
+            <div class="modal-team">
+                <img src="${home.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${home.team.name}">
+                <div class="modal-team-name">${home.team.abbreviation || home.team.name}</div>
+            </div>
+            <div class="modal-score-block">
+                <div class="modal-score">${scoreDisplay}</div>
+                <div class="modal-status">${statusDisplay}</div>
+            </div>
+            <div class="modal-team">
+                <img src="${away.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${away.team.name}">
+                <div class="modal-team-name">${away.team.abbreviation || away.team.name}</div>
+            </div>
+        </div>
+        
+        <div class="modal-scorers">
+            <div class="modal-scorers-home">${homeScorersHTML}</div>
+            <div class="modal-scorers-away" style="text-align: right;">${awayScorersHTML}</div>
+        </div>
+        
+        <div class="modal-info-list" style="margin-top: 20px;">
+            <div class="modal-info-item">
+                <span style="color: var(--text-secondary)">Sân vận động</span>
+                <span>${venue}</span>
+            </div>
+            <div class="modal-info-item">
+                <span style="color: var(--text-secondary)">Ngày thi đấu</span>
+                <span>${dateStr}</span>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById("modal-match-details").innerHTML = modalContent;
+    document.getElementById("match-modal").classList.add("active");
+    document.body.style.overflow = "hidden"; // Prevent background scrolling
+}
+
+function closeMatchModal() {
+    document.getElementById("match-modal").classList.remove("active");
+    document.body.style.overflow = "";
+}
+
+// Close on overlay click
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("match-modal");
+    if (modal) {
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeMatchModal();
         });
     }
 });
