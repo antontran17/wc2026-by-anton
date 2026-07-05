@@ -10936,6 +10936,15 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        // Hide global loading overlay
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const overlay = document.getElementById('global-loading-overlay');
+                if (overlay) overlay.classList.add('hidden');
+            }, 2000);
+        });
+    </script>
 </body>
 </html>
 
