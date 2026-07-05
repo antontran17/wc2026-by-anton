@@ -5342,15 +5342,16 @@
             }
         }
         .swiper-slide .next-match-card {
-            background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(10, 10, 10, 0.98));
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             transition: all 0.5s ease;
             transform: scale(0.9);
             opacity: 0.15;
             border-radius: 12px;
             padding: 20px;
             color: #fff;
-            height: 200px;
+            min-height: 240px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -5365,10 +5366,10 @@
         }
         .swiper-slide-active .next-match-card,
         .swiper-slide-duplicate-active .next-match-card {
-            background: linear-gradient(145deg, rgba(216, 0, 20, 0.8), rgba(0, 0, 0, 0.9));
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(216, 0, 20, 0.6);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(216, 0, 20, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             transform: scale(1);
             opacity: 1;
             filter: blur(0px);
@@ -5456,7 +5457,7 @@
                 </picture>
                 <h1 class="hero-banner-fallback">WORLD CUP 2026</h1>
                 <!-- Swiper Carousel -->
-                <div class="swiper mySwiper" style="margin-top: 20px; padding-bottom: 30px;">
+                <div class="swiper mySwiper" style="margin-top: -80px; padding-bottom: 30px; position: relative; z-index: 10;">
                     <div class="swiper-wrapper" id="next-match-container">
                         <!-- Matches will be injected here -->
                     </div>
