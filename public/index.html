@@ -201,6 +201,38 @@
             filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
             animation: pulseFav 2s infinite;
         }
+    
+        .carousel-team-flag {
+            width: 100px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+            /* ensure no background */
+            background: transparent !important;
+            border: none !important;
+        }
+        .carousel-team-flag.favorite-flag-carousel {
+            animation: favoriteFlagSparkle 1.8s ease-in-out infinite !important;
+            filter: drop-shadow(0 0 10px rgba(255,230,145,.72)) drop-shadow(0 0 18px rgba(123,220,255,.36)) !important;
+        }
+        .carousel-flag-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .carousel-flag-wrapper.favorite-flag-wrap-carousel::before {
+            content: "" !important;
+            position: absolute !important;
+            inset: -4px !important;
+            border-radius: 50% !important;
+            pointer-events: none !important;
+            background:
+                radial-gradient(circle at 12% 16%, rgba(123,220,255,.95) 0 2px, transparent 3px),
+                radial-gradient(circle at 84% 78%, rgba(255,82,168,.90) 0 2px, transparent 3px),
+                radial-gradient(circle at 30% 84%, rgba(255,230,145,.76) 0 1.5px, transparent 3px);
+            animation: favoriteCardSparkle 1.35s linear infinite !important;
+            z-index: 1 !important;
+        }
     </style>
 
     <!-- DNS Prefetch & Preconnect for performance -->
@@ -9684,12 +9716,12 @@
                             
                             <div class="match-teams-carousel" style="width: 100%; margin-top: 10px;">
                                 <div class="team-box-carousel">
-                                    <img class="team-flag ${favoriteTeams.has(String(homeTeam.id)) ? 'favorite-flag' : ''}" src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${homeLabel}">
+                                    <div class="carousel-flag-wrapper ${favoriteTeams.has(String(homeTeam.id)) ? \'favorite-flag-wrap-carousel\' : \'\'}"><img class="carousel-team-flag ${favoriteTeams.has(String(homeTeam.id)) ? \'favorite-flag-carousel\' : \'\'}" src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${homeLabel}"></div>
                                     <div class="team-name">${homeName}</div>
                                 </div>
                                 <div class="vs-box">${scoreDisplay}</div>
                                 <div class="team-box-carousel">
-                                    <img class="team-flag ${favoriteTeams.has(String(awayTeam.id)) ? 'favorite-flag' : ''}" src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${awayLabel}">
+                                    <div class="carousel-flag-wrapper ${favoriteTeams.has(String(awayTeam.id)) ? \'favorite-flag-wrap-carousel\' : \'\'}"><img class="carousel-team-flag ${favoriteTeams.has(String(awayTeam.id)) ? \'favorite-flag-carousel\' : \'\'}" src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${awayLabel}"></div>
                                     <div class="team-name">${awayName}</div>
                                 </div>
                             </div>
