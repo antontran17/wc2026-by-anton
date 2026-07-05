@@ -600,8 +600,12 @@ function openMatchModal(matchId, element) {
     modalContainer.innerHTML = '';
     
     let clonedCard = null;
+    let isNextMatchCard = false;
+    
     if (element) {
         clonedCard = element.cloneNode(true);
+        isNextMatchCard = clonedCard.classList.contains('next-match-card');
+        
         // Remove clickability
         clonedCard.removeAttribute('onclick');
         clonedCard.classList.remove('clickable-card');
@@ -617,47 +621,49 @@ function openMatchModal(matchId, element) {
         // Ensure overflow is visible so labels don't get clipped
         clonedCard.style.overflow = 'visible';
         
-        // For carousel cards, remove fixed height
-        if (clonedCard.classList.contains('next-match-card')) {
-            clonedCard.style.height = 'auto';
-            clonedCard.style.paddingBottom = '30px'; // Restore padding instead of flex space-between
-        }
+        // For carousel cards, we DO NOT change height or append extra info,
+        // so it looks exactly 100% identical to the un-clicked card.
     } else {
         return; // Safety fallback
     }
 
-    const comp = match.competitions[0];
-    const venue = comp.venue?.fullName || "Chưa xác định";
-    const home = comp.competitors.find(c => c.homeAway === 'home');
-    
-    let homeScorersHTML = '';
-    let awayScorersHTML = '';
-    if (comp.details) {
-        comp.details.forEach(detail => {
-            if (detail.team.id === home.team.id) {
-                homeScorersHTML += `<div class="modal-scorer-item">${detail.participants[0].athlete.displayName} (${detail.clock.displayTime})</div>`;
-            } else {
-                awayScorersHTML += `<div class="modal-scorer-item">${detail.participants[0].athlete.displayName} (${detail.clock.displayTime})</div>`;
-            }
-        });
+    // Only append extra info (venue, scorers) if it's a grid card (.match-card).
+    // Carousel cards already have this info built-in!
+    if (!isNextMatchCard) {
+        const comp = match.competitions[0];
+        const venue = comp.venue?.fullName || "Chưa xác định";
+        const home = comp.competitors.find(c => c.homeAway === 'home');
+        
+        let homeScorersHTML = '';
+        let awayScorersHTML = '';
+        if (comp.details) {
+            comp.details.forEach(detail => {
+                if (detail.team.id === home.team.id) {
+                    homeScorersHTML += `<div class="modal-scorer-item">${detail.participants[0].athlete.displayName} (${detail.clock.displayTime})</div>`;
+                } else {
+                    awayScorersHTML += `<div class="modal-scorer-item">${detail.participants[0].athlete.displayName} (${detail.clock.displayTime})</div>`;
+                }
+            });
+        }
+        
+        const extraInfo = document.createElement('div');
+        extraInfo.style.marginTop = "25px";
+        extraInfo.style.borderTop = "1px solid rgba(255,255,255,0.1)";
+        extraInfo.style.paddingTop = "15px";
+        extraInfo.innerHTML = `
+            <div style="text-align: center; font-size: 13px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">
+                ${venue}
+            </div>
+            ${(homeScorersHTML || awayScorersHTML) ? `
+            <div class="modal-scorers" style="display:flex; justify-content:space-between; font-size:13px;">
+                <div class="modal-scorers-home" style="width:48%; text-align: left;">${homeScorersHTML}</div>
+                <div class="modal-scorers-away" style="width:48%; text-align: right;">${awayScorersHTML}</div>
+            </div>` : ''}
+        `;
+        
+        clonedCard.appendChild(extraInfo);
     }
     
-    const extraInfo = document.createElement('div');
-    extraInfo.style.marginTop = "25px";
-    extraInfo.style.borderTop = "1px solid rgba(255,255,255,0.1)";
-    extraInfo.style.paddingTop = "15px";
-    extraInfo.innerHTML = `
-        <div style="text-align: center; font-size: 13px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">
-            ${venue}
-        </div>
-        ${(homeScorersHTML || awayScorersHTML) ? `
-        <div class="modal-scorers" style="display:flex; justify-content:space-between; font-size:13px;">
-            <div class="modal-scorers-home" style="width:48%; text-align: left;">${homeScorersHTML}</div>
-            <div class="modal-scorers-away" style="width:48%; text-align: right;">${awayScorersHTML}</div>
-        </div>` : ''}
-    `;
-    
-    clonedCard.appendChild(extraInfo);
     modalContainer.appendChild(clonedCard);
     
     document.getElementById("match-modal").classList.add("active");
