@@ -208,7 +208,7 @@ function renderNextMatchesCarousel(matches) {
         
         slidesHTML += `
             <div class="swiper-slide">
-                <div class="next-match-card clickable-card ${derbyClass}" onclick="openMatchModal('${match.id}')" style="margin: 0; width: 100%; box-sizing: border-box; position: relative;">
+                <div class="next-match-card clickable-card ${derbyClass}" onclick="openMatchModal('${match.id}', this)" style="margin: 0; width: 100%; box-sizing: border-box; position: relative;">
                     <div style="text-align: center;">
                         ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 15px; border-radius: 12px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
                         ${isLive && match.status.displayClock ? `
@@ -378,7 +378,7 @@ function renderMatchesGrid() {
         const finalClasses = `match-card clickable-card ${bigMatchClass} ${derbyClass}`.trim();
         
         grid.innerHTML += `
-            <div class="${finalClasses}" onclick="openMatchModal('${match.id}')" style="position: relative;">
+            <div class="${finalClasses}" onclick="openMatchModal('${match.id}', this)" style="position: relative;">
                 ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 15px; border-radius: 12px; margin-bottom: 10px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
                 <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:20px; border-bottom: none; gap:4px;">
                     <div>${formattedTime} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}</div>
@@ -585,7 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // Modal Logic
-function openMatchModal(matchId) {
+function openMatchModal(matchId, element) {
     const match = allMatches.find(m => m.id === matchId);
     if (!match) return;
     
@@ -598,49 +598,12 @@ function openMatchModal(matchId) {
     const home = comp.competitors.find(c => c.homeAway === 'home');
     const away = comp.competitors.find(c => c.homeAway === 'away');
     
-    const isLive = comp.status.type.state === 'in';
-    const isPost = comp.status.type.state === 'post';
-    
+    const isLive = match.status.type.state === 'in';
     let scoreDisplay = "VS";
-    let statusDisplay = timeStr;
-    
-    if (isLive || isPost) {
-        scoreDisplay = `${home.score || 0} - ${away.score || 0}`;
-        statusDisplay = isLive ? (comp.status.displayClock ? comp.status.displayClock + "'" : "LIVE") : "FT";
+    if (match.status.type.state === 'in' || match.status.type.state === 'post') {
+        scoreDisplay = `${home.score} - ${away.score}`;
     }
     
-    // Parse Scorers
-    let homeScorersHTML = '';
-    let awayScorersHTML = '';
-    
-    if (isLive || isPost) {
-        const details = comp.details || [];
-        const goals = details.filter(d => d.scoringPlay === true || d.type.text === "Goal" || d.type.text === "Penalty - Scored");
-        
-        goals.forEach(g => {
-            let scorer = "Unknown";
-            let teamId = null;
-            if (g.participants && g.participants[0] && g.participants[0].athlete) {
-                scorer = g.participants[0].athlete.shortName || g.participants[0].athlete.displayName;
-            }
-            if (g.team && g.team.id) {
-                teamId = g.team.id;
-            }
-            const isPenalty = g.type.text.includes("Penalty") ? " (P)" : "";
-            const isOwnGoal = g.type.text.includes("Own") ? " (OG)" : "";
-            const time = g.clock && g.clock.displayValue ? g.clock.displayValue : "?'";
-            
-            const itemHTML = `<div class="modal-scorer-item">⚽ ${scorer} ${time}${isPenalty}${isOwnGoal}</div>`;
-            if (teamId === home.team.id) homeScorersHTML += itemHTML;
-            if (teamId === away.team.id) awayScorersHTML += itemHTML;
-        });
-    }
-
-    const venue = comp.venue && comp.venue.fullName ? comp.venue.fullName : "Chưa xác định";
-    const leagueName = match.leagueName || "Tournament";
-
-    
-    // Determine card classes
     const TEAM_ID = "360";
     const opponent = home.team.id === TEAM_ID ? away : home;
     const opponentId = opponent.team.id;
@@ -655,29 +618,55 @@ function openMatchModal(matchId) {
     }
     const isBigMatch = ["359", "363", "364", "382", "367", "361"].includes(opponentId);
     const bigMatchClass = isBigMatch ? "big-match" : "";
-    const finalClasses = `match-card ${bigMatchClass} ${derbyClass}`.trim();
+    
+    let finalClasses = `next-match-card ${bigMatchClass} ${derbyClass}`.trim();
+    if (element) {
+        const classList = Array.from(element.classList).filter(c => !['clickable-card', 'swiper-slide-active', 'swiper-slide-duplicate-active'].includes(c));
+        if (classList.length > 0) {
+            finalClasses = classList.join(' ');
+        }
+    }
+    
+    const leagueName = match.leagueName || match.season?.displayName || "Giải đấu";
+    const venue = comp.venue?.fullName || "Chưa xác định";
+    
+    let homeScorersHTML = '';
+    let awayScorersHTML = '';
+    if (comp.details) {
+        comp.details.forEach(detail => {
+            if (detail.team.id === home.team.id) {
+                homeScorersHTML += `<div class="modal-scorer-item">${detail.participants[0].athlete.displayName} (${detail.clock.displayTime})</div>`;
+            } else {
+                awayScorersHTML += `<div class="modal-scorer-item">${detail.participants[0].athlete.displayName} (${detail.clock.displayTime})</div>`;
+            }
+        });
+    }
+    
+    const isSmallCard = finalClasses.includes('match-card') && !finalClasses.includes('next-match-card');
+    const nameFontSize = isSmallCard ? '16px' : '20px';
+    const scoreFontSize = isSmallCard ? '32px' : '42px';
+    const logoSize = isSmallCard ? '50px' : '70px';
 
     const modalContent = `
-        <div class="${finalClasses}" style="margin: 0; width: 100%; cursor: default; transform: none; position: relative; overflow: visible;">
+        <div class="${finalClasses}" style="margin: 0; width: 100%; cursor: default; transform: none; position: relative; overflow: visible !important;">
             ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 15px; border-radius: 12px; margin-bottom: 10px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
-            ${!derbyClass ? `<div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--primary-color), #8b0000); border-radius: 20px 20px 0 0;"></div>` : ''}
             
-            <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:20px; border-bottom: none; gap:4px;">
+            <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:13px; margin-bottom:15px; border-bottom: none; gap:4px;">
                 <div>${timeStr}, ${dateStr} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}</div>
                 <div style="font-size:14px; color:#fff; font-weight: 700; text-transform: uppercase;">${leagueName}</div>
             </div>
             
-            <div class="card-teams-inline" style="display:flex; justify-content:center; align-items:center; gap: 24px;">
+            <div class="card-teams-inline" style="display:flex; justify-content:center; align-items:center; gap: 15px;">
                 <div class="team-left" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
-                    <img src="${home.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${home.team.name}" style="width:60px; height:60px; object-fit:contain;">
-                    <span class="card-team-name" style="font-size:20px; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase;">${home.team.abbreviation || home.team.name}</span>
+                    <img src="${home.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${home.team.name}" style="width:${logoSize}; height:${logoSize}; object-fit:contain;">
+                    <span class="card-team-name" style="font-size:${nameFontSize}; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase; text-align:center;">${home.team.abbreviation || home.team.name}</span>
                 </div>
-                <div class="match-score" style="font-weight: 700; font-size:36px; font-family: 'Google Sans Flex', sans-serif; white-space:nowrap; padding:0 10px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
+                <div class="match-score" style="font-weight: 700; font-size:${scoreFontSize}; font-family: 'Google Sans Flex', sans-serif; white-space:nowrap; padding:0 10px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
                     ${scoreDisplay}
                 </div>
                 <div class="team-right" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
-                    <img src="${away.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${away.team.name}" style="width:60px; height:60px; object-fit:contain;">
-                    <span class="card-team-name" style="font-size:20px; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase;">${away.team.abbreviation || away.team.name}</span>
+                    <img src="${away.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${away.team.name}" style="width:${logoSize}; height:${logoSize}; object-fit:contain;">
+                    <span class="card-team-name" style="font-size:${nameFontSize}; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase; text-align:center;">${away.team.abbreviation || away.team.name}</span>
                 </div>
             </div>
             
@@ -686,7 +675,7 @@ function openMatchModal(matchId) {
             </div>
             
             ${(homeScorersHTML || awayScorersHTML) ? `
-            <div class="modal-scorers" style="margin-top: 25px; display:flex; justify-content:space-between; font-size:13px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+            <div class="modal-scorers" style="margin-top: 20px; display:flex; justify-content:space-between; font-size:13px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
                 <div class="modal-scorers-home" style="width:48%; text-align: left;">${homeScorersHTML}</div>
                 <div class="modal-scorers-away" style="width:48%; text-align: right;">${awayScorersHTML}</div>
             </div>` : ''}
@@ -695,9 +684,8 @@ function openMatchModal(matchId) {
     
     document.getElementById("modal-match-details").innerHTML = modalContent;
     document.getElementById("match-modal").classList.add("active");
-    document.body.style.overflow = "hidden"; // Prevent background scrolling
+    document.body.style.overflow = "hidden";
 }
-
 function closeMatchModal() {
     document.getElementById("match-modal").classList.remove("active");
     document.body.style.overflow = "";

@@ -1197,16 +1197,25 @@ footer p {
 
 .close-modal-btn {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: -40px;
+    right: 0px;
     background: transparent;
     border: none;
-    color: var(--text-secondary);
-    font-size: 24px;
+    color: #fff;
+    font-size: 28px;
     cursor: pointer;
     transition: color 0.3s;
-    z-index: 10;
+    z-index: 999;
 }
+.match-modal-content .next-match-card::before {
+    display: block !important;
+    opacity: 1 !important;
+}
+.match-modal-content .next-match-card.derby-match::before,
+.match-modal-content .next-match-card.super-match::before {
+    display: none !important;
+}
+
 
 .close-modal-btn:hover {
     color: var(--primary-color);
