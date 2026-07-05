@@ -34,6 +34,7 @@ function formatMatchTime(dateObj) {
 
 // State
 let allMatches = [];
+let allPlayers = [];
 let currentFilter = "all"; // all, upcoming, completed
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -473,6 +474,7 @@ async function loadRoster() {
             "Forward": 4
         };
         
+        allPlayers = athletes;
         athletes.sort((a, b) => {
             const numA = parseInt(a.jersey);
             const numB = parseInt(b.jersey);
@@ -510,7 +512,7 @@ async function loadRoster() {
             const firstName = player.firstName || player.displayName.split(' ')[0] || '';
             const lastName = player.lastName || player.displayName.substring(firstName.length).trim() || '';
             return `
-                <div class="player-card">
+                <div class="player-card clickable-card" onclick="openPlayerModal('${player.id}')">
                     ${player.displayName === 'Bruno Fernandes' ? '<div class="captain-badge">C</div>' : ''}
                     <img class="player-photo" src="${player.headshot?.href || 'nopic.png'}" alt="${player.displayName}">
                     <div class="player-info">
@@ -689,6 +691,70 @@ document.addEventListener("DOMContentLoaded", () => {
     if (modal) {
         modal.addEventListener("click", (e) => {
             if (e.target === modal) closeMatchModal();
+        });
+    }
+});
+
+
+function openPlayerModal(playerId) {
+    const player = allPlayers.find(p => p.id === playerId);
+    if (!player) return;
+    
+    const avatarUrl = player.headshot && player.headshot.href ? player.headshot.href : 'https://a.espncdn.com/i/headshots/soccer/players/full/default-player.png';
+    const flagUrl = player.flag && player.flag.href ? player.flag.href : '';
+    
+    const flagImg = flagUrl ? `<img src="${flagUrl}" alt="${player.citizenship}">` : '';
+    const numberDisplay = player.jersey && player.jersey !== "-" ? player.jersey : "N/A";
+    const heightDisplay = player.displayHeight || "N/A";
+    const weightDisplay = player.displayWeight || "N/A";
+    const ageDisplay = player.age ? `${player.age} tuổi` : "N/A";
+    const positionName = player.position && player.position.displayName ? player.position.displayName : "Unknown";
+
+    const modalContent = `
+        <img src="${avatarUrl}" alt="${player.fullName}" class="player-modal-avatar">
+        <div class="player-modal-name">${player.displayName || player.fullName}</div>
+        <div class="player-modal-pos">${positionName}</div>
+        
+        <div class="player-modal-grid">
+            <div class="player-modal-stat">
+                <div class="player-modal-stat-label">Số Áo</div>
+                <div class="player-modal-stat-value">#${numberDisplay}</div>
+            </div>
+            <div class="player-modal-stat">
+                <div class="player-modal-stat-label">Quốc Tịch</div>
+                <div class="player-modal-stat-value">${flagImg} ${player.citizenship || "N/A"}</div>
+            </div>
+            <div class="player-modal-stat">
+                <div class="player-modal-stat-label">Tuổi</div>
+                <div class="player-modal-stat-value">${ageDisplay}</div>
+            </div>
+            <div class="player-modal-stat">
+                <div class="player-modal-stat-label">Chiều Cao</div>
+                <div class="player-modal-stat-value">${heightDisplay}</div>
+            </div>
+            <div class="player-modal-stat">
+                <div class="player-modal-stat-label">Cân Nặng</div>
+                <div class="player-modal-stat-value">${weightDisplay}</div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById("modal-player-details").innerHTML = modalContent;
+    document.getElementById("player-modal").classList.add("active");
+    document.body.style.overflow = "hidden";
+}
+
+function closePlayerModal() {
+    document.getElementById("player-modal").classList.remove("active");
+    document.body.style.overflow = "";
+}
+
+// Attach overlay click for player modal
+document.addEventListener("DOMContentLoaded", () => {
+    const pModal = document.getElementById("player-modal");
+    if (pModal) {
+        pModal.addEventListener("click", (e) => {
+            if (e.target === pModal) closePlayerModal();
         });
     }
 });
