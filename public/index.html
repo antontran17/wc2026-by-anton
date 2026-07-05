@@ -178,6 +178,29 @@
             }
         }
 
+    
+        #global-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #111;
+            z-index: 9999999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease-out, visibility 1s ease-out;
+        }
+        #global-loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        #global-loading-overlay img {
+            width: 250px;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
+            animation: pulseFav 2s infinite;
+        }
     </style>
 
     <!-- DNS Prefetch & Preconnect for performance -->
@@ -8129,6 +8152,11 @@
     </style>
 </head>
 <body>
+    <!-- Global Loading Overlay -->
+    <div id="global-loading-overlay">
+        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/05/2026_FIFA_World_Cup_logo.svg/1200px-2026_FIFA_World_Cup_logo.svg.png" alt="WC2026">
+    </div>
+
     <!-- SEO fallback content for crawlers that don't execute JavaScript -->
     <noscript>
         <div>
