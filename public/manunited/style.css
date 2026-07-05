@@ -727,15 +727,15 @@ footer {
     .custom-nav-btn {
         color: white !important;
         background: transparent !important;
-        width: 30px !important;
-        height: 40px !important;
+        width: 50px !important;
+        height: 60px !important;
         border-radius: 0;
         border: none;
         opacity: 0.2 !important; /* Faint */
         transition: all 0.3s ease;
     }
     .custom-nav-btn:after {
-        font-size: 14px !important; /* Small */
+        font-size: 28px !important; /* X2 size for mobile */
     }
     .swiper-button-prev {
         left: 5px !important;
