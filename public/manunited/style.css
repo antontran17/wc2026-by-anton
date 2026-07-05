@@ -584,6 +584,7 @@ footer {
 
 /* Responsive */
 @media (max-width: 768px) {
+    .hero { min-height: calc(100vh - 70px); display: flex; flex-direction: column; justify-content: center; padding: 40px 0 80px; }
     .hero h1 { font-size: 36px; }
     .hero .highlight { font-size: 54px; margin-top: 0; }
     .hero p { font-size: 16px; }
