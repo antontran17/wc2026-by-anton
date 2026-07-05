@@ -86,7 +86,7 @@ function initNavigation() {
         });
     });
 }
-function loadSchedule() {
+async function loadSchedule() {
     try {
         const fetchSeason = async (year) => {
             try {
