@@ -278,6 +278,7 @@ function renderNextMatchesCarousel(matches) {
             centeredSlides: true,
             slidesPerView: 'auto',
             loop: true,
+            mousewheel: true,
             coverflowEffect: {
                 rotate: 0,
                 stretch: -60,
