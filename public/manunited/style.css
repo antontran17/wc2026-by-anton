@@ -1473,27 +1473,16 @@ footer p {
     color: rgba(255, 255, 255, 0.6);
     cursor: pointer;
     z-index: 20;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
     transition: color 0.3s, transform 0.3s;
 }
 .scroll-down-btn:hover {
     color: #fff;
     transform: translateX(-50%) scale(1.1);
 }
-.scroll-down-btn .scroll-text {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    font-family: 'Google Sans Flex', sans-serif;
-}
 .scroll-down-btn .scroll-icon {
     font-size: 36px;
-    font-weight: 300;
-    -webkit-text-stroke: 1px rgba(13, 13, 18, 1); /* Creates a thinner look by stroking with background color */
+    font-weight: 900;
+    -webkit-text-stroke: 1.5px rgba(13, 13, 18, 1); /* Creates a thinner look by stroking with background color */
     color: rgba(255, 255, 255, 0.8);
     animation: bounceDown 2s infinite;
 }
