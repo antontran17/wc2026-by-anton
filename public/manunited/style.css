@@ -421,9 +421,9 @@ nav a:hover::after, nav a.active::after {
 
 .standings-table tr.highlight-mu {
     background: linear-gradient(90deg, 
-        rgba(216, 0, 20, 0.05) 0%, 
-        rgba(216, 0, 20, 0.4) 50%, 
-        rgba(216, 0, 20, 0.05) 100%);
+        rgba(255, 0, 0, 0.05) 0%, 
+        rgba(255, 0, 0, 0.4) 50%, 
+        rgba(255, 0, 0, 0.05) 100%);
     background-size: 200% auto;
     animation: redRunningGlow 3s linear infinite;
 }
