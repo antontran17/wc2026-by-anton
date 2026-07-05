@@ -5385,14 +5385,16 @@
             width: 40%;
         }
         .team-box-carousel img {
-            width: 60px;
-            height: 60px;
+            width: 100px;
+            height: 80px;
             object-fit: contain;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
         }
         .team-box-carousel .team-name {
-            font-size: 16px;
+            font-size: 20px;
             font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
         }
         .match-info-carousel {
             text-align: center;
@@ -6949,9 +6951,9 @@
                                 </div>
                             </div>
                             
-                            <div class="match-info-carousel" style="margin-top: auto; padding-top: 15px; display: flex; flex-direction: column; gap: 5px; justify-content: flex-end;">
-                                <div style="color: #ddd; font-size: 14px; font-weight: bold;">${timeStr} - ${dateStr.split('/').join('.')}</div>
-                                <div style="color: #aaa; font-size: 13px;">${stageName} • ${stadiumName}</div>
+                            <div class="match-info-carousel" style="margin-top: auto; padding-bottom: 5px; text-align: center;">
+                                <div style="color: #fff; font-size: 15px; font-weight: bold; line-height: 1.6; letter-spacing: 1px;">${timeStr} - ${dateStr.split('/').join('.')}</div>
+                                <div style="color: #ccc; font-size: 14px; line-height: 1.6;">${stageName} • ${stadiumName}</div>
                                 ${scorersHtml}
                             </div>
                         </div>
