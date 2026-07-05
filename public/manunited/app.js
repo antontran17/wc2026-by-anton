@@ -61,16 +61,31 @@ async function loadSchedule() {
             try {
                 if (year === "2026") {
                     // Fetch both EPL and Club Friendlies for 2026
-                    const [resEpl, resFriendly] = await Promise.all([
+                    const [resEpl, resFriendly, resFA, resLC, resUCL, resUEL] = await Promise.all([
                         fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=20260801-20270530&limit=380`),
-                        fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/club.friendly/scoreboard?dates=20260701-20260830&limit=380`)
+                        fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/club.friendly/scoreboard?dates=20260701-20260830&limit=380`),
+                        fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.fa/scoreboard?dates=20260801-20270530&limit=380`),
+                        fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.league_cup/scoreboard?dates=20260801-20270530&limit=380`),
+                        fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/scoreboard?dates=20260801-20270530&limit=380`),
+                        fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.europa/scoreboard?dates=20260801-20270530&limit=380`)
                     ]);
                     const dataEpl = await resEpl.json();
                     const dataFriendly = await resFriendly.json();
+                    const dataFA = await resFA.json();
+                    const dataLC = await resLC.json();
+                    const dataUCL = await resUCL.json();
+                    const dataUEL = await resUEL.json();
                     
-                    const eplEvents = (dataEpl.events || []).map(e => ({...e, leagueName: dataEpl.leagues?.[0]?.name || "English Premier League"}));
-                    const friendlyEvents = (dataFriendly.events || []).map(e => ({...e, leagueName: dataFriendly.leagues?.[0]?.name || "Club Friendlies"}));
-                    const allMatches2026 = [...eplEvents, ...friendlyEvents];
+                    const mapEvents = (data, defaultName) => (data.events || []).map(e => ({...e, leagueName: data.leagues?.[0]?.name || defaultName}));
+                    
+                    const allMatches2026 = [
+                        ...mapEvents(dataEpl, "English Premier League"),
+                        ...mapEvents(dataFriendly, "Club Friendlies"),
+                        ...mapEvents(dataFA, "English FA Cup"),
+                        ...mapEvents(dataLC, "English Carabao Cup"),
+                        ...mapEvents(dataUCL, "UEFA Champions League"),
+                        ...mapEvents(dataUEL, "UEFA Europa League")
+                    ];
                     return allMatches2026.filter(m => {
                         return m.competitions[0].competitors.some(c => c.team.id === TEAM_ID);
                     });
