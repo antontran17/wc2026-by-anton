@@ -6868,7 +6868,15 @@
                 return;
             }
 
-            const renderMatchesList = upcomingOrLive.slice(0, 10);
+            let limit = 10;
+            const currentStage = upcomingOrLive[0]?.group_name;
+            if (currentStage === 'R32') limit = 7;
+            else if (currentStage === 'R16') limit = 8;
+            else if (currentStage === 'QF') limit = 4;
+            else if (currentStage === 'SF') limit = 2;
+            else if (currentStage === 'F' || currentStage === '3rd') limit = 1;
+
+            const renderMatchesList = upcomingOrLive.slice(0, limit);
             
             // Duplicate to make swiper loop nicely if few matches
             const slidesData = renderMatchesList.length < 3 ? [...renderMatchesList, ...renderMatchesList, ...renderMatchesList] : renderMatchesList;
