@@ -59,9 +59,9 @@
                 </div>
             </div>
         
-            <div class="scroll-down-btn" onclick="document.getElementById('matches').scrollIntoView({behavior: 'smooth'})">
+            <div class="scroll-down-btn" onclick="const tgt = document.getElementById('matches'); const hdr = document.getElementById('header'); window.scrollTo({ top: tgt.offsetTop - (hdr ? hdr.offsetHeight : 0), behavior: 'smooth' });">
                 <span class="scroll-text">SCROLL DOWN</span>
-                <i class="fas fa-angle-down scroll-icon"></i>
+                <i class="fa-solid fa-angles-down scroll-icon"></i>
             </div>
         </section>
 

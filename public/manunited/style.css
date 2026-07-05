@@ -1491,8 +1491,10 @@ footer p {
     font-family: 'Google Sans Flex', sans-serif;
 }
 .scroll-down-btn .scroll-icon {
-    font-size: 32px;
-    font-weight: 300; /* Makes the chevron thinner and wider, similar to the image */
+    font-size: 36px;
+    font-weight: 300;
+    -webkit-text-stroke: 1px rgba(13, 13, 18, 1); /* Creates a thinner look by stroking with background color */
+    color: rgba(255, 255, 255, 0.8);
     animation: bounceDown 2s infinite;
 }
 @keyframes bounceDown {
