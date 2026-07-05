@@ -43,8 +43,31 @@ document.addEventListener("DOMContentLoaded", () => {
     loadRoster();
 });
 
+const leagueAcronyms = {
+    "English Premier League": "EPL",
+    "English FA Cup": "FA",
+    "English Carabao Cup": "EFL",
+    "UEFA Champions League": "CL",
+    "UEFA Europa League": "EL",
+    "Club Friendlies": "FM"
+};
+
 function initNavigation() {
-    const tabs = document.querySelectorAll(".tab-btn");
+    const filterContainer = document.getElementById("league-filters");
+    if (!filterContainer) return;
+    
+    // Find unique leagues from allMatches
+    const uniqueLeagues = [...new Set(allMatches.map(m => m.leagueName))].filter(Boolean);
+    
+    let buttonsHTML = `<button class="tab-btn active" data-filter="all">Tất cả</button>`;
+    uniqueLeagues.forEach(league => {
+        const acronym = leagueAcronyms[league] || league;
+        buttonsHTML += `<button class="tab-btn" data-filter="${league}">${acronym}</button>`;
+    });
+    
+    filterContainer.innerHTML = buttonsHTML;
+    
+    const tabs = filterContainer.querySelectorAll(".tab-btn");
     tabs.forEach(tab => {
         tab.addEventListener("click", (e) => {
             tabs.forEach(t => t.classList.remove("active"));
@@ -304,22 +327,13 @@ function renderMatchesGrid() {
     const now = new Date();
     
     let filtered = allMatches;
-    if (currentFilter === "upcoming") {
-        filtered = allMatches.filter(m => new Date(m.date) > now);
-    } else if (currentFilter === "completed") {
-        filtered = allMatches.filter(m => new Date(m.date) <= now);
+    if (currentFilter !== "all") {
+        filtered = allMatches.filter(m => m.leagueName === currentFilter);
     }
     
-    // Sort logic: if upcoming, ascending. If completed, descending. If all, closest match first.
+    // Sort logic: closest match first
     filtered.sort((a, b) => {
-        if (currentFilter === "upcoming") {
-            return new Date(a.date) - new Date(b.date);
-        } else if (currentFilter === "completed") {
-            return new Date(b.date) - new Date(a.date);
-        } else {
-            // "all": trận gần nhất (closest to now) lên đầu
-            return Math.abs(new Date(a.date) - now) - Math.abs(new Date(b.date) - now);
-        }
+        return Math.abs(new Date(a.date) - now) - Math.abs(new Date(b.date) - now);
     });
     
     if (filtered.length === 0) {
