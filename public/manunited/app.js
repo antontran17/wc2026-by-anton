@@ -640,37 +640,34 @@ function openMatchModal(matchId) {
     const leagueName = match.leagueName || "Tournament";
 
     const modalContent = `
-        <div class="modal-header">
-            ${leagueName}
+        <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:30px; border-bottom: none; gap:8px;">
+            <div>${dateStr} - ${timeStr} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}</div>
+            <div style="font-size:16px; color:#fff; font-weight: 700;">${leagueName}</div>
         </div>
-        <div class="modal-teams">
-            <div class="modal-team">
-                <img src="${home.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${home.team.name}">
-                <div class="modal-team-name">${home.team.abbreviation || home.team.name}</div>
+        
+        <div class="card-teams-inline" style="display:flex; justify-content:center; align-items:center; gap: 30px;">
+            <div class="team-left" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 12px;">
+                <img src="${home.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${home.team.name}" style="width:80px; height:80px; object-fit:contain;">
+                <span class="card-team-name" style="font-size:20px; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase; text-align:center;">${home.team.abbreviation || home.team.name}</span>
             </div>
-            <div class="modal-score-block">
-                <div class="modal-score">${scoreDisplay}</div>
-                <div class="modal-status">${statusDisplay}</div>
+            <div class="match-score" style="font-weight: 900; font-size:48px; font-family: 'Google Sans Flex', sans-serif; white-space:nowrap; padding:0 15px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
+                ${scoreDisplay}
             </div>
-            <div class="modal-team">
-                <img src="${away.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${away.team.name}">
-                <div class="modal-team-name">${away.team.abbreviation || away.team.name}</div>
+            <div class="team-right" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 12px;">
+                <img src="${away.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${away.team.name}" style="width:80px; height:80px; object-fit:contain;">
+                <span class="card-team-name" style="font-size:20px; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase; text-align:center;">${away.team.abbreviation || away.team.name}</span>
             </div>
         </div>
         
-        <div class="modal-scorers">
-            <div class="modal-scorers-home">${homeScorersHTML}</div>
-            <div class="modal-scorers-away" style="text-align: right;">${awayScorersHTML}</div>
+        <div class="modal-scorers" style="margin-top: 30px; display:flex; justify-content:space-between; font-size:14px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+            <div class="modal-scorers-home" style="width:48%;">${homeScorersHTML}</div>
+            <div class="modal-scorers-away" style="width:48%; text-align: right;">${awayScorersHTML}</div>
         </div>
         
-        <div class="modal-info-list" style="margin-top: 20px;">
-            <div class="modal-info-item">
-                <span style="color: var(--text-secondary)">Sân vận động</span>
-                <span>${venue}</span>
-            </div>
-            <div class="modal-info-item">
-                <span style="color: var(--text-secondary)">Ngày thi đấu</span>
-                <span>${dateStr}</span>
+        <div class="modal-info-list" style="margin-top: 20px; background: rgba(255,255,255,0.02); border-radius: 12px; padding: 15px;">
+            <div class="modal-info-item" style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="color: var(--text-secondary); font-size: 13px; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Sân vận động</span>
+                <span style="font-weight:700; font-size:15px;">${venue}</span>
             </div>
         </div>
     `;

@@ -1177,10 +1177,10 @@ footer p {
 }
 
 .match-modal-content {
-    background: var(--bg-color);
-    border: 1px solid var(--primary-color);
-    box-shadow: 0 0 30px rgba(216, 0, 20, 0.4);
-    border-radius: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border-radius: 20px;
     width: 90%;
     max-width: 500px;
     position: relative;
