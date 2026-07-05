@@ -6859,7 +6859,7 @@
             if (!container) return;
 
             // Lọc ra các trận sắp diễn ra (chưa đá) và đang đá bằng hàm chuẩn của WC
-            const upcomingOrLive = games.filter(g => matchStatusClass(g).includes('is-live') || matchStatusClass(g).includes('is-upcoming'))
+            const upcomingOrLive = games.filter(g => !isCompletedGame(g) && parseSourceDate(g))
                                         .sort((a, b) => parseSourceDate(a) - parseSourceDate(b));
 
             if (upcomingOrLive.length === 0) {
