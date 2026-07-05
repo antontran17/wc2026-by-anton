@@ -7876,9 +7876,14 @@
         }
 
     </style>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <style id="anton-swiper-css">
+        .carousel-container {
+            width: 100%;
+            padding-top: 50px;
+            padding-bottom: 50px;
+            overflow: visible;
+        }
         .swiper {
             width: 100%;
             padding-top: 10px;
@@ -9651,12 +9656,12 @@
                             
                             <div class="match-teams-carousel" style="width: 100%; margin-top: 10px;">
                                 <div class="team-box-carousel">
-                                    <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${homeLabel}">
+                                    <img class="team-flag ${favoriteTeams.has(String(homeTeam.id)) ? 'favorite-flag' : ''}" src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${homeLabel}">
                                     <div class="team-name">${homeName}</div>
                                 </div>
                                 <div class="vs-box">${scoreDisplay}</div>
                                 <div class="team-box-carousel">
-                                    <img src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${awayLabel}">
+                                    <img class="team-flag ${favoriteTeams.has(String(awayTeam.id)) ? 'favorite-flag' : ''}" src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${awayLabel}">
                                     <div class="team-name">${awayName}</div>
                                 </div>
                             </div>
