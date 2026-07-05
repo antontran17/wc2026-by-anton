@@ -5351,7 +5351,7 @@
             border-radius: 12px;
             padding: 20px;
             color: #fff;
-            min-height: 240px;
+            min-height: 360px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -5366,10 +5366,10 @@
         }
         .swiper-slide-active .next-match-card,
         .swiper-slide-duplicate-active .next-match-card {
-            background: rgba(255, 255, 255, 0.15);
+            background: linear-gradient(145deg, rgba(30, 40, 100, 0.7), rgba(80, 20, 120, 0.7));
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             transform: scale(1);
             opacity: 1;
             filter: blur(0px);
@@ -6904,7 +6904,7 @@
                     const statusText = liveMinute(game) || String(game.status || 'LIVE').toUpperCase();
                     topStatusHtml = `<div class="match-status-badge">${statusText}</div>`;
                 } else {
-                    topStatusHtml = `<div class="carousel-countdown" data-date="${d ? d.toISOString() : ''}" style="font-weight: bold; color: #ffcc00; margin-bottom: 10px;">ĐANG TÍNH...</div>`;
+                    topStatusHtml = `<div class="carousel-countdown" data-date="${d ? d.toISOString() : ''}" style="font-weight: bold; color: #fff; font-size: 20px; letter-spacing: 2px; margin-bottom: 10px;">ĐANG TÍNH...</div>`;
                 }
                 
                 // Tỉ số hoặc VS
@@ -6949,9 +6949,9 @@
                                 </div>
                             </div>
                             
-                            <div class="match-info-carousel" style="margin-top: 10px;">
-                                <div style="color: #ccc; font-size: 12px; margin-bottom: 3px;">${timeStr} ${dateStr.split('/').join('.')}</div>
-                                <div>${stageName} • ${stadiumName}</div>
+                            <div class="match-info-carousel" style="margin-top: auto; padding-top: 15px; display: flex; flex-direction: column; gap: 5px; justify-content: flex-end;">
+                                <div style="color: #ddd; font-size: 14px; font-weight: bold;">${timeStr} - ${dateStr.split('/').join('.')}</div>
+                                <div style="color: #aaa; font-size: 13px;">${stageName} • ${stadiumName}</div>
                                 ${scorersHtml}
                             </div>
                         </div>
@@ -7007,9 +7007,7 @@
                     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                     const s = Math.floor((diff % (1000 * 60)) / 1000);
                     
-                    let out = '';
-                    if (d > 0) out += `${d}D `;
-                    out += `${h.toString().padStart(2, '0')}H ${m.toString().padStart(2, '0')}M ${s.toString().padStart(2, '0')}S`;
+                    const out = `${d.toString().padStart(2, '0')}:${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
                     el.innerHTML = out;
                 });
             }
