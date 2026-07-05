@@ -6891,8 +6891,8 @@
 
             let html = '';
             slidesData.forEach(game => {
-                const homeTeam = getTeamInfo(game.home_team_id);
-                const awayTeam = getTeamInfo(game.away_team_id);
+                const homeTeam = teamsData.find(t => String(t.id) === String(game.home_team_id)) || {};
+                const awayTeam = teamsData.find(t => String(t.id) === String(game.away_team_id)) || {};
                 const d = parseSourceDate(game);
                 const dateStr = d ? d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
                 const timeStr = d ? d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
@@ -6906,7 +6906,12 @@
                 let stageName = roundLabels[rawGroup] || game.group || 'Knockout Stage';
                 if (/^[A-L]$/.test(rawGroup)) stageName = 'Bảng ' + rawGroup;
 
-                const stadiumName = getStadiumInfo(game.stadium_id)?.name || '';
+                const stadiumName = stadiumsData.find(s => String(s.id) === String(game.stadium_id))?.name || '';
+
+                const homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || 'TBD';
+                const awayLabel = game.away_team_name_en || awayTeam.name_en || game.away_team_label || 'TBD';
+                const homeName = homeTeam.id ? teamCode(homeTeam, homeLabel) : homeLabel;
+                const awayName = awayTeam.id ? teamCode(awayTeam, awayLabel) : awayLabel;
 
                 html += `
                     <div class="swiper-slide">
@@ -6914,13 +6919,13 @@
                             <div style="text-align: center;">${statusBadge}</div>
                             <div class="match-teams-carousel">
                                 <div class="team-box-carousel">
-                                    <img src="${homeTeam.flag}" alt="${homeTeam.name}">
-                                    <div class="team-name">${homeTeam.short_name || homeTeam.name}</div>
+                                    <img src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${homeLabel}">
+                                    <div class="team-name">${homeName}</div>
                                 </div>
                                 <div class="vs-box">${scoreDisplay}</div>
                                 <div class="team-box-carousel">
-                                    <img src="${awayTeam.flag}" alt="${awayTeam.name}">
-                                    <div class="team-name">${awayTeam.short_name || awayTeam.name}</div>
+                                    <img src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${awayLabel}">
+                                    <div class="team-name">${awayName}</div>
                                 </div>
                             </div>
                             <div class="match-info-carousel">
