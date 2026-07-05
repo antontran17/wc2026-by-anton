@@ -1177,9 +1177,9 @@ footer p {
 }
 
 .match-modal-content {
-    background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(10, 10, 10, 0.98));
-    border: 1px solid rgba(216, 0, 20, 0.6);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(216, 0, 20, 0.4);
+    background: var(--bg-color);
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 0 30px rgba(216, 0, 20, 0.4);
     border-radius: 16px;
     width: 90%;
     max-width: 500px;
@@ -1306,7 +1306,7 @@ footer p {
     box-shadow: 0 5px 15px rgba(216, 0, 20, 0.3);
 }
 
-.match-modal-content::before, .player-modal-content::before {
+.player-modal-content::before {
     content: '';
     position: absolute;
     top: 0;

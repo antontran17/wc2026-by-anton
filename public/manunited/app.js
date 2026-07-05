@@ -375,10 +375,10 @@ function renderMatchesGrid() {
         
         const isBigMatch = ["359", "363", "364", "382", "367", "361"].includes(opponentId);
         const bigMatchClass = isBigMatch ? "big-match" : "";
-        const finalClasses = `match-card ${bigMatchClass} ${derbyClass}`.trim();
+        const finalClasses = `match-card clickable-card ${bigMatchClass} ${derbyClass}`.trim();
         
         grid.innerHTML += `
-            <div class="${finalClasses}" style="position: relative;">
+            <div class="${finalClasses}" onclick="openMatchModal('${match.id}')" style="position: relative;">
                 ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 15px; border-radius: 12px; margin-bottom: 10px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
                 <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:20px; border-bottom: none; gap:4px;">
                     <div>${formattedTime} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}</div>
