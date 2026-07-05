@@ -1213,7 +1213,7 @@ footer p {
     box-shadow: none;
     border-radius: 0;
     width: 90%;
-    max-width: 450px;
+    max-width: 600px;
     position: relative;
     padding: 0;
     transform: translateY(20px) scale(0.95);
@@ -1239,8 +1239,8 @@ footer p {
     z-index: 999;
 }
 .match-modal-content .next-match-card::before {
-    display: block !important;
-    opacity: 1 !important;
+    content: none !important;
+    display: none !important;
 }
 .match-modal-content .next-match-card.derby-match::before,
 .match-modal-content .next-match-card.super-match::before {
