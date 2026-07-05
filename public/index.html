@@ -7960,7 +7960,9 @@
             backdrop-filter: blur(10px);
             transition: all 0.5s ease;
             transform: scale(0.9);
-            opacity: 0.1; filter: blur(6px); border-radius: 12px;
+            opacity: 0.25 !important; 
+            filter: blur(4px) !important; 
+            border-radius: 12px;
             padding: 50px 20px;
             color: #fff;
             min-height: 360px;
@@ -8009,9 +8011,10 @@
         .swiper-slide-prev .next-match-card,
         .swiper-slide-duplicate-next .next-match-card,
         .swiper-slide-duplicate-prev .next-match-card {
-            transform: scale(0.95);
-            opacity: 0.65;
-            filter: blur(1px);
+            transform: scale(0.95) !important;
+            opacity: 0.85 !important;
+            filter: blur(1px) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
         }
         .swiper-slide-active .next-match-card,
         .swiper-slide-duplicate-active .next-match-card {
