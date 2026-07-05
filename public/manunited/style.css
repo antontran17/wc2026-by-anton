@@ -414,11 +414,26 @@ nav a:hover::after, nav a.active::after {
     height: 24px;
 }
 
-.standings-table tr.highlight-mu td {
-    background: rgba(218, 2, 14, 0.1);
+@keyframes redRunningGlow {
+    0% { background-position: 200% center; }
+    100% { background-position: -200% center; }
 }
+
+.standings-table tr.highlight-mu {
+    background: linear-gradient(90deg, 
+        rgba(218, 2, 14, 0.05) 0%, 
+        rgba(218, 2, 14, 0.4) 50%, 
+        rgba(218, 2, 14, 0.05) 100%);
+    background-size: 200% auto;
+    animation: redRunningGlow 3s linear infinite;
+}
+
+.standings-table tr.highlight-mu td {
+    background: transparent;
+}
+
 .standings-table tr.highlight-mu .col-pos {
-    color: var(--primary-color);
+    color: #ffffff;
     font-weight: 700;
 }
 
