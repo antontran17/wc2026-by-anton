@@ -68,33 +68,46 @@
         }
         .fav-btn i { font-size: 24px !important; line-height: 1 !important; transform: translateY(-1px); }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -104,6 +117,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
 
     <!-- DNS Prefetch & Preconnect for performance -->
@@ -1530,33 +1604,46 @@
             color: #f44336;
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -1566,6 +1653,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
     
     <!-- Umami Analytics -->
@@ -1720,33 +1868,46 @@
             nav a{font-size:12px !important;padding:7px 9px !important}
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -1756,6 +1917,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
 
 
@@ -1864,33 +2086,46 @@
             .section-header h2{font-size:18px !important}
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -1900,6 +2135,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
 
 
@@ -2217,33 +2513,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -2253,6 +2562,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
 
 
@@ -2459,33 +2829,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -2495,6 +2878,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
 
 
@@ -2536,33 +2980,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -2572,6 +3029,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
 
 
@@ -2823,33 +3341,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -2859,6 +3390,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
 
 
@@ -2931,33 +3523,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -2967,6 +3572,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
 
 
@@ -3082,33 +3748,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -3118,6 +3797,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
 
 
@@ -3257,33 +3997,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -3293,6 +4046,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
 
 
@@ -4197,33 +5011,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -4233,6 +5060,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
     <style id="anton-group-filter-final">
         .group-card {
@@ -4269,33 +5157,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -4305,6 +5206,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
     <style id="anton-favorite-motion-final">
         .match-card,
@@ -4752,33 +5714,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -4788,6 +5763,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
     <style id="anton-match-click-filter-final">
         .matches-section {
@@ -4818,33 +5854,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -4854,6 +5903,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
     <style id="anton-hero-banner-final">
         .clean-hero {
@@ -4921,33 +6031,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -4957,6 +6080,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
     <style id="anton-scorers-final">
         #scorer-dialog {
@@ -5130,33 +6314,46 @@
         .qualified-2nd td:first-child { border-left: 3px solid rgba(0, 150, 255, 1) !important; }
         .qualified-3rd td:first-child { border-left: 3px solid rgba(227, 28, 61, 1) !important; }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -5166,6 +6363,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
     <style id="anton-match-dialog-and-mobile-density">
         .scorer-dialog-panel {
@@ -5373,33 +6631,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -5409,6 +6680,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
     <style id="anton-mobile-menu-and-match-scale">
         .fav-btn,
@@ -5549,33 +6881,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -5585,6 +6930,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
 
     <style id="anton-statistics">
@@ -5612,33 +7018,46 @@
             .statistics-value, .statistics-rank { font-size: 14px; }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -5648,6 +7067,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
     <style id="anton-menu-refresh-patch">
         /* Khắc phục lỗi xuyên qua header trên iPhone (SafeArea & Blur) */
@@ -5771,33 +7251,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -5807,6 +7300,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
     <style id="anton-hide-overall-ranking-mobile">
         @media (max-width: 800px) {
@@ -5822,33 +7376,46 @@
             -ms-touch-action: pan-x pan-y !important;
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -5858,6 +7425,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
     <style id="anton-bracket-css">
         .bracket-section { overflow: hidden; padding-bottom: 20px; margin-top: 50px; }
@@ -6137,33 +7765,46 @@
             }
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -6173,6 +7814,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
@@ -6281,33 +7983,46 @@
             border-color: rgba(255, 62, 70, .86) !important;
         }
 
-        .carousel-container {
-            margin-top: -80px;
-            padding-bottom: 30px;
-            position: relative;
-            z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .carousel-container {
-                margin-top: 20px;
-            }
-        }
         .custom-swiper-nav {
             color: #fff !important;
+            font-size: 24px;
             text-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
         }
         .custom-swiper-nav:hover {
             color: #ffcc00 !important;
             transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
         }
         .swiper-button-prev.custom-swiper-nav {
             animation: bounceLeft 2s infinite ease-in-out;
-            left: 20px;
+            left: 50%;
+            margin-left: -350px;
         }
         .swiper-button-next.custom-swiper-nav {
             animation: bounceRight 2s infinite ease-in-out;
-            right: 20px;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
         }
         @keyframes bounceLeft {
             0%, 100% { transform: translateX(0); }
@@ -6317,6 +8032,67 @@
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(10px); }
         }
+        .carousel-container {
+            margin-top: -80px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .custom-swiper-nav {
+            color: #fff !important;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(0,0,0,0.9);
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            content: none !important;
+        }
+        .custom-swiper-nav:hover {
+            color: #ffcc00 !important;
+            transform: scale(1.2);
+            background: rgba(0,0,0,0.6);
+        }
+        .swiper-button-prev.custom-swiper-nav {
+            animation: bounceLeft 2s infinite ease-in-out;
+            left: 50%;
+            margin-left: -350px;
+        }
+        .swiper-button-next.custom-swiper-nav {
+            animation: bounceRight 2s infinite ease-in-out;
+            right: 50%;
+            margin-right: -350px;
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev.custom-swiper-nav {
+                left: 10px;
+                margin-left: 0;
+            }
+            .swiper-button-next.custom-swiper-nav {
+                right: 10px;
+                margin-right: 0;
+            }
+        }
+        @keyframes bounceLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+        @keyframes bounceRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .carousel-container {
+                margin-top: 20px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -6364,8 +8140,8 @@
                     <div class="swiper-wrapper" id="next-match-container">
                         <!-- Matches will be injected here -->
                     </div>
-                    <div class="swiper-button-next custom-swiper-nav"></div>
-                    <div class="swiper-button-prev custom-swiper-nav"></div>
+                    <div class="swiper-button-next custom-swiper-nav"><i class="fa-solid fa-chevron-right"></i></div>
+                    <div class="swiper-button-prev custom-swiper-nav"><i class="fa-solid fa-chevron-left"></i></div>
                 </div>
 
             </div>
