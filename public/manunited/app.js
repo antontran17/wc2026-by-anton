@@ -43,26 +43,35 @@ document.addEventListener("DOMContentLoaded", () => {
     loadRoster();
 });
 
-const leagueAcronyms = {
-    "English Premier League": "EPL",
-    "English FA Cup": "FA",
-    "English Carabao Cup": "EFL",
-    "UEFA Champions League": "CL",
-    "UEFA Europa League": "EL",
-    "Club Friendlies": "FM"
-};
+function getMatchGroup(leagueName) {
+    if (!leagueName) return 'Other';
+    const name = leagueName.toLowerCase();
+    if (name.includes('premier league')) return 'EPL';
+    if (name.includes('fa cup')) return 'FA';
+    if (name.includes('champions league')) return 'CL';
+    if (name.includes('europa league')) return 'EL';
+    if (name.includes('carabao') || name.includes('efl cup') || name.includes('league cup')) return 'EFL';
+    return 'Other';
+}
 
 function initNavigation() {
     const filterContainer = document.getElementById("league-filters");
     if (!filterContainer) return;
     
-    // Find unique leagues from allMatches
-    const uniqueLeagues = [...new Set(allMatches.map(m => m.leagueName))].filter(Boolean);
+    // Create specific tabs requested by user
+    const filterGroups = [
+        { id: 'all', label: 'ALL' },
+        { id: 'EPL', label: 'EPL' },
+        { id: 'FA', label: 'FA' },
+        { id: 'CL', label: 'CL' },
+        { id: 'EL', label: 'EL' },
+        { id: 'EFL', label: 'EFL' },
+        { id: 'Other', label: 'Other' }
+    ];
     
-    let buttonsHTML = `<button class="tab-btn active" data-filter="all">Tất cả</button>`;
-    uniqueLeagues.forEach(league => {
-        const acronym = leagueAcronyms[league] || league;
-        buttonsHTML += `<button class="tab-btn" data-filter="${league}">${acronym}</button>`;
+    let buttonsHTML = '';
+    filterGroups.forEach(group => {
+        buttonsHTML += `<button class="tab-btn ${group.id === 'all' ? 'active' : ''}" data-filter="${group.id}">${group.label}</button>`;
     });
     
     filterContainer.innerHTML = buttonsHTML;
@@ -77,8 +86,7 @@ function initNavigation() {
         });
     });
 }
-
-async function loadSchedule() {
+function loadSchedule() {
     try {
         const fetchSeason = async (year) => {
             try {
@@ -336,7 +344,7 @@ function renderMatchesGrid() {
     
     let filtered = allMatches;
     if (currentFilter !== "all") {
-        filtered = allMatches.filter(m => m.leagueName === currentFilter);
+        filtered = allMatches.filter(m => getMatchGroup(m.leagueName) === currentFilter);
     }
     
     // Sort logic: closest match first
