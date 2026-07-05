@@ -196,10 +196,15 @@
             opacity: 0;
             visibility: hidden;
         }
+        @keyframes logoLoadingPulse {
+            0% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1)); }
+            50% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.6)); }
+            100% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1)); }
+        }
         #global-loading-overlay img {
             width: 250px;
             filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
-            animation: pulseFav 2s infinite;
+            animation: logoLoadingPulse 2s ease-in-out infinite;
         }
     
         .carousel-team-flag {
