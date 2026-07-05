@@ -639,36 +639,57 @@ function openMatchModal(matchId) {
     const venue = comp.venue && comp.venue.fullName ? comp.venue.fullName : "Chưa xác định";
     const leagueName = match.leagueName || "Tournament";
 
+    
+    // Determine card classes
+    const TEAM_ID = "360";
+    const opponent = home.team.id === TEAM_ID ? away : home;
+    const opponentId = opponent.team.id;
+    let derbyName = "";
+    let derbyClass = "";
+    if (["364", "382", "357"].includes(opponentId)) {
+        derbyName = "DERBY";
+        derbyClass = "derby-match";
+    } else if (["359", "363", "367", "361"].includes(opponentId)) {
+        derbyName = "SUPER MATCH";
+        derbyClass = "super-match";
+    }
+    const isBigMatch = ["359", "363", "364", "382", "367", "361"].includes(opponentId);
+    const bigMatchClass = isBigMatch ? "big-match" : "";
+    const finalClasses = `match-card ${bigMatchClass} ${derbyClass}`.trim();
+
     const modalContent = `
-        <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:30px; border-bottom: none; gap:8px;">
-            <div>${dateStr} - ${timeStr} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}</div>
-            <div style="font-size:16px; color:#fff; font-weight: 700;">${leagueName}</div>
-        </div>
-        
-        <div class="card-teams-inline" style="display:flex; justify-content:center; align-items:center; gap: 30px;">
-            <div class="team-left" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 12px;">
-                <img src="${home.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${home.team.name}" style="width:80px; height:80px; object-fit:contain;">
-                <span class="card-team-name" style="font-size:20px; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase; text-align:center;">${home.team.abbreviation || home.team.name}</span>
+        <div class="${finalClasses}" style="margin: 0; width: 100%; cursor: default; transform: none; position: relative; overflow: visible;">
+            ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 15px; border-radius: 12px; margin-bottom: 10px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
+            ${!derbyClass ? `<div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--primary-color), #8b0000); border-radius: 20px 20px 0 0;"></div>` : ''}
+            
+            <div class="card-header" style="justify-content:center; flex-direction:column; align-items:center; color:var(--text-secondary); font-weight:700; font-size:14px; margin-bottom:20px; border-bottom: none; gap:4px;">
+                <div>${timeStr}, ${dateStr} ${isLive ? '<span class="card-status live" style="margin-left:8px;">LIVE</span>' : ''}</div>
+                <div style="font-size:14px; color:#fff; font-weight: 700; text-transform: uppercase;">${leagueName}</div>
             </div>
-            <div class="match-score" style="font-weight: 900; font-size:48px; font-family: 'Google Sans Flex', sans-serif; white-space:nowrap; padding:0 15px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
-                ${scoreDisplay}
+            
+            <div class="card-teams-inline" style="display:flex; justify-content:center; align-items:center; gap: 24px;">
+                <div class="team-left" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
+                    <img src="${home.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${home.team.name}" style="width:60px; height:60px; object-fit:contain;">
+                    <span class="card-team-name" style="font-size:20px; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase;">${home.team.abbreviation || home.team.name}</span>
+                </div>
+                <div class="match-score" style="font-weight: 700; font-size:36px; font-family: 'Google Sans Flex', sans-serif; white-space:nowrap; padding:0 10px; color: ${isLive ? 'var(--primary-color)' : 'var(--text-primary)'}; text-shadow: ${isLive ? '0 0 15px var(--primary-color)' : 'none'};">
+                    ${scoreDisplay}
+                </div>
+                <div class="team-right" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 8px;">
+                    <img src="${away.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${away.team.name}" style="width:60px; height:60px; object-fit:contain;">
+                    <span class="card-team-name" style="font-size:20px; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase;">${away.team.abbreviation || away.team.name}</span>
+                </div>
             </div>
-            <div class="team-right" style="display:flex; flex-direction:column; align-items:center; flex:1; gap: 12px;">
-                <img src="${away.team.logo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo-500.png'}" alt="${away.team.name}" style="width:80px; height:80px; object-fit:contain;">
-                <span class="card-team-name" style="font-size:20px; font-weight: 700; font-family: 'Google Sans Flex', sans-serif; text-transform: uppercase; text-align:center;">${away.team.abbreviation || away.team.name}</span>
+            
+            <div style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                ${venue}
             </div>
-        </div>
-        
-        <div class="modal-scorers" style="margin-top: 30px; display:flex; justify-content:space-between; font-size:14px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
-            <div class="modal-scorers-home" style="width:48%;">${homeScorersHTML}</div>
-            <div class="modal-scorers-away" style="width:48%; text-align: right;">${awayScorersHTML}</div>
-        </div>
-        
-        <div class="modal-info-list" style="margin-top: 20px; background: rgba(255,255,255,0.02); border-radius: 12px; padding: 15px;">
-            <div class="modal-info-item" style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="color: var(--text-secondary); font-size: 13px; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Sân vận động</span>
-                <span style="font-weight:700; font-size:15px;">${venue}</span>
-            </div>
+            
+            ${(homeScorersHTML || awayScorersHTML) ? `
+            <div class="modal-scorers" style="margin-top: 25px; display:flex; justify-content:space-between; font-size:13px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                <div class="modal-scorers-home" style="width:48%; text-align: left;">${homeScorersHTML}</div>
+                <div class="modal-scorers-away" style="width:48%; text-align: right;">${awayScorersHTML}</div>
+            </div>` : ''}
         </div>
     `;
     
