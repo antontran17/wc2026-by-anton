@@ -1471,15 +1471,29 @@ footer p {
     left: 50%;
     transform: translateX(-50%);
     color: rgba(255, 255, 255, 0.6);
-    font-size: 28px;
     cursor: pointer;
-    animation: bounceDown 2s infinite;
     z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
     transition: color 0.3s, transform 0.3s;
 }
 .scroll-down-btn:hover {
     color: #fff;
     transform: translateX(-50%) scale(1.1);
+}
+.scroll-down-btn .scroll-text {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-family: 'Google Sans Flex', sans-serif;
+}
+.scroll-down-btn .scroll-icon {
+    font-size: 32px;
+    font-weight: 300; /* Makes the chevron thinner and wider, similar to the image */
+    animation: bounceDown 2s infinite;
 }
 @keyframes bounceDown {
     0%, 20%, 50%, 80%, 100% {
