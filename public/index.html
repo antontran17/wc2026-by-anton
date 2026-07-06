@@ -8047,7 +8047,7 @@
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
         }
         .team-box-carousel .team-name {
-            font-size: 28px;
+            font-size: 20px;
             font-weight: 800;
             text-shadow: 0 2px 4px rgba(0,0,0,0.6);
             margin-top: 8px;
@@ -8064,12 +8064,14 @@
             margin-top: 15px;
         }
         .match-status-badge {
-            background: #ff3e46;
-            color: white;
-            padding: 20px;
+            background-color: #ff0000;
+            color: #fff;
+            padding: 15px;
             border-radius: 50px;
-            font-size: 20px;
-            font-weight: bold;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
             display: inline-block;
             margin-bottom: 10px;
         }
@@ -9635,6 +9637,7 @@
         // Render Matches
         
         let carouselSwiper = null;
+        let previousCarouselIds = '';
 
         function renderNextMatchesCarousel(games) {
             const container = document.getElementById('next-match-container');
@@ -9682,7 +9685,8 @@
                 // Trạng thái / Đếm ngược
                 let topStatusHtml = '';
                 if (isLive) {
-                    const statusText = liveMinute(game) || String(game.status || 'LIVE').toUpperCase();
+                    let statusText = liveMinute(game) || String(game.status || 'LIVE').toUpperCase();
+                    if (statusText === 'IN_PLAY') statusText = 'ĐANG DIỄN RA';
                     topStatusHtml = `<div class="match-status-badge">${statusText}</div>`;
                 } else {
                     topStatusHtml = `<div class="carousel-countdown" data-date="${d ? d.toISOString() : ''}" style="display: inline-block; background-color: #ff0000; border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);">ĐANG TÍNH...</div>`;
@@ -9719,7 +9723,7 @@
                 html += `
                     <div class="swiper-slide">
                         <div class="next-match-card ${isLive ? 'is-live' : ''} ${favClass}" onclick="handleMatchCardClick('${game.id}')">
-                            <div style="position: absolute; top: 50px; left: 0; width: 100%; text-align: center;">${topStatusHtml}</div>
+                            <div class="carousel-top-status" style="position: absolute; top: 50px; left: 0; width: 100%; text-align: center;">${topStatusHtml}</div>
                             
                             <div class="match-teams-carousel" style="width: 100%; margin-top: 10px;">
                                 <div class="team-box-carousel">
@@ -9743,36 +9747,63 @@
                 `;
             });
             
-            container.innerHTML = html;
+            const currentIds = renderMatchesList.map(g => g.id).join(',');
+            if (carouselSwiper && previousCarouselIds === currentIds) {
+                const swiperSlides = container.querySelectorAll('.swiper-slide');
+                if (swiperSlides.length > 0) {
+                    swiperSlides.forEach(slide => {
+                        const originalIndex = slide.getAttribute('data-swiper-slide-index');
+                        if (originalIndex === null) return;
+                        const targetData = slidesData[parseInt(originalIndex, 10)];
+                        if (!targetData) return;
+                        
+                        const isLive = matchStatusClass(targetData).includes('is-live');
+                        let statusText = liveMinute(targetData) || String(targetData.status || 'LIVE').toUpperCase();
+                        if (statusText === 'IN_PLAY') statusText = 'ĐANG DIỄN RA';
+                        
+                        const topDiv = slide.querySelector('.carousel-top-status');
+                        if (topDiv) {
+                            if (isLive) topDiv.innerHTML = `<div class="match-status-badge">${statusText}</div>`;
+                            else topDiv.innerHTML = `<div class="carousel-countdown" data-date="${parseSourceDate(targetData)?.toISOString() || ''}" style="display: inline-block; background-color: #ff0000; border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);">ĐANG TÍNH...</div>`;
+                        }
+                        
+                        const vsBox = slide.querySelector('.vs-box');
+                        if (vsBox) vsBox.innerHTML = isLive ? `<h2 style="margin:0">${targetData.home_score} : ${targetData.away_score}</h2>` : `<h2 style="margin:0">VS</h2>`;
+                    });
+                    return;
+                }
+            }
+            previousCarouselIds = currentIds;
 
             if (carouselSwiper) {
                 carouselSwiper.destroy(true, true);
+                carouselSwiper = null;
             }
+            
+            container.innerHTML = html;
 
-            setTimeout(() => {
-                if (typeof Swiper !== 'undefined') {
-                    carouselSwiper = new Swiper('.mySwiper', {
-                        effect: 'coverflow',
-                        grabCursor: true,
-                        centeredSlides: true,
-                        slidesPerView: 'auto',
-                        loop: true,
-                        mousewheel: true,
-                        navigation: {
-                            nextEl: '.swiper-button-next',
-                            prevEl: '.swiper-button-prev',
-                        },
-                        coverflowEffect: {
-                            rotate: 0,
-                            stretch: -40,
-                            depth: 300,
-                            modifier: 1,
-                            slideShadows: false,
-                        },
-                    });
-                }
-                startCarouselCountdowns();
-            }, 100);
+            if (typeof Swiper !== 'undefined') {
+                carouselSwiper = new Swiper('.mySwiper', {
+                    effect: 'coverflow',
+                    grabCursor: true,
+                    centeredSlides: true,
+                    slidesPerView: 'auto',
+                    loop: true,
+                    mousewheel: true,
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },
+                    coverflowEffect: {
+                        rotate: 0,
+                        stretch: -40,
+                        depth: 300,
+                        modifier: 1,
+                        slideShadows: false,
+                    },
+                });
+            }
+            startCarouselCountdowns();
         }
 
         function startCarouselCountdowns() {
