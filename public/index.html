@@ -9807,13 +9807,19 @@
             container.innerHTML = html;
 
             if (typeof Swiper !== 'undefined') {
+                const anyLive = slidesData.some(game => {
+                    const st = String(game.status || '').trim().toUpperCase();
+                    return ['IN_PLAY', 'LIVE', 'HALF_TIME_BREAK', 'EXTRA_TIME_BREAK', 'PENALTIES_BREAK'].includes(st);
+                });
+
                 carouselSwiper = new Swiper('.mySwiper', {
                     effect: 'coverflow',
-                    grabCursor: true,
+                    grabCursor: !anyLive,
+                    allowTouchMove: !anyLive,
                     centeredSlides: true,
                     slidesPerView: 'auto',
                     loop: true,
-                    mousewheel: true,
+                    mousewheel: !anyLive,
                     navigation: {
                         nextEl: '.swiper-button-next',
                         prevEl: '.swiper-button-prev',
