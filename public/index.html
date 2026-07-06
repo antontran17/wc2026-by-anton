@@ -9668,8 +9668,11 @@
 
             const renderMatchesList = upcomingOrLive.slice(0, limit);
             
-            // Duplicate to make swiper loop nicely if few matches
-            const slidesData = renderMatchesList.length < 3 ? [...renderMatchesList, ...renderMatchesList, ...renderMatchesList] : renderMatchesList;
+            // Duplicate to make swiper loop nicely if few matches (ensure at least 7 slides for a 5-card infinite view)
+            let slidesData = [...renderMatchesList];
+            while (slidesData.length > 0 && slidesData.length < 7) {
+                slidesData = [...slidesData, ...renderMatchesList];
+            }
 
             const roundLabels = {
                 'R32': 'VÒNG 32',
