@@ -8790,6 +8790,13 @@
 
             } catch (err) {
                 console.error('Error loading data:', err);
+            } finally {
+                const overlay = document.getElementById('global-loading-overlay');
+                if (overlay) {
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                    }, 1000); // Trì hoãn 1s sau khi dữ liệu web render xong
+                }
             }
         }
 
@@ -10991,14 +10998,6 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script>
-        // Hide global loading overlay
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const overlay = document.getElementById('global-loading-overlay');
-                if (overlay) overlay.classList.add('hidden');
-            }, 1000);
-        });
     </script>
 </body>
 </html>
