@@ -9644,8 +9644,17 @@
             if (!container) return;
 
             // Lọc ra các trận sắp diễn ra (chưa đá) và đang đá bằng hàm chuẩn của WC
-            const upcomingOrLive = games.filter(g => !isCompletedGame(g) && parseSourceDate(g))
-                                        .sort((a, b) => parseSourceDate(a) - parseSourceDate(b));
+            const upcomingOrLive = games.filter(g => {
+                if (isCompletedGame(g)) return false;
+                if (!parseSourceDate(g)) return false;
+                
+                const hTeam = resolveMatchTeam(g, 'home');
+                const aTeam = resolveMatchTeam(g, 'away');
+                // Bỏ qua nếu một trong hai đội chưa được xác định (TBD)
+                if (!hTeam.id || !aTeam.id) return false;
+                
+                return true;
+            }).sort((a, b) => parseSourceDate(a) - parseSourceDate(b));
 
             if (upcomingOrLive.length === 0) {
                 container.innerHTML = '<p style="color: #aaa;">No upcoming matches</p>';
