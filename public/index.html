@@ -8070,7 +8070,6 @@
             border-radius: 50px;
             font-size: 15px;
             font-weight: 700;
-            letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
             display: inline-block;
             margin-bottom: 10px;
@@ -9698,7 +9697,7 @@
                     if (statusText === 'IN_PLAY') statusText = 'ĐANG DIỄN RA';
                     topStatusHtml = `<div class="match-status-badge">${statusText}</div>`;
                 } else {
-                    topStatusHtml = `<div class="carousel-countdown" data-date="${d ? d.toISOString() : ''}" style="display: inline-block; background-color: #ff0000; border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);">ĐANG TÍNH...</div>`;
+                    topStatusHtml = `<div class="carousel-countdown" data-date="${d ? d.toISOString() : ''}" style="display: inline-block; background-color: #ff0000; border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);">ĐANG TÍNH...</div>`;
                 }
                 
                 // Tỉ số hoặc VS
@@ -9747,7 +9746,7 @@
                             </div>
                             
                             <div class="match-info-carousel" style="position: absolute; bottom: 50px; left: 0; width: 100%; text-align: center;">
-                                <div style="color: #fff; font-size: 15px; font-weight: bold; line-height: 1.6; letter-spacing: 1px;">${timeStr} - ${dateStr.split('/').join('.')}</div>
+                                <div style="color: #fff; font-size: 15px; font-weight: bold; line-height: 1.6;">${timeStr} - ${dateStr.split('/').join('.')}</div>
                                 <div style="color: #ccc; font-size: 14px; line-height: 1.6;">${stageName}${stadiumName ? ' • ' + stadiumName : ''}</div>
                                 ${scorersHtml}
                             </div>
@@ -9773,7 +9772,7 @@
                         const topDiv = slide.querySelector('.carousel-top-status');
                         if (topDiv) {
                             if (isLive) topDiv.innerHTML = `<div class="match-status-badge">${statusText}</div>`;
-                            else topDiv.innerHTML = `<div class="carousel-countdown" data-date="${parseSourceDate(targetData)?.toISOString() || ''}" style="display: inline-block; background-color: #ff0000; border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);">ĐANG TÍNH...</div>`;
+                            else topDiv.innerHTML = `<div class="carousel-countdown" data-date="${parseSourceDate(targetData)?.toISOString() || ''}" style="display: inline-block; background-color: #ff0000; border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);">ĐANG TÍNH...</div>`;
                         }
                         
                         const vsBox = slide.querySelector('.vs-box');
