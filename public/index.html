@@ -8064,13 +8064,14 @@
             margin-top: 15px;
         }
         .match-status-badge {
-            background-color: #ff0000;
+            background: linear-gradient(135deg, #ff334e, #b40f2c);
+            border: 1px solid rgba(255,122,140,.82);
             color: #fff;
             padding: 15px;
             border-radius: 50px;
             font-size: 15px;
             font-weight: 700;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+            box-shadow: 0 0 18px rgba(255,40,70,.5);
             display: inline-block;
             margin-bottom: 10px;
         }
@@ -8189,6 +8190,11 @@
             }
         }
 
+        .match-card::before,
+        .match-card.is-live::before {
+            display: none !important;
+            content: none !important;
+        }
     </style>
 </head>
 <body>
@@ -9700,7 +9706,7 @@
                     if (statusText === 'IN_PLAY') statusText = 'ĐANG DIỄN RA';
                     topStatusHtml = `<div class="match-status-badge">${statusText}</div>`;
                 } else {
-                    topStatusHtml = `<div class="carousel-countdown" data-date="${d ? d.toISOString() : ''}" style="display: inline-block; background-color: #ff0000; border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);">ĐANG TÍNH...</div>`;
+                    topStatusHtml = `<div class="carousel-countdown" data-date="${d ? d.toISOString() : ''}" style="display: inline-block; background: linear-gradient(135deg, #ff334e, #b40f2c); border: 1px solid rgba(255,122,140,.82); border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; box-shadow: 0 0 18px rgba(255,40,70,.5);">ĐANG TÍNH...</div>`;
                 }
                 
                 // Tỉ số hoặc VS
@@ -9775,7 +9781,7 @@
                         const topDiv = slide.querySelector('.carousel-top-status');
                         if (topDiv) {
                             if (isLive) topDiv.innerHTML = `<div class="match-status-badge">${statusText}</div>`;
-                            else topDiv.innerHTML = `<div class="carousel-countdown" data-date="${parseSourceDate(targetData)?.toISOString() || ''}" style="display: inline-block; background-color: #ff0000; border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);">ĐANG TÍNH...</div>`;
+                            else topDiv.innerHTML = `<div class="carousel-countdown" data-date="${parseSourceDate(targetData)?.toISOString() || ''}" style="display: inline-block; background: linear-gradient(135deg, #ff334e, #b40f2c); border: 1px solid rgba(255,122,140,.82); border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; box-shadow: 0 0 18px rgba(255,40,70,.5);">ĐANG TÍNH...</div>`;
                         }
                         
                         const vsBox = slide.querySelector('.vs-box');
