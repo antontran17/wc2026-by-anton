@@ -141,12 +141,48 @@ async function loadSchedule() {
         
         allMatches = [...events2026];
         
-        // Find next match
+        // Prepare Carousel Matches
         const now = new Date();
+        const completedMatches = allMatches.filter(m => new Date(m.date) <= now).sort((a, b) => new Date(b.date) - new Date(a.date));
         const upcomingMatches = allMatches.filter(m => new Date(m.date) > now).sort((a, b) => new Date(a.date) - new Date(b.date));
         
-        if (upcomingMatches.length > 0) {
-            renderNextMatchesCarousel(upcomingMatches.slice(0, 17));
+        const recentPast = completedMatches.slice(0, 5).reverse();
+        const nearFuture = upcomingMatches.slice(0, 12);
+        const carouselMatches = [...recentPast, ...nearFuture];
+        
+        let targetKingId = null;
+        let initialSlideIndex = 0;
+        
+        if (carouselMatches.length > 0) {
+            const lastCompleted = completedMatches[0];
+            const nextUpcoming = upcomingMatches[0];
+            
+            if (lastCompleted) {
+                const hoursSinceCompleted = (now - new Date(lastCompleted.date)) / (1000 * 60 * 60);
+                if (hoursSinceCompleted <= 72) {
+                    if (nextUpcoming) {
+                        const hoursUntilUpcoming = (new Date(nextUpcoming.date) - now) / (1000 * 60 * 60);
+                        targetKingId = (hoursUntilUpcoming <= 48) ? nextUpcoming.id : lastCompleted.id;
+                    } else {
+                        targetKingId = lastCompleted.id;
+                    }
+                } else {
+                    if (nextUpcoming) targetKingId = nextUpcoming.id;
+                }
+            } else if (nextUpcoming) {
+                targetKingId = nextUpcoming.id;
+            }
+            
+            if (targetKingId) {
+                const idx = carouselMatches.findIndex(m => m.id === targetKingId);
+                if (idx !== -1) initialSlideIndex = idx;
+            } else if (nextUpcoming) {
+                initialSlideIndex = recentPast.length;
+            } else if (recentPast.length > 0) {
+                initialSlideIndex = recentPast.length - 1;
+            }
+            
+            renderNextMatchesCarousel(carouselMatches, initialSlideIndex);
         } else {
             document.getElementById("next-match-container").innerHTML = `<p style="text-align:center; color: var(--text-secondary)">Hiện chưa có lịch thi đấu tiếp theo.</p>`;
         }
@@ -159,7 +195,7 @@ async function loadSchedule() {
     }
 }
 
-function renderNextMatchesCarousel(matches) {
+function renderNextMatchesCarousel(matches, initialSlideIndex = 0) {
     const container = document.getElementById("next-match-container");
     if (countdownInterval) clearInterval(countdownInterval);
     
@@ -170,8 +206,7 @@ function renderNextMatchesCarousel(matches) {
     
     let slidesHTML = "";
     
-    const renderMatches = [...matches, ...matches, ...matches]; // Duplicate 3x to ensure enough slides for auto loop
-    renderMatches.forEach((match, index) => {
+    matches.forEach((match, index) => {
         const comp = match.competitions[0];
         const home = comp.competitors.find(c => c.homeAway === "home");
         const away = comp.competitors.find(c => c.homeAway === "away");
@@ -196,10 +231,11 @@ function renderNextMatchesCarousel(matches) {
         
         
         const isLive = match.status.type.state === 'in';
+        const isCompleted = match.status.type.state === 'post';
         let homeScorersHTML = '';
         let awayScorersHTML = '';
         
-        if (isLive) {
+        if (isLive || isCompleted) {
             const details = match.competitions[0].details || [];
             const goals = details.filter(d => d.scoringPlay === true || d.type.text === "Goal" || d.type.text === "Penalty - Scored");
             
@@ -221,12 +257,12 @@ function renderNextMatchesCarousel(matches) {
         
         slidesHTML += `
             <div class="swiper-slide">
-                <div class="next-match-card clickable-card ${derbyClass}" onclick="openMatchModal('${match.id}', this)" style="margin: 0; width: 100%; box-sizing: border-box; position: relative;">
+                <div class="next-match-card clickable-card ${derbyClass}" onclick="handleCarouselClick('${match.id}', this)" style="margin: 0; width: 100%; box-sizing: border-box; position: relative;">
                     <div style="text-align: center;">
                         ${derbyName ? `<div class="derby-label" style="display:inline-block; background: linear-gradient(90deg, #ff0000, #8b0000); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 15px; border-radius: 12px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255,0,0,0.6); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 5;">${derbyName}</div>` : ''}
-                        ${isLive && match.status.displayClock ? `
+                        ${(isLive || isCompleted) ? `
                             <div style="background: #000; color: #fff; border-radius: 20px; padding: 6px 20px; display: inline-block; font-family: 'Google Sans Flex', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
-                                ${match.status.displayClock}'
+                                ${isLive ? (match.status.displayClock + "'") : 'FT'}
                             </div>
                         ` : `
                             <div class="countdown-box" id="countdown-${match.id}" data-date="${match.date}">
@@ -241,8 +277,8 @@ function renderNextMatchesCarousel(matches) {
                         </div>
                         
                         <div class="match-vs-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex: 1;">
-                            <div class="match-vs" style="font-size: ${isLive ? '48px' : '30px'}; font-weight: 700; color: #fff; margin-bottom: 5px; text-shadow: ${isLive ? '0 5px 15px rgba(0,0,0,0.5)' : 'none'};">
-                                ${isLive ? (home.score !== undefined ? home.score : "0") + ' : ' + (away.score !== undefined ? away.score : "0") : 'VS'}
+                            <div class="match-vs" style="font-size: ${(isLive || isCompleted) ? '48px' : '30px'}; font-weight: 700; color: #fff; margin-bottom: 5px; text-shadow: ${(isLive || isCompleted) ? '0 5px 15px rgba(0,0,0,0.5)' : 'none'};">
+                                ${(isLive || isCompleted) ? (home.score !== undefined ? home.score : "0") + ' : ' + (away.score !== undefined ? away.score : "0") : 'VS'}
                             </div>
                         </div>
 
@@ -292,6 +328,8 @@ function renderNextMatchesCarousel(matches) {
             slidesPerView: 'auto',
             loop: true,
             mousewheel: true,
+            slideToClickedSlide: true,
+            initialSlide: initialSlideIndex,
             coverflowEffect: {
                 rotate: 0,
                 stretch: -60,
@@ -605,6 +643,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // Modal Logic
+function handleCarouselClick(id, el) {
+    const slide = el.closest('.swiper-slide');
+    if (slide && (slide.classList.contains('swiper-slide-active') || slide.classList.contains('swiper-slide-duplicate-active'))) {
+        openMatchModal(id, el);
+    }
+}
+
 function openMatchModal(matchId, element) {
     const match = allMatches.find(m => m.id === matchId);
     if (!match) return;
