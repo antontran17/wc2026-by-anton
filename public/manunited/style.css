@@ -627,6 +627,7 @@ footer {
     background-position: center;
     background-size: cover;
     width: 600px;
+    pointer-events: none;
 }
 
 .swiper-slide-active, .swiper-slide-duplicate-active {
@@ -639,6 +640,7 @@ footer {
     transition: all 0.5s ease;
     transform: scale(0.9);
     opacity: 0.15;
+    pointer-events: auto;
     filter: blur(8px);
 }
 
