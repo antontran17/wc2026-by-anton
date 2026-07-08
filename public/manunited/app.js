@@ -146,7 +146,7 @@ async function loadSchedule() {
         const upcomingMatches = allMatches.filter(m => new Date(m.date) > now).sort((a, b) => new Date(a.date) - new Date(b.date));
         
         if (upcomingMatches.length > 0) {
-            renderNextMatchesCarousel(upcomingMatches.slice(0, 7));
+            renderNextMatchesCarousel(upcomingMatches.slice(0, 17));
         } else {
             document.getElementById("next-match-container").innerHTML = `<p style="text-align:center; color: var(--text-secondary)">Hiện chưa có lịch thi đấu tiếp theo.</p>`;
         }
