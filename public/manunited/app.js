@@ -332,7 +332,7 @@ function renderNextMatchesCarousel(matches, initialSlideIndex = 0) {
             initialSlide: initialSlideIndex,
             coverflowEffect: {
                 rotate: 0,
-                stretch: -40,
+                stretch: -60,
                 depth: 300,
                 modifier: 1,
                 slideShadows: false,
