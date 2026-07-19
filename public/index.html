@@ -9756,32 +9756,32 @@
                 }
             }
 
-            container.innerHTML = \`
+            container.innerHTML = `
                 <div style="display: flex; justify-content: center; align-items: center; padding: 20px 0; width: 100%;">
-                    <div class="next-match-card \${isLive ? 'is-live' : ''}" style="position: relative; width: 100%; max-width: 600px; transform: scale(1); opacity: 1; filter: none; pointer-events: auto; background: linear-gradient(145deg, rgba(30, 40, 100, 0.7), rgba(10, 60, 120, 0.7)); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); cursor: pointer;" onclick="openMatchModal('\${finalMatch.id}', this)">
-                        <div class="carousel-top-status" style="position: absolute; top: 50px; left: 0; width: 100%; text-align: center;">\${topStatusHtml}</div>
+                    <div class="next-match-card ${isLive ? 'is-live' : ''}" style="position: relative; width: 100%; max-width: 600px; transform: scale(1); opacity: 1; filter: none; pointer-events: auto; background: linear-gradient(145deg, rgba(30, 40, 100, 0.7), rgba(10, 60, 120, 0.7)); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); cursor: pointer;" onclick="openMatchModal('${finalMatch.id}')">
+                        <div class="carousel-top-status" style="position: absolute; top: 50px; left: 0; width: 100%; text-align: center;">${topStatusHtml}</div>
                         
                         <div class="match-teams-carousel" style="width: 100%; margin-top: 10px;">
                             <div class="team-box-carousel">
-                                <div class="carousel-flag-wrapper"><img class="carousel-team-flag" src="\${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="\${homeLabel}"></div>
-                                <div class="team-name">\${homeName}</div>
+                                <div class="carousel-flag-wrapper"><img class="carousel-team-flag" src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${homeLabel}"></div>
+                                <div class="team-name">${homeName}</div>
                             </div>
-                            <div class="vs-box">\${scoreDisplay}</div>
+                            <div class="vs-box">${scoreDisplay}</div>
                             <div class="team-box-carousel">
-                                <div class="carousel-flag-wrapper"><img class="carousel-team-flag" src="\${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="\${awayLabel}"></div>
-                                <div class="team-name">\${awayName}</div>
+                                <div class="carousel-flag-wrapper"><img class="carousel-team-flag" src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${awayLabel}"></div>
+                                <div class="team-name">${awayName}</div>
                             </div>
                         </div>
                         
                         <div class="match-info-carousel" style="position: absolute; bottom: 50px; left: 0; width: 100%; text-align: center;">
                             <div style="color: #ffcc00; font-size: 16px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase;">CHUNG KẾT WORLD CUP 2026</div>
-                            <div style="color: #fff; font-size: 15px; font-weight: bold; line-height: 1.6;">\${timeStr} - \${dateStr.split('/').join('.')}</div>
-                            <div style="color: #ccc; font-size: 14px; line-height: 1.6;">\${stadiumName}</div>
-                            \${scorersHtml}
+                            <div style="color: #fff; font-size: 15px; font-weight: bold; line-height: 1.6;">${timeStr} - ${dateStr.split('/').join('.')}</div>
+                            <div style="color: #ccc; font-size: 14px; line-height: 1.6;">${stadiumName}</div>
+                            ${scorersHtml}
                         </div>
                     </div>
                 </div>
-            \`;
+            `;
             
             startCarouselCountdowns();
         }
