@@ -8242,15 +8242,11 @@
                     <img src="/assets/hero-pc.webp" alt="WORLD CUP 2026" width="1920" height="360" decoding="async" fetchpriority="high">
                 </picture>
                 <h1 class="hero-banner-fallback">WORLD CUP 2026</h1>
-                <!-- Swiper Carousel -->
                 <div class="swiper mySwiper carousel-container">
                     <div class="swiper-wrapper" id="next-match-container">
                         <!-- Matches will be injected here -->
                     </div>
-                    <div class="swiper-button-next custom-swiper-nav"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
-                    <div class="swiper-button-prev custom-swiper-nav"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></div>
                 </div>
-
             </div>
         </div>
     </section>
@@ -9662,185 +9658,131 @@
             const container = document.getElementById('next-match-container');
             if (!container) return;
 
-            // Lọc ra các trận sắp diễn ra (chưa đá) và đang đá bằng hàm chuẩn của WC
-            const upcomingOrLive = games.filter(g => {
-                if (isCompletedGame(g)) return false;
-                if (!parseSourceDate(g)) return false;
-                
-                const hTeam = resolveMatchTeam(g, 'home');
-                const aTeam = resolveMatchTeam(g, 'away');
-                // Bỏ qua nếu một trong hai đội chưa được xác định (TBD)
-                if (!hTeam.id || !aTeam.id) return false;
-                
-                return true;
-            }).sort((a, b) => parseSourceDate(a) - parseSourceDate(b));
-
-            if (upcomingOrLive.length === 0) {
-                container.innerHTML = '<p style="color: #aaa;">No upcoming matches</p>';
+            // Tìm trận Chung Kết
+            const finalMatch = games.find(g => String(g.group).trim().toUpperCase() === 'FINAL');
+            
+            if (!finalMatch) {
+                container.innerHTML = '<p style="color: #aaa; text-align: center;">No final match found</p>';
                 return;
             }
 
-            let limit = 7;
-            const currentStage = String(upcomingOrLive[0]?.group).trim().toUpperCase();
-            if (currentStage === 'QF') limit = 4;
-            else if (currentStage === 'SF') limit = 2;
-            else if (currentStage === 'FINAL' || currentStage === '3RD') limit = 1;
-
-            const renderMatchesList = upcomingOrLive.slice(0, limit);
+            const homeTeam = teamsData.find(t => String(t.id) === String(finalMatch.home_team_id)) || {};
+            const awayTeam = teamsData.find(t => String(t.id) === String(finalMatch.away_team_id)) || {};
+            const d = parseSourceDate(finalMatch);
+            const dateStr = d ? d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+            const timeStr = d ? d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+            const stadiumName = stadiumsData.find(s => String(s.id) === String(finalMatch.stadium_id))?.name_en || '';
             
-            // Duplicate to make swiper loop nicely if few matches (ensure at least 7 slides for a 5-card infinite view)
-            let slidesData = [...renderMatchesList];
-            while (slidesData.length > 0 && slidesData.length < 7) {
-                slidesData = [...slidesData, ...renderMatchesList];
+            const isCompleted = isCompletedGame(finalMatch);
+            const isLive = matchStatusClass(finalMatch).includes('is-live');
+            
+            let winnerTeam = null;
+            if (isCompleted) {
+                const homeScore = parseInt(finalMatch.home_score) || 0;
+                const awayScore = parseInt(finalMatch.away_score) || 0;
+                let homeWin = homeScore > awayScore;
+                let awayWin = awayScore > homeScore;
+                if (homeScore === awayScore) {
+                    const homePen = parseInt(finalMatch.home_penalty) || 0;
+                    const awayPen = parseInt(finalMatch.away_penalty) || 0;
+                    homeWin = homePen > awayPen;
+                    awayWin = awayPen > homePen;
+                }
+                if (homeWin) winnerTeam = homeTeam;
+                else if (awayWin) winnerTeam = awayTeam;
             }
 
-            const roundLabels = {
-                'R32': 'VÒNG 32',
-                'R16': 'VÒNG 16',
-                'QF': 'TỨ KẾT',
-                'SF': 'BÁN KẾT',
-                '3RD': 'TRANH HẠNG 3',
-                'FINAL': 'CHUNG KẾT'
-            };
-
-            let html = '';
-            slidesData.forEach(game => {
-                const homeTeam = teamsData.find(t => String(t.id) === String(game.home_team_id)) || {};
-                const awayTeam = teamsData.find(t => String(t.id) === String(game.away_team_id)) || {};
-                const d = parseSourceDate(game);
-                const dateStr = d ? d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
-                const timeStr = d ? d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
-                
-                const isLive = matchStatusClass(game).includes('is-live');
-                
-                // Trạng thái / Đếm ngược
-                let topStatusHtml = '';
-                if (isLive) {
-                    let statusText = liveMinute(game) || String(game.status || 'LIVE').toUpperCase();
-                    if (statusText === 'IN_PLAY') statusText = 'ĐANG DIỄN RA';
-                    topStatusHtml = `<div class="match-status-badge">${statusText}</div>`;
-                } else {
-                    topStatusHtml = `<div class="carousel-countdown" data-date="${d ? d.toISOString() : ''}" style="display: inline-block; background: linear-gradient(135deg, #ff334e, #b40f2c); border: 1px solid rgba(255,122,140,.82); border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; box-shadow: 0 0 18px rgba(255,40,70,.5);">ĐANG TÍNH...</div>`;
-                }
-                
-                // Tỉ số hoặc VS
-                const scoreDisplay = isLive ? `<h2 style="margin:0">${game.home_score} : ${game.away_score}</h2>` : `<h2 style="margin:0">VS</h2>`;
-
-                const rawGroup = String(game.group).trim().toUpperCase();
-                let stageName = roundLabels[rawGroup] || game.group || 'Knockout Stage';
-                if (/^[A-L]$/.test(rawGroup)) stageName = 'Bảng ' + rawGroup;
-
-                const stadiumName = stadiumsData.find(s => String(s.id) === String(game.stadium_id))?.name_en || '';
-
-                const homeLabel = game.home_team_name_en || homeTeam.name_en || game.home_team_label || 'TBD';
-                const awayLabel = game.away_team_name_en || awayTeam.name_en || game.away_team_label || 'TBD';
-                const homeName = homeTeam.id ? teamCode(homeTeam, homeLabel) : homeLabel;
-                const awayName = awayTeam.id ? teamCode(awayTeam, awayLabel) : awayLabel;
-                
-                // Goal Scorers if live
-                let scorersHtml = '';
-                if (isLive && game.events && game.events.length > 0) {
-                    const goals = game.events.filter(e => e.type === 'goal' || e.type_en === 'Goal' || String(e.detail).toLowerCase().includes('goal'));
-                    if (goals.length > 0) {
-                        scorersHtml = `<div style="font-size: 11px; margin-top: 5px; color: #ccc;">
-                            ${goals.map(g => `<i class="fa-solid fa-futbol"></i> ${g.player || g.player_name} ${g.time}'`).join('<br>')}
-                        </div>`;
-                    }
-                }
-
-                const isFavCard = favoriteMatches.has(String(game.id)) || favoriteTeams.has(String(homeTeam.id)) || favoriteTeams.has(String(awayTeam.id));
-                const favClass = isFavCard ? 'is-favorite-card' : '';
-
-                html += `
-                    <div class="swiper-slide">
-                        <div class="next-match-card ${isLive ? 'is-live' : ''} ${favClass}" onclick="handleCarouselClick('${game.id}', this)">
-                            <div class="carousel-top-status" style="position: absolute; top: 50px; left: 0; width: 100%; text-align: center;">${topStatusHtml}</div>
-                            
-                            <div class="match-teams-carousel" style="width: 100%; margin-top: 10px;">
-                                <div class="team-box-carousel">
-                                    <div class="carousel-flag-wrapper ${favoriteTeams.has(String(homeTeam.id)) ? 'favorite-flag-wrap-carousel' : ''}"><img class="carousel-team-flag ${favoriteTeams.has(String(homeTeam.id)) ? 'favorite-flag-carousel' : ''}" src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${homeLabel}"></div>
-                                    <div class="team-name">${homeName}</div>
-                                </div>
-                                <div class="vs-box">${scoreDisplay}</div>
-                                <div class="team-box-carousel">
-                                    <div class="carousel-flag-wrapper ${favoriteTeams.has(String(awayTeam.id)) ? 'favorite-flag-wrap-carousel' : ''}"><img class="carousel-team-flag ${favoriteTeams.has(String(awayTeam.id)) ? 'favorite-flag-carousel' : ''}" src="${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${awayLabel}"></div>
-                                    <div class="team-name">${awayName}</div>
-                                </div>
-                            </div>
-                            
-                            <div class="match-info-carousel" style="position: absolute; bottom: 50px; left: 0; width: 100%; text-align: center;">
-                                <div style="color: #fff; font-size: 15px; font-weight: bold; line-height: 1.6;">${timeStr} - ${dateStr.split('/').join('.')}</div>
-                                <div style="color: #ccc; font-size: 14px; line-height: 1.6;">${stageName}${stadiumName ? ' • ' + stadiumName : ''}</div>
-                                ${scorersHtml}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            const currentIds = renderMatchesList.map(g => g.id).join(',');
-            if (carouselSwiper && previousCarouselIds === currentIds) {
-                const swiperSlides = container.querySelectorAll('.swiper-slide');
-                if (swiperSlides.length > 0) {
-                    swiperSlides.forEach(slide => {
-                        const originalIndex = slide.getAttribute('data-swiper-slide-index');
-                        if (originalIndex === null) return;
-                        const targetData = slidesData[parseInt(originalIndex, 10)];
-                        if (!targetData) return;
-                        
-                        const isLive = matchStatusClass(targetData).includes('is-live');
-                        let statusText = liveMinute(targetData) || String(targetData.status || 'LIVE').toUpperCase();
-                        if (statusText === 'IN_PLAY') statusText = 'ĐANG DIỄN RA';
-                        
-                        const topDiv = slide.querySelector('.carousel-top-status');
-                        if (topDiv) {
-                            if (isLive) topDiv.innerHTML = `<div class="match-status-badge">${statusText}</div>`;
-                            else topDiv.innerHTML = `<div class="carousel-countdown" data-date="${parseSourceDate(targetData)?.toISOString() || ''}" style="display: inline-block; background: linear-gradient(135deg, #ff334e, #b40f2c); border: 1px solid rgba(255,122,140,.82); border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; box-shadow: 0 0 18px rgba(255,40,70,.5);">ĐANG TÍNH...</div>`;
-                        }
-                        
-                        const vsBox = slide.querySelector('.vs-box');
-                        if (vsBox) vsBox.innerHTML = isLive ? `<h2 style="margin:0">${targetData.home_score} : ${targetData.away_score}</h2>` : `<h2 style="margin:0">VS</h2>`;
-                    });
-                    return;
-                }
-            }
-            previousCarouselIds = currentIds;
-
-            if (carouselSwiper) {
+            // Xoá Swiper instance cũ nếu có
+            if (typeof carouselSwiper !== 'undefined' && carouselSwiper) {
                 carouselSwiper.destroy(true, true);
                 carouselSwiper = null;
             }
-            
-            container.innerHTML = html;
 
-            if (typeof Swiper !== 'undefined') {
-                const anyLive = slidesData.some(game => {
-                    const st = String(game.status || '').trim().toUpperCase();
-                    return ['IN_PLAY', 'LIVE', 'HALF_TIME_BREAK', 'EXTRA_TIME_BREAK', 'PENALTIES_BREAK'].includes(st);
-                });
+            if (isCompleted && winnerTeam) {
+                // Giao diện Lễ đăng quang
+                container.innerHTML = `
+                    <div style="text-align: center; color: #fff; padding: 40px 20px; animation: fadeIn 1.5s ease-in-out;">
+                        <h1 style="font-size: 3rem; margin-bottom: 25px; text-shadow: 0 0 20px rgba(123,220,255,0.8); animation: liveBreath 2s infinite;">🏆 WORLD CUP 2026 CHAMPION 🏆</h1>
+                        <div style="display: inline-block; padding: 30px; background: rgba(0,0,0,0.6); border-radius: 20px; border: 2px solid #7bdcff; box-shadow: 0 0 40px rgba(123,220,255,0.5);">
+                            <img src="${winnerTeam.flag}" style="width: 250px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.6);">
+                            <h2 style="font-size: 2.8rem; margin: 0; color: #ffcc00; text-transform: uppercase;">${winnerTeam.name_en || winnerTeam.name}</h2>
+                        </div>
+                    </div>
+                `;
 
-                carouselSwiper = new Swiper('.mySwiper', {
-                    effect: 'coverflow',
-                    grabCursor: !anyLive,
-                    allowTouchMove: !anyLive,
-                    centeredSlides: true,
-                    slidesPerView: 'auto',
-                    loop: true,
-                    mousewheel: !anyLive,
-                    slideToClickedSlide: true,
-                    navigation: {
-                        nextEl: '.swiper-button-next',
-                        prevEl: '.swiper-button-prev',
-                    },
-                    coverflowEffect: {
-                        rotate: 0,
-                        stretch: -40,
-                        depth: 300,
-                        modifier: 1,
-                        slideShadows: false,
-                    },
-                });
+                // Bắn pháo giấy
+                if (typeof confetti === 'function' && !window.confettiFired) {
+                    window.confettiFired = true;
+                    const duration = 15 * 1000;
+                    const animationEnd = Date.now() + duration;
+                    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
+
+                    function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+                    const interval = setInterval(function() {
+                        const timeLeft = animationEnd - Date.now();
+                        if (timeLeft <= 0) return clearInterval(interval);
+                        const particleCount = 50 * (timeLeft / duration);
+                        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+                    }, 250);
+                }
+                return;
             }
+
+            // Giao diện thẻ Chung Kết đơn
+            let topStatusHtml = '';
+            if (isLive) {
+                let statusText = liveMinute(finalMatch) || String(finalMatch.status || 'LIVE').toUpperCase();
+                if (statusText === 'IN_PLAY') statusText = 'ĐANG DIỄN RA';
+                topStatusHtml = `<div class="match-status-badge">${statusText}</div>`;
+            } else {
+                topStatusHtml = `<div class="carousel-countdown" data-date="${d ? d.toISOString() : ''}" style="display: inline-block; background: linear-gradient(135deg, #ff334e, #b40f2c); border: 1px solid rgba(255,122,140,.82); border-radius: 50px; padding: 15px; font-weight: 700; color: #fff; font-size: 15px; box-shadow: 0 0 18px rgba(255,40,70,.5);">ĐANG TÍNH...</div>`;
+            }
+
+            const scoreDisplay = isLive ? `<h2 style="margin:0">${finalMatch.home_score} : ${finalMatch.away_score}</h2>` : `<h2 style="margin:0">VS</h2>`;
+            const homeLabel = finalMatch.home_team_name_en || homeTeam.name_en || finalMatch.home_team_label || 'TBD';
+            const awayLabel = finalMatch.away_team_name_en || awayTeam.name_en || finalMatch.away_team_label || 'TBD';
+            const homeName = homeTeam.id ? teamCode(homeTeam, homeLabel) : homeLabel;
+            const awayName = awayTeam.id ? teamCode(awayTeam, awayLabel) : awayLabel;
+
+            let scorersHtml = '';
+            if (isLive && finalMatch.events && finalMatch.events.length > 0) {
+                const goals = finalMatch.events.filter(e => e.type === 'goal' || e.type_en === 'Goal' || String(e.detail).toLowerCase().includes('goal'));
+                if (goals.length > 0) {
+                    scorersHtml = `<div style="font-size: 11px; margin-top: 5px; color: #ccc;">
+                        ${goals.map(g => `<i class="fa-solid fa-futbol"></i> ${g.player || g.player_name} ${g.time}'`).join('<br>')}
+                    </div>`;
+                }
+            }
+
+            container.innerHTML = \`
+                <div style="display: flex; justify-content: center; align-items: center; padding: 20px 0; width: 100%;">
+                    <div class="next-match-card \${isLive ? 'is-live' : ''}" style="position: relative; width: 100%; max-width: 600px; transform: scale(1); opacity: 1; filter: none; pointer-events: auto; background: linear-gradient(145deg, rgba(30, 40, 100, 0.7), rgba(10, 60, 120, 0.7)); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); cursor: pointer;" onclick="openMatchModal('\${finalMatch.id}', this)">
+                        <div class="carousel-top-status" style="position: absolute; top: 50px; left: 0; width: 100%; text-align: center;">\${topStatusHtml}</div>
+                        
+                        <div class="match-teams-carousel" style="width: 100%; margin-top: 10px;">
+                            <div class="team-box-carousel">
+                                <div class="carousel-flag-wrapper"><img class="carousel-team-flag" src="\${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="\${homeLabel}"></div>
+                                <div class="team-name">\${homeName}</div>
+                            </div>
+                            <div class="vs-box">\${scoreDisplay}</div>
+                            <div class="team-box-carousel">
+                                <div class="carousel-flag-wrapper"><img class="carousel-team-flag" src="\${awayTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="\${awayLabel}"></div>
+                                <div class="team-name">\${awayName}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="match-info-carousel" style="position: absolute; bottom: 50px; left: 0; width: 100%; text-align: center;">
+                            <div style="color: #ffcc00; font-size: 16px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase;">CHUNG KẾT WORLD CUP 2026</div>
+                            <div style="color: #fff; font-size: 15px; font-weight: bold; line-height: 1.6;">\${timeStr} - \${dateStr.split('/').join('.')}</div>
+                            <div style="color: #ccc; font-size: 14px; line-height: 1.6;">\${stadiumName}</div>
+                            \${scorersHtml}
+                        </div>
+                    </div>
+                </div>
+            \`;
+            
             startCarouselCountdowns();
         }
 
@@ -11013,6 +10955,7 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </body>
 </html>
 
