@@ -9697,10 +9697,19 @@
                 carouselSwiper = null;
             }
 
-            if (isCompleted && winnerTeam) {
+                        if (isCompleted && winnerTeam) {
+                const heroBannerImg = document.getElementById('hero-banner-img');
+                if (heroBannerImg) {
+                    if (winnerTeam.id === 'ESP') {
+                        heroBannerImg.src = '/assets/banner-spain-champion.png';
+                    } else if (winnerTeam.id === 'ARG') {
+                        heroBannerImg.src = '/assets/banner-argentina-champion.png';
+                    }
+                }
+
                 // Giao diện Lễ đăng quang
                 container.innerHTML = `
-                    <div style="text-align: center; color: #fff; padding: 40px 20px; animation: fadeIn 1.5s ease-in-out;">
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; text-align: center; color: #fff; padding: 40px 20px; animation: fadeIn 1.5s ease-in-out;">
                         <h1 style="font-size: 3rem; margin-bottom: 25px; text-shadow: 0 0 20px rgba(123,220,255,0.8); animation: liveBreath 2s infinite;">🏆 WORLD CUP 2026 CHAMPION 🏆</h1>
                         <div style="display: inline-block; padding: 30px; background: rgba(0,0,0,0.6); border-radius: 20px; border: 2px solid #7bdcff; box-shadow: 0 0 40px rgba(123,220,255,0.5);">
                             <img src="${winnerTeam.flag}" style="width: 250px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.6);">
