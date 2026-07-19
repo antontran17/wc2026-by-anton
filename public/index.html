@@ -9758,8 +9758,8 @@
 
             container.innerHTML = `
                 <div style="display: flex; justify-content: center; align-items: center; padding: 20px 0; width: 100%;">
-                    <div class="next-match-card ${isLive ? 'is-live' : ''}" style="position: relative; width: 100%; max-width: 600px; transform: scale(1); opacity: 1; filter: none; pointer-events: auto; background: linear-gradient(145deg, rgba(30, 40, 100, 0.7), rgba(10, 60, 120, 0.7)); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); cursor: pointer;" onclick="openMatchModal('${finalMatch.id}')">
-                        <div class="carousel-top-status" style="position: absolute; top: 50px; left: 0; width: 100%; text-align: center;">${topStatusHtml}</div>
+                    <div class="next-match-card ${isLive ? 'is-live' : ''}" style="position: relative; width: 100%; max-width: 600px; padding: 120px 20px; min-height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 16px; color: #fff; background: linear-gradient(145deg, rgba(30, 40, 100, 0.7), rgba(10, 60, 120, 0.7)); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); cursor: pointer;" onclick="openMatchModal('${finalMatch.id}')">
+                        <div class="carousel-top-status" style="position: absolute; top: 40px; left: 0; width: 100%; text-align: center;">${topStatusHtml}</div>
                         
                         <div class="match-teams-carousel" style="width: 100%; margin-top: 10px;">
                             <div class="team-box-carousel">
