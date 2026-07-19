@@ -9746,21 +9746,21 @@
             const awayName = awayTeam.id ? teamCode(awayTeam, awayLabel) : awayLabel;
 
             let scorersHtml = '';
-            if (isLive && finalMatch.events && finalMatch.events.length > 0) {
+            if (finalMatch.events && finalMatch.events.length > 0) {
                 const goals = finalMatch.events.filter(e => e.type === 'goal' || e.type_en === 'Goal' || String(e.detail).toLowerCase().includes('goal'));
                 if (goals.length > 0) {
-                    scorersHtml = `<div style="font-size: 11px; margin-top: 5px; color: #ccc;">
-                        ${goals.map(g => `<i class="fa-solid fa-futbol"></i> ${g.player || g.player_name} ${g.time}'`).join('<br>')}
+                    scorersHtml = `<div style="font-size: 13px; margin-top: 15px; color: #fff; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                        ${goals.map(g => `<i class="fa-solid fa-futbol" style="color:#ffcc00; margin-right:5px;"></i> ${g.player || g.player_name} <span style="color:#aaa;">${g.time}'</span>`).join('<br>')}
                     </div>`;
                 }
             }
 
             container.innerHTML = `
                 <div style="display: flex; justify-content: center; align-items: center; padding: 20px 0; width: 100%;">
-                    <div class="next-match-card ${isLive ? 'is-live' : ''}" style="position: relative; width: 100%; max-width: 600px; padding: 120px 20px; min-height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 16px; color: #fff; background: linear-gradient(145deg, rgba(30, 40, 100, 0.7), rgba(10, 60, 120, 0.7)); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); cursor: pointer;" onclick="openMatchModal('${finalMatch.id}')">
-                        <div class="carousel-top-status" style="position: absolute; top: 40px; left: 0; width: 100%; text-align: center;">${topStatusHtml}</div>
+                    <div class="next-match-card ${isLive ? 'is-live' : ''}" style="position: relative; width: 100%; max-width: 600px; padding: 40px 20px; min-height: 350px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; border-radius: 16px; color: #fff; background: linear-gradient(145deg, rgba(30, 40, 100, 0.7), rgba(10, 60, 120, 0.7)); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); cursor: pointer;" onclick="openMatchModal('${finalMatch.id}')">
+                        <div class="carousel-top-status" style="width: 100%; text-align: center; margin-bottom: 20px;">${topStatusHtml}</div>
                         
-                        <div class="match-teams-carousel" style="width: 100%; margin-top: 10px;">
+                        <div class="match-teams-carousel" style="width: 100%; flex-grow: 1; display: flex; align-items: center; justify-content: center;">
                             <div class="team-box-carousel">
                                 <div class="carousel-flag-wrapper"><img class="carousel-team-flag" src="${homeTeam.flag || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${homeLabel}"></div>
                                 <div class="team-name">${homeName}</div>
@@ -9772,7 +9772,7 @@
                             </div>
                         </div>
                         
-                        <div class="match-info-carousel" style="position: absolute; bottom: 50px; left: 0; width: 100%; text-align: center;">
+                        <div class="match-info-carousel" style="width: 100%; text-align: center; margin-top: 20px;">
                             <div style="color: #ffcc00; font-size: 16px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase;">CHUNG KẾT WORLD CUP 2026</div>
                             <div style="color: #fff; font-size: 15px; font-weight: bold; line-height: 1.6;">${timeStr} - ${dateStr.split('/').join('.')}</div>
                             <div style="color: #ccc; font-size: 14px; line-height: 1.6;">${stadiumName}</div>
